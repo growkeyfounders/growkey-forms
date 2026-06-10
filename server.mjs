@@ -10,7 +10,7 @@ const dataDir = path.join(__dirname, "data");
 const submissionsFile = path.join(dataDir, "submissions.json");
 const submissionsCsvFile = path.join(dataDir, "submissions.csv");
 const port = Number(process.env.PORT || 5174);
-const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+const supabaseUrl = normalizeSupabaseUrl(process.env.SUPABASE_URL);
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseTable = process.env.SUPABASE_TABLE || "growkey_form_submissions";
 const hasSupabase = Boolean(supabaseUrl && supabaseServiceRoleKey);
@@ -224,6 +224,10 @@ function normalizeValues(values) {
 function inferFormSlug(values) {
   if (values.business || values.mainProfile || values.email) return "growkey-onboarding-v1";
   return "growkey-offer-v1";
+}
+
+function normalizeSupabaseUrl(value) {
+  return value?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
 }
 
 async function writeCsvBackup(submissions) {

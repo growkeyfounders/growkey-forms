@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import logoUrl from "../../../app/public/growkey-mascot.png";
+import logoUrl from "./assets/growkey-mascot.png";
 import {
   createEmptyValues,
   getFormBySlug,

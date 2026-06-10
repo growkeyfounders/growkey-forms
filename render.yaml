@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: growkey-forms
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_TABLE
+        value: growkey_form_submissions
+      - key: ALLOW_ADMIN_DELETE
+        value: "false"

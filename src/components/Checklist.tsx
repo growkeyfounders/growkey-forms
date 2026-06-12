@@ -62,7 +62,9 @@ export function Checklist({
                 aria-checked={task.done}
                 aria-label={task.done ? `Desmarcar: ${task.title}` : `Marcar como lista: ${task.title}`}
                 className={busy ? "check-toggle check-toggle--busy" : "check-toggle"}
-                disabled={!canToggle || busy}
+                // Con un toggle en vuelo se deshabilitan TODOS los checkboxes:
+                // evita toggles concurrentes que el padre descartaría en silencio.
+                disabled={!canToggle || busyTaskId !== null}
                 onClick={() => onToggle(task)}
               >
                 {task.done ? "✓" : ""}

@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { PhaseConfig } from "../../shared/program.mjs";
 import { addDays } from "../../shared/program.mjs";
 import logoUrl from "../assets/growkey-mascot.png";
-import { apiGet, apiPost } from "../api";
+import { ApiError, apiGet, apiPost } from "../api";
 import { ChatThread, threadMemberToChatMember } from "../components/ChatThread";
 import { Checklist } from "../components/Checklist";
 import { PhaseTimeline } from "../components/PhaseTimeline";
 import { WeekView } from "../components/WeekView";
-import type { ClientRow, PortalData, TaskRow, ThreadMemberRow, ToggleResponse } from "../skoolTypes";
+import type { ClientRow, MessageRow, PortalData, TaskRow, ThreadMemberRow, ToggleResponse } from "../skoolTypes";
 import { supabase } from "../supabaseClient";
 
 // Fecha local del navegador (no UTC): cerca de medianoche en Colombia el
@@ -36,6 +36,7 @@ export function ClientPortal() {
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<number | null>(null);
+  const celebrationButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const [startDate, setStartDate] = useState(localTodayIso);
   const [starting, setStarting] = useState(false);
@@ -141,7 +142,13 @@ export function ClientPortal() {
     try {
       await apiPost("/api/skool/start-date", { startDate });
       await load();
-    } catch {
+    } catch (error) {
+      // 409 already_started: la fecha ya quedó fijada en otra pestaña o por un
+      // admin. Recargar el portal muestra el camino en vez de un error falso.
+      if (error instanceof ApiError && error.status === 409) {
+        await load();
+        return;
+      }
       showToast("No pudimos guardar la fecha, intenta de nuevo.");
     } finally {
       setStarting(false);
@@ -151,6 +158,21 @@ export function ClientPortal() {
   function closeCelebration() {
     setCelebration(null);
     void load();
+  }
+
+  // Escape cierra el overlay igual que el botón. Focus trap básico: el botón
+  // es el único elemento enfocable del overlay (autoFocus al montar), así que
+  // Tab/Shift+Tab solo devuelven el foco a él en vez de salir del diálogo.
+  function onCelebrationKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeCelebration();
+      return;
+    }
+    if (event.key === "Tab") {
+      event.preventDefault();
+      celebrationButtonRef.current?.focus();
+    }
   }
 
   if (loading) {
@@ -197,7 +219,13 @@ export function ClientPortal() {
       )}
 
       {celebration ? (
-        <div className="celebration" role="dialog" aria-modal="true" aria-label="Celebración de avance">
+        <div
+          aria-label="Celebración de avance"
+          aria-modal="true"
+          className="celebration"
+          onKeyDown={onCelebrationKeyDown}
+          role="dialog"
+        >
           <div className="celebration__card">
             <img src={logoUrl} alt="" />
             {celebration.kind === "completed" ? (
@@ -218,7 +246,13 @@ export function ClientPortal() {
                 <p>{celebration.phase.headline}.</p>
               </>
             )}
-            <button autoFocus className="primary-button" onClick={closeCelebration} type="button">
+            <button
+              autoFocus
+              className="primary-button"
+              onClick={closeCelebration}
+              ref={celebrationButtonRef}
+              type="button"
+            >
               {celebration.kind === "completed" ? "Ver mi camino" : "Ver mi nueva fase"}
             </button>
           </div>
@@ -402,33 +436,83 @@ function TeamChatCard({ clientId }: { clientId: string }) {
 
   // Badge de no leídos: mensajes ajenos posteriores a mi last_read_at,
   // query directa con supabase-js (RLS solo deja ver el propio hilo).
+  const fetchUnread = useCallback(async () => {
+    const { data: read } = await supabase
+      .from("skool_message_reads")
+      .select("last_read_at")
+      .eq("user_id", clientId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    let query = supabase
+      .from("skool_messages")
+      .select("id", { count: "exact", head: true })
+      .eq("client_id", clientId)
+      .neq("sender_id", clientId);
+    if (read?.last_read_at) query = query.gt("created_at", read.last_read_at);
+    const { count } = await query;
+    return count ?? 0;
+  }, [clientId]);
+
   useEffect(() => {
     if (open) return;
     let active = true;
-    void (async () => {
-      try {
-        const { data: read } = await supabase
-          .from("skool_message_reads")
-          .select("last_read_at")
-          .eq("user_id", clientId)
-          .eq("client_id", clientId)
-          .maybeSingle();
-        let query = supabase
-          .from("skool_messages")
-          .select("id", { count: "exact", head: true })
-          .eq("client_id", clientId)
-          .neq("sender_id", clientId);
-        if (read?.last_read_at) query = query.gt("created_at", read.last_read_at);
-        const { count } = await query;
-        if (active) setUnread(count ?? 0);
-      } catch {
+    fetchUnread()
+      .then((count) => {
+        if (active) setUnread(count);
+      })
+      .catch(() => {
         // Sin supabase configurado el badge simplemente no se muestra.
-      }
-    })();
+      });
     return () => {
       active = false;
     };
-  }, [clientId, open]);
+  }, [fetchUnread, open]);
+
+  // Con el chat cerrado, los mensajes nuevos del equipo deben subir el badge
+  // sin recargar: suscripción realtime a INSERTs del hilo (los propios no
+  // cuentan). Si el canal falla, fallback a recalcular cada 30s.
+  useEffect(() => {
+    if (open) return;
+    let active = true;
+    let pollId: number | null = null;
+    const stopPolling = () => {
+      if (pollId !== null) {
+        window.clearInterval(pollId);
+        pollId = null;
+      }
+    };
+    const startPolling = () => {
+      if (pollId !== null) return;
+      pollId = window.setInterval(() => {
+        fetchUnread()
+          .then((count) => {
+            if (active) setUnread(count);
+          })
+          .catch(() => {
+            // Reintenta en el próximo tick del interval.
+          });
+      }, 30_000);
+    };
+    const channel = supabase
+      .channel(`skool-unread-${clientId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "skool_messages", filter: `client_id=eq.${clientId}` },
+        (payload) => {
+          const incoming = payload.new as MessageRow;
+          if (incoming.sender_id !== clientId) setUnread((current) => current + 1);
+        },
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") stopPolling();
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") startPolling();
+      });
+    return () => {
+      active = false;
+      stopPolling();
+      void supabase.removeChannel(channel);
+    };
+  }, [clientId, fetchUnread, open]);
 
   return (
     <section className="portal-card portal-chat" aria-label="Chat con tu equipo">

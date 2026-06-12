@@ -82,7 +82,7 @@ Tablas nuevas (prefijo `skool_`), junto a la existente:
 | `skool_messages` | `id`, `client_id` (= hilo), `sender_id`, `body`, `created_at` |
 | `skool_thread_members` | `client_id`, `user_id` (miembros del equipo en el grupo), `added_at`. El cliente es miembro implícito de su hilo |
 | `skool_message_reads` | `user_id`, `client_id`, `last_read_at` (contadores de no leídos) |
-| `skool_events` | `id`, `client_id`, `type` ('task_done'\|'task_added'\|'form_submitted'\|'phase_advanced'\|'phase_override'\|'status_change'\|'start_date_set'\|'note'), `payload` (jsonb), `actor_id`, `created_at` |
+| `skool_events` | `id`, `client_id`, `type` ('task_done'\|'task_undone'\|'task_added'\|'task_deleted'\|'form_submitted'\|'phase_advanced'\|'phase_override'\|'status_change'\|'start_date_set'\|'note'), `payload` (jsonb), `actor_id`, `created_at` |
 | `growkey_form_submissions` (existente) | + columna nueva `client_id` (uuid, null). Nada más se toca |
 
 **RLS**: el cliente puede leer su `skool_clients`, leer/marcar `done` en sus tareas, leer/escribir mensajes de su hilo y leer sus submissions. El admin lee y escribe todo. El motor de progresión corre con service role en el servidor.

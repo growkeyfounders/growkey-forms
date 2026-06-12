@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { hasSupabase, supabaseRequest } from "./server/db.mjs";
+import { authenticate } from "./server/auth.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -48,7 +49,7 @@ const server = createServer(async (request, response) => {
     }
 
     if (url.pathname === "/api/submissions.csv") {
-      await handleSubmissionsCsv(response, url);
+      await handleSubmissionsCsv(request, response, url);
       return;
     }
 
@@ -66,11 +67,21 @@ server.listen(port, "0.0.0.0", () => {
 
 async function handleSubmissions(request, response, url) {
   if (request.method === "GET") {
+    const auth = await authenticate(request);
+    if (!auth) {
+      sendJson(response, 401, { error: "unauthorized" });
+      return;
+    }
+    if (auth.role !== "admin") {
+      sendJson(response, 403, { error: "forbidden" });
+      return;
+    }
     sendJson(response, 200, filterSubmissions(await readSubmissions(), url.searchParams.get("form")));
     return;
   }
 
   if (request.method === "POST") {
+    const auth = await authenticate(request); // null es válido aquí (endpoint público)
     const body = await readBody(request);
     const submission = JSON.parse(body);
     const saved = {
@@ -79,12 +90,22 @@ async function handleSubmissions(request, response, url) {
       createdAt: submission.createdAt || new Date().toISOString(),
       values: normalizeValues(submission.values || {}),
     };
+    if (auth && auth.role === "client") saved.clientId = auth.userId;
     await saveSubmission(saved);
     sendJson(response, 200, saved);
     return;
   }
 
   if (request.method === "DELETE") {
+    const auth = await authenticate(request);
+    if (!auth) {
+      sendJson(response, 401, { error: "unauthorized" });
+      return;
+    }
+    if (auth.role !== "admin") {
+      sendJson(response, 403, { error: "forbidden" });
+      return;
+    }
     if (hasSupabase && process.env.ALLOW_ADMIN_DELETE !== "true") {
       sendJson(response, 403, { error: "delete_disabled" });
       return;
@@ -99,7 +120,16 @@ async function handleSubmissions(request, response, url) {
   sendJson(response, 405, { error: "method_not_allowed" });
 }
 
-async function handleSubmissionsCsv(response, url) {
+async function handleSubmissionsCsv(request, response, url) {
+  const auth = await authenticate(request);
+  if (!auth) {
+    sendJson(response, 401, { error: "unauthorized" });
+    return;
+  }
+  if (auth.role !== "admin") {
+    sendJson(response, 403, { error: "forbidden" });
+    return;
+  }
   const submissions = filterSubmissions(await readSubmissions(), url.searchParams.get("form"));
   const csv = buildCsv(submissions);
   response.writeHead(200, {
@@ -162,6 +192,7 @@ async function createSupabaseSubmission(submission) {
       created_at: submission.createdAt,
       score: Number(submission.score || 0),
       stage: String(submission.stage || ""),
+      client_id: submission.clientId ?? null,
       values: {
         ...submission.values,
         formSlug,

@@ -12,6 +12,14 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      # Las VITE_* se necesitan en build time: Render las inyecta en
+      # `npm run build` por ser env vars del servicio.
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
       - key: SUPABASE_TABLE
         value: growkey_form_submissions
       - key: ALLOW_ADMIN_DELETE

@@ -90,7 +90,9 @@ async function handleSubmissions(request, response, url) {
       createdAt: submission.createdAt || new Date().toISOString(),
       values: normalizeValues(submission.values || {}),
     };
-    if (auth && auth.role === "client") saved.clientId = auth.userId;
+    // Nunca confiar en el clientId del body: la submission solo queda ligada
+    // a un cliente cuando llega con token de cliente válido (spec §3).
+    saved.clientId = auth && auth.role === "client" ? auth.userId : null;
     await saveSubmission(saved);
     sendJson(response, 200, saved);
     return;

@@ -1,7 +1,7 @@
 import { db, supabaseRequest } from "./db.mjs";
 import { authenticate } from "./auth.mjs";
 import { evaluateAdvance } from "./engine.mjs";
-import { PROGRAM, currentWeek, isLate, phaseById, programDay } from "../shared/program.mjs";
+import { PROGRAM, currentWeek, isLate, isValidDateIso, phaseById, programDay } from "../shared/program.mjs";
 
 const todayIso = () => new Date().toISOString().slice(0, 10);
 
@@ -52,11 +52,21 @@ async function materializePhase(clientId, phaseId) {
 // Estado derivado que consumen ambos paneles.
 function clientView(client, tasks, submittedSlugs) {
   const day = client.start_date ? programDay(client.start_date, todayIso()) : null;
+  // Defensivo: si current_phase está corrupto en DB, phaseById lanza dentro de
+  // isLate. Mostramos la vista sin marcar atraso en vez de tumbar el endpoint.
+  let late = false;
+  if (day !== null && client.status === "active") {
+    try {
+      late = isLate(client.current_phase, day);
+    } catch (error) {
+      console.error(`clientView: fase desconocida para el cliente ${client.id}`, error);
+    }
+  }
   return {
     ...client,
     day,
     week: day === null ? null : currentWeek(day),
-    late: day !== null && client.status === "active" ? isLate(client.current_phase, day) : false,
+    late,
     tasks,
     submittedFormSlugs: submittedSlugs,
   };
@@ -68,11 +78,19 @@ export async function runEngine(clientId, actorId) {
   const client = await getClient(clientId);
   if (!client || client.status !== "active" || !client.start_date) return { advanced: false, client };
   const [tasks, submitted] = await Promise.all([getTasks(clientId), getSubmittedSlugs(clientId)]);
-  const verdict = evaluateAdvance({
-    currentPhaseId: client.current_phase,
-    tasks,
-    submittedFormSlugs: submitted,
-  });
+  // Defensivo: un current_phase corrupto en DB hace lanzar a phaseById dentro
+  // del motor. Logueamos y no avanzamos en vez de propagar un 500.
+  let verdict;
+  try {
+    verdict = evaluateAdvance({
+      currentPhaseId: client.current_phase,
+      tasks,
+      submittedFormSlugs: submitted,
+    });
+  } catch (error) {
+    console.error(`runEngine: evaluateAdvance falló para el cliente ${clientId}`, error);
+    return { advanced: false, client };
+  }
   if (!verdict.complete) return { advanced: false, client };
 
   if (verdict.programCompleted) {
@@ -110,6 +128,11 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       sendJson(response, 400, { error: "invalid_json" });
       return;
     }
+    // JSON.parse acepta "null" o "5": exigimos un objeto para leer campos.
+    if (body === null || typeof body !== "object") {
+      sendJson(response, 400, { error: "invalid_json" });
+      return;
+    }
   }
 
   if (path === "/me" && method === "GET") {
@@ -125,15 +148,18 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
   if (path === "/start-date" && method === "POST") {
     if (auth.role !== "client") { sendJson(response, 403, { error: "forbidden" }); return; }
     const startDate = String(body.startDate || "");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
+    if (!isValidDateIso(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
     const existing = await getClient(auth.userId);
     if (!existing) { sendJson(response, 404, { error: "not_found" }); return; }
     if (existing.start_date) { sendJson(response, 409, { error: "already_started" }); return; }
-    const updated = await db.update("skool_clients", `id=eq.${auth.userId}`, {
+    // start_date=is.null cierra la carrera entre el check de arriba y el update:
+    // dos requests simultáneas solo dejan pasar una.
+    const updated = await db.update("skool_clients", `id=eq.${auth.userId}&start_date=is.null`, {
       start_date: startDate,
       status: "active",
       phase_started_at: new Date().toISOString(),
     });
+    if (!updated?.length) { sendJson(response, 409, { error: "already_started" }); return; }
     await materializePhase(auth.userId, 1);
     await logEvent(auth.userId, "start_date_set", { startDate }, auth.userId);
     sendJson(response, 200, updated[0]);
@@ -169,7 +195,16 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     });
     await logEvent(task.client_id, nextDone ? "task_done" : "task_undone", { taskId, title: task.title }, auth.userId);
 
-    const engine = nextDone ? await runEngine(task.client_id, auth.userId) : { advanced: false };
+    // El toggle ya quedó persistido: si el motor falla (DB intermitente,
+    // datos corruptos), respondemos sin avance en vez de un 500.
+    let engine = { advanced: false };
+    if (nextDone) {
+      try {
+        engine = await runEngine(task.client_id, auth.userId);
+      } catch (error) {
+        console.error(`toggle: runEngine falló para el cliente ${task.client_id}`, error);
+      }
+    }
     const [tasks, submitted] = await Promise.all([getTasks(task.client_id), getSubmittedSlugs(task.client_id)]);
     const freshClient = await getClient(task.client_id);
     sendJson(response, 200, {
@@ -209,8 +244,11 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     const [allTasks, allSubmissions, allEvents, allMessages] = await Promise.all([
       db.select("skool_client_tasks", `select=*&client_id=in.(${ids})&order=phase.asc,position.asc,created_at.asc`),
       db.select("growkey_form_submissions", `select=client_id,form_slug&client_id=in.(${ids})`),
-      db.select("skool_events", "select=client_id,created_at&order=created_at.desc"),
-      db.select("skool_messages", "select=client_id,created_at&order=created_at.desc"),
+      // limit mitiga el volumen mientras la base es chica: los más recientes
+      // bastan para lastActivityAt. Con escala real esto se cambia por una
+      // agregación (max(created_at) group by client_id) en vez de traer filas.
+      db.select("skool_events", "select=client_id,created_at&order=created_at.desc&limit=2000"),
+      db.select("skool_messages", "select=client_id,created_at&order=created_at.desc&limit=2000"),
     ]);
 
     const lastByClient = (rows, clientId) =>
@@ -267,6 +305,9 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     if (typeof title !== "string" || !title.trim()) { sendJson(response, 400, { error: "invalid_title" }); return; }
     const phaseNum = Number(phase);
     if (!PROGRAM.phases.some((p) => p.id === phaseNum)) { sendJson(response, 400, { error: "invalid_phase" }); return; }
+    // week/suggestedDay son opcionales, pero si vienen deben ser enteros.
+    if (week !== null && !Number.isInteger(week)) { sendJson(response, 400, { error: "invalid_week" }); return; }
+    if (suggestedDay !== null && !Number.isInteger(suggestedDay)) { sendJson(response, 400, { error: "invalid_suggested_day" }); return; }
     if (classId && !phaseById(phaseNum).classes.some((c) => c.id === classId)) {
       sendJson(response, 400, { error: "invalid_class" });
       return;
@@ -336,7 +377,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
 
     if (action === "set_start_date") {
       const startDate = String(body.startDate || "");
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
+      if (!isValidDateIso(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
       const firstActivation = !client.start_date;
       const patch = { start_date: startDate };
       if (firstActivation) {
@@ -372,9 +413,18 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
     const invite = await db.authInvite(client.email, { name: client.name });
     if (invite.ok) { sendJson(response, 200, { ok: true, via: "invite" }); return; }
+    // Fallback a recover SOLO cuando GoTrue indica que el email ya está
+    // registrado (422 o mensaje "already..."). Cualquier otro fallo (red,
+    // config, rate limit) se reporta tal cual: encadenar recover lo taparía.
+    const alreadyRegistered =
+      invite.status === 422 || /already/i.test(String(invite.data?.msg ?? invite.data?.message ?? ""));
+    if (!alreadyRegistered) {
+      sendJson(response, 502, { error: "invite_failed", detail: invite.data?.msg ?? null });
+      return;
+    }
     const recover = await db.authRecover(client.email);
     if (!recover.ok) {
-      sendJson(response, 409, { error: "resend_failed", detail: invite.data?.msg ?? recover.data?.msg });
+      sendJson(response, 409, { error: "resend_failed", detail: recover.data?.msg ?? invite.data?.msg });
       return;
     }
     sendJson(response, 200, { ok: true, via: "recover" });
@@ -403,8 +453,19 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
     const submissionId = String(body.submissionId || "");
     if (!/^[0-9a-fA-F-]{36}$/.test(submissionId)) { sendJson(response, 400, { error: "invalid_submission_id" }); return; }
-    const updated = await db.update("growkey_form_submissions", `id=eq.${submissionId}`, { client_id: clientId });
-    if (!updated?.length) { sendJson(response, 404, { error: "submission_not_found" }); return; }
+    // client_id=is.null: solo se ligan submissions huérfanas — nunca robar una
+    // que ya pertenece a otro cliente.
+    const updated = await db.update(
+      "growkey_form_submissions",
+      `id=eq.${submissionId}&client_id=is.null`,
+      { client_id: clientId },
+    );
+    if (!updated?.length) {
+      const existing = await db.select("growkey_form_submissions", `select=id&id=eq.${submissionId}`);
+      if (!existing?.length) { sendJson(response, 404, { error: "submission_not_found" }); return; }
+      sendJson(response, 409, { error: "already_linked_or_missing" });
+      return;
+    }
     await logEvent(clientId, "form_submitted", { linked: true, submissionId, formSlug: updated[0].form_slug }, auth.userId);
     const engine = await runEngine(clientId, auth.userId);
     sendJson(response, 200, {

@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { hasSupabase, supabaseRequest } from "./server/db.mjs";
 import { authenticate } from "./server/auth.mjs";
+import { handleSkool } from "./server/skool.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -50,6 +51,11 @@ const server = createServer(async (request, response) => {
 
     if (url.pathname === "/api/submissions.csv") {
       await handleSubmissionsCsv(request, response, url);
+      return;
+    }
+
+    if (url.pathname.startsWith("/api/skool/")) {
+      await handleSkool(request, response, url, { sendJson, readBody });
       return;
     }
 

@@ -1,3 +1,4 @@
+import { apiDelete, apiGet, apiGetBlob } from "./api";
 import { OFFER_SLUG, ONBOARDING_SLUG, type FormValues } from "./formSchema";
 
 const STORAGE_KEY = "client-intake:submissions";
@@ -13,8 +14,8 @@ export type Submission = {
 
 export async function loadSubmissions(formSlug: string | null = FORM_SLUG): Promise<Submission[]> {
   try {
-    const response = await fetch(formSlug ? `/api/submissions?form=${formSlug}` : "/api/submissions");
-    if (response.ok) return (await response.json()) as Submission[];
+    // GET /api/submissions requiere token de admin (apiGet lo adjunta).
+    return await apiGet<Submission[]>(formSlug ? `/api/submissions?form=${formSlug}` : "/api/submissions");
   } catch {
     // Local fallback for pure static previews.
   }
@@ -66,12 +67,20 @@ export async function saveSubmission(submission: Submission, formSlug = FORM_SLU
 
 export async function clearSubmissions() {
   try {
-    const response = await fetch("/api/submissions", { method: "DELETE" });
-    if (response.ok) return;
+    // DELETE /api/submissions requiere token de admin (apiDelete lo adjunta).
+    await apiDelete<{ ok: boolean }>("/api/submissions");
+    return;
   } catch {
     // Local fallback for pure static previews.
   }
   window.localStorage.removeItem(STORAGE_KEY);
+}
+
+export async function exportCsv(formSlug: string | null = FORM_SLUG) {
+  // window.location.href no puede llevar el header Authorization:
+  // descargamos el CSV vía fetch autenticado + blob.
+  const blob = await apiGetBlob(formSlug ? `/api/submissions.csv?form=${formSlug}` : "/api/submissions.csv");
+  downloadBlob("client-intake-submissions.csv", blob);
 }
 
 export function exportJson(submissions: Submission[]) {
@@ -83,7 +92,10 @@ export function exportJson(submissions: Submission[]) {
 }
 
 function download(fileName: string, content: string, type: string) {
-  const blob = new Blob([content], { type });
+  downloadBlob(fileName, new Blob([content], { type }));
+}
+
+function downloadBlob(fileName: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;

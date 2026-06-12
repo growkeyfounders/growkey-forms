@@ -31,3 +31,13 @@ export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
 export async function apiDelete<T>(path: string): Promise<T> {
   return handle<T>(await fetch(path, { method: "DELETE", headers: await authHeaders() }));
 }
+
+// Para descargas (CSV): misma autenticación pero devuelve el cuerpo como Blob.
+export async function apiGetBlob(path: string): Promise<Blob> {
+  const response = await fetch(path, { headers: await authHeaders() });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `http_${response.status}`);
+  }
+  return response.blob();
+}

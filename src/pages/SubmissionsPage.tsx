@@ -7,6 +7,7 @@ import {
 } from "../formSchema";
 import {
   clearSubmissions,
+  exportCsv,
   exportJson,
   loadSubmissions,
   type Submission,
@@ -63,7 +64,7 @@ export function SubmissionsPage({ filterSlug }: { filterSlug: string | null }) {
           )}
         </div>
         <div className="export-row">
-          <button className="secondary-button" onClick={() => { window.location.href = filterSlug ? `/api/submissions.csv?form=${filterSlug}` : "/api/submissions.csv"; }} type="button">
+          <button className="secondary-button" onClick={() => { void exportCsv(filterSlug).catch(() => {}); }} type="button">
             CSV
           </button>
           <button className="secondary-button" onClick={() => exportJson(submissions)} type="button">

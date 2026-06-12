@@ -1,8 +1,17 @@
-import { apiDelete, apiGet, apiGetBlob } from "./api";
+import { ApiError, apiDelete, apiGet, apiGetBlob } from "./api";
 import { OFFER_SLUG, ONBOARDING_SLUG, type FormValues } from "./formSchema";
 
 const STORAGE_KEY = "client-intake:submissions";
 export const FORM_SLUG = OFFER_SLUG;
+
+// El server rechazó el token (401/403): la sesión expiró o no alcanza.
+// NO es un error de red — no aplica el fallback a localStorage.
+export class SessionExpiredError extends Error {
+  constructor() {
+    super("session_expired");
+    this.name = "SessionExpiredError";
+  }
+}
 
 export type Submission = {
   id: string;
@@ -18,7 +27,12 @@ export async function loadSubmissions(formSlug: string | null = FORM_SLUG): Prom
   try {
     // GET /api/submissions requiere token de admin (apiGet lo adjunta).
     return await apiGet<Submission[]>(formSlug ? `/api/submissions?form=${formSlug}` : "/api/submissions");
-  } catch {
+  } catch (error) {
+    // 401/403 NO cae en silencio a localStorage: la vista debe avisar que la
+    // sesión expiró. El resto de errores (red, server caído) sí usa fallback.
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      throw new SessionExpiredError();
+    }
     // Local fallback for pure static previews.
   }
 

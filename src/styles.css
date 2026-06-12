@@ -2649,6 +2649,14 @@ a.secondary-button {
   min-height: 88px;
 }
 
+/* sesión expirada en la vista de submissions */
+
+.ops-layout--status {
+  grid-template-columns: 1fr;
+  place-items: center;
+  min-height: 320px;
+}
+
 /* toast de éxito (verde corporativo, mismo patrón del toast de error) */
 
 .toast-success {

@@ -1,5 +1,17 @@
 import { supabase } from "./supabaseClient";
 
+// Error HTTP con status: deja distinguir 401/403 (sesión/permisos) de
+// errores de red o del servidor en los call sites.
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 async function authHeaders(): Promise<Record<string, string>> {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
@@ -9,7 +21,7 @@ async function authHeaders(): Promise<Record<string, string>> {
 async function handle<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body.error || `http_${response.status}`);
+    throw new ApiError(body.error || `http_${response.status}`, response.status);
   }
   return response.json() as Promise<T>;
 }
@@ -37,7 +49,7 @@ export async function apiGetBlob(path: string): Promise<Blob> {
   const response = await fetch(path, { headers: await authHeaders() });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body.error || `http_${response.status}`);
+    throw new ApiError(body.error || `http_${response.status}`, response.status);
   }
   return response.blob();
 }

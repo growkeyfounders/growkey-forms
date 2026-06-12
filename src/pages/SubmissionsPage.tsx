@@ -10,23 +10,45 @@ import {
   exportCsv,
   exportJson,
   loadSubmissions,
+  SessionExpiredError,
   type Submission,
 } from "../storage";
 
 export function SubmissionsPage({ filterSlug }: { filterSlug: string | null }) {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   const selectedSubmission = submissions.find((item) => item.id === activeSubmissionId) ?? submissions[0];
 
   useEffect(() => {
-    void loadSubmissions(filterSlug).then(setSubmissions);
+    setSessionExpired(false);
+    loadSubmissions(filterSlug)
+      .then(setSubmissions)
+      .catch((error) => {
+        // El server rechazó el token (401/403): avisar en vez de mostrar el
+        // fallback local en silencio. Otros errores ya cayeron a localStorage.
+        if (error instanceof SessionExpiredError) setSessionExpired(true);
+      });
   }, [filterSlug]);
 
   async function resetDemoData() {
     await clearSubmissions();
     setSubmissions([]);
     setActiveSubmissionId(null);
+  }
+
+  if (sessionExpired) {
+    return (
+      <main className="ops-layout ops-layout--status">
+        <div className="portal-status">
+          <p className="route-status">Tu sesión expiró, vuelve a entrar.</p>
+          <a className="secondary-button" href="/login">
+            Ir al login
+          </a>
+        </div>
+      </main>
+    );
   }
 
   return (

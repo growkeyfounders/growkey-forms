@@ -3,10 +3,12 @@ import type { PhaseConfig } from "../../shared/program.mjs";
 import { addDays } from "../../shared/program.mjs";
 import logoUrl from "../assets/growkey-mascot.png";
 import { apiGet, apiPost } from "../api";
+import { ChatThread, threadMemberToChatMember } from "../components/ChatThread";
 import { Checklist } from "../components/Checklist";
 import { PhaseTimeline } from "../components/PhaseTimeline";
 import { WeekView } from "../components/WeekView";
-import type { ClientRow, PortalData, TaskRow, ToggleResponse } from "../skoolTypes";
+import type { ClientRow, PortalData, TaskRow, ThreadMemberRow, ToggleResponse } from "../skoolTypes";
+import { supabase } from "../supabaseClient";
 
 // Fecha local del navegador (no UTC): cerca de medianoche en Colombia el
 // default del date picker debe seguir siendo "hoy" para el cliente.
@@ -371,7 +373,92 @@ function Active({
           />
         </div>
       </div>
+
+      <TeamChatCard clientId={client.id} />
     </main>
+  );
+}
+
+// ===== Chat con tu equipo (spec §7.7): badge de no leídos + hilo grupal =====
+
+function TeamChatCard({ clientId }: { clientId: string }) {
+  const [open, setOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
+  const [members, setMembers] = useState<ThreadMemberRow[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    apiGet<{ members: ThreadMemberRow[] }>(`/api/skool/thread/${clientId}/members`)
+      .then((data) => {
+        if (active) setMembers(data.members);
+      })
+      .catch(() => {
+        // Sin miembros cargados el chat sigue funcionando ("Equipo Growkey").
+      });
+    return () => {
+      active = false;
+    };
+  }, [clientId]);
+
+  // Badge de no leídos: mensajes ajenos posteriores a mi last_read_at,
+  // query directa con supabase-js (RLS solo deja ver el propio hilo).
+  useEffect(() => {
+    if (open) return;
+    let active = true;
+    void (async () => {
+      try {
+        const { data: read } = await supabase
+          .from("skool_message_reads")
+          .select("last_read_at")
+          .eq("user_id", clientId)
+          .eq("client_id", clientId)
+          .maybeSingle();
+        let query = supabase
+          .from("skool_messages")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", clientId)
+          .neq("sender_id", clientId);
+        if (read?.last_read_at) query = query.gt("created_at", read.last_read_at);
+        const { count } = await query;
+        if (active) setUnread(count ?? 0);
+      } catch {
+        // Sin supabase configurado el badge simplemente no se muestra.
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [clientId, open]);
+
+  return (
+    <section className="portal-card portal-chat" aria-label="Chat con tu equipo">
+      <header className="portal-card__header">
+        <h3>
+          Chat con tu equipo
+          {!open && unread > 0 ? (
+            <span aria-label={`${unread} mensajes sin leer`} className="chat-badge">
+              {unread > 99 ? "99+" : unread}
+            </span>
+          ) : null}
+        </h3>
+        <button className="secondary-button" onClick={() => setOpen((current) => !current)} type="button">
+          {open ? "Ocultar chat" : unread > 0 ? "Ver mensajes" : "Abrir chat"}
+        </button>
+      </header>
+      {open ? (
+        <ChatThread
+          clientId={clientId}
+          meId={clientId}
+          members={members.map(threadMemberToChatMember)}
+          onRead={() => setUnread(0)}
+          title="Tu equipo Growkey"
+        />
+      ) : (
+        <p className="route-status">
+          Tu equipo Growkey está a un mensaje de distancia: dudas, bloqueos o avances, todo va aquí.
+        </p>
+      )}
+    </section>
   );
 }
 
@@ -419,6 +506,8 @@ function Completed({ data }: { data: PortalData }) {
           <PhaseClasses phase={phase} title="Clases de tu última fase" />
         </div>
       </div>
+
+      <TeamChatCard clientId={client.id} />
     </main>
   );
 }

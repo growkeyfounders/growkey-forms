@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PROGRAM } from "../../shared/program.mjs";
 import { apiGet, apiPost } from "../api";
+import { ChatThread, ThreadMembersManager, threadMemberToChatMember } from "../components/ChatThread";
 import { PhaseTimeline } from "../components/PhaseTimeline";
 import { OFFER_SLUG, ONBOARDING_SLUG } from "../formSchema";
-import type { AdminClientView, ClientsData } from "../skoolTypes";
+import { useSession } from "../session";
+import type { AdminClientView, ClientsData, InboxData, InboxThread, ThreadMemberRow } from "../skoolTypes";
 import { SubmissionsPage } from "./SubmissionsPage";
 
 export type AdminTab = "clients" | "roadmap" | "conversations" | "forms";
@@ -111,7 +113,7 @@ export function AdminPanel({
       {tab === "roadmap" ? (
         <RoadmapTab clients={clients} loadError={loadError} loading={loading} onRetry={load} />
       ) : null}
-      {tab === "conversations" ? <ConversationsPlaceholder /> : null}
+      {tab === "conversations" ? <ConversationsTab /> : null}
       {tab === "forms" ? (
         <section className="admin-forms">
           <nav className="admin-subnav" aria-label="Filtro de formularios">
@@ -524,17 +526,151 @@ function RoadmapTab({
   );
 }
 
-// ===== Pestaña Conversaciones (placeholder hasta el chat) =====
+// ===== Pestaña Conversaciones (bandeja + hilo, spec §8.4) =====
 
-function ConversationsPlaceholder() {
+function ConversationsTab() {
+  const { me } = useSession();
+  const meId = me?.profile?.userId ?? "";
+
+  const [threads, setThreads] = useState<InboxThread[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoadError(false);
+    try {
+      const data = await apiGet<InboxData>("/api/skool/inbox");
+      setThreads(data.threads);
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const selected = threads.find((thread) => thread.client.id === selectedId) ?? null;
+
+  function open(thread: InboxThread) {
+    setSelectedId(thread.client.id);
+    // ChatThread marca el hilo como leído al montar: el badge se limpia ya.
+    setThreads((current) =>
+      current.map((item) => (item.client.id === thread.client.id ? { ...item, unread: 0 } : item)),
+    );
+  }
+
+  function onMembersChanged(clientId: string, members: ThreadMemberRow[]) {
+    setThreads((current) =>
+      current.map((item) => (item.client.id === clientId ? { ...item, members } : item)),
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="portal-status" role="status">
+        <span className="spinner" aria-hidden="true" />
+        <p className="route-status">Cargando conversaciones…</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="portal-status">
+        <p className="route-status">No pudimos cargar las conversaciones. Revisa tu conexión e intenta de nuevo.</p>
+        <button className="secondary-button" onClick={() => void load()} type="button">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (threads.length === 0) {
+    return (
+      <section className="admin-card admin-card--empty">
+        <p className="eyebrow">Conversaciones</p>
+        <h2>Todavía no hay hilos</h2>
+        <p className="route-status">
+          Cada cliente invitado abre su propio hilo de chat con el equipo. Invita al primero desde la
+          pestaña Clientes.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <section className="admin-card admin-card--empty">
-      <p className="eyebrow">Conversaciones</p>
-      <h2>La bandeja de chat llega en la siguiente entrega</h2>
-      <p className="route-status">
-        Aquí vas a ver los hilos de cada cliente con sus mensajes no leídos. Mientras tanto,
-        el detalle de cada cliente ya muestra su contexto completo.
-      </p>
+    <section className="admin-card" aria-label="Conversaciones">
+      <header className="admin-card__header">
+        <div>
+          <p className="eyebrow">Conversaciones</p>
+          <h2>Hilos con tus clientes</h2>
+        </div>
+        <button className="ghost-button" onClick={() => void load()} type="button">
+          Actualizar
+        </button>
+      </header>
+
+      <div className="inbox">
+        <div className="inbox-list" role="list">
+          {threads.map((thread) => {
+            const active = thread.client.id === selectedId;
+            return (
+              <button
+                className={active ? "inbox-row inbox-row--active" : "inbox-row"}
+                key={thread.client.id}
+                onClick={() => open(thread)}
+                role="listitem"
+                type="button"
+              >
+                <span aria-hidden="true" className="admin-avatar">
+                  {initials(thread.client.name || thread.client.email)}
+                </span>
+                <span className="inbox-row__body">
+                  <strong>{thread.client.name || thread.client.email}</strong>
+                  <small>
+                    {thread.lastMessage
+                      ? thread.lastMessage.body
+                      : thread.client.business || "Sin mensajes todavía"}
+                  </small>
+                </span>
+                <span className="inbox-row__meta">
+                  {thread.lastMessage ? <small>{relativeTime(thread.lastMessage.created_at)}</small> : null}
+                  {thread.unread > 0 ? (
+                    <span aria-label={`${thread.unread} mensajes sin leer`} className="chat-badge">
+                      {thread.unread > 99 ? "99+" : thread.unread}
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {selected && meId ? (
+          <div className="inbox-thread">
+            <ChatThread
+              clientId={selected.client.id}
+              clientName={selected.client.name || selected.client.email}
+              meId={meId}
+              members={selected.members.map(threadMemberToChatMember)}
+              title={selected.client.name || selected.client.email}
+            />
+            <ThreadMembersManager
+              clientId={selected.client.id}
+              members={selected.members}
+              onChanged={(members) => onMembersChanged(selected.client.id, members)}
+            />
+          </div>
+        ) : (
+          <div className="inbox-thread inbox-thread--empty">
+            <p className="route-status">Elige una conversación para abrir el hilo.</p>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

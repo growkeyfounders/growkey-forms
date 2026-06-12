@@ -476,6 +476,93 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     return;
   }
 
-  // --- las rutas de chat se agregan en el chunk 5 ---
+  // ===== Chat (spec §9) =====
+
+  // Bandeja de conversaciones (admin): por cliente, último mensaje, no leídos
+  // de ESTE admin (sin contar los propios) y miembros del hilo. 4 selects +
+  // merge en JS: volumen bajo, sin RPC.
+  if (path === "/inbox" && method === "GET") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clients = (await db.select("skool_clients", "select=id,email,name,business,status&order=created_at.desc")) ?? [];
+    if (!clients.length) { sendJson(response, 200, { threads: [] }); return; }
+    const [messages, reads, members] = await Promise.all([
+      // Los más recientes bastan para lastMessage/unread mientras la base es
+      // chica; con escala real esto se cambia por una agregación.
+      db.select("skool_messages", "select=*&order=created_at.desc&limit=2000"),
+      db.select("skool_message_reads", `select=client_id,last_read_at&user_id=eq.${auth.userId}`),
+      db.select("skool_thread_members", "select=*,profiles(name,photo_url)&order=added_at.asc"),
+    ]);
+    const threads = clients.map((client) => {
+      const clientMessages = (messages ?? []).filter((message) => message.client_id === client.id);
+      const lastReadAt = (reads ?? []).find((read) => read.client_id === client.id)?.last_read_at ?? null;
+      const unread = clientMessages.filter(
+        (message) => message.sender_id !== auth.userId && (!lastReadAt || message.created_at > lastReadAt),
+      ).length;
+      return {
+        client,
+        lastMessage: clientMessages[0] ?? null,
+        unread,
+        members: (members ?? []).filter((member) => member.client_id === client.id),
+      };
+    });
+    // Hilos con actividad reciente primero; sin mensajes, al final.
+    threads.sort((a, b) =>
+      (b.lastMessage?.created_at ?? "").localeCompare(a.lastMessage?.created_at ?? ""),
+    );
+    sendJson(response, 200, { threads });
+    return;
+  }
+
+  // Miembros del hilo (admin o el cliente dueño) con perfil embebido.
+  const membersMatch = path.match(/^\/thread\/([0-9a-f-]+)\/members$/);
+  if (membersMatch && method === "GET") {
+    const clientId = membersMatch[1];
+    if (!isAdmin && clientId !== auth.userId) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const members = await db.select(
+      "skool_thread_members",
+      `select=*,profiles(name,photo_url)&client_id=eq.${clientId}&order=added_at.asc`,
+    );
+    sendJson(response, 200, { members: members ?? [] });
+    return;
+  }
+
+  // Agregar/quitar miembros del equipo en el hilo (admin). El cliente es
+  // miembro implícito de su hilo (spec §5): solo se gestionan admins.
+  const threadMembersMatch = path.match(/^\/clients\/([0-9a-f-]+)\/thread-members$/);
+  if (threadMembersMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = threadMembersMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const userId = String(body.userId || "");
+    const action = String(body.action || "");
+    if (!/^[0-9a-fA-F-]{36}$/.test(userId)) { sendJson(response, 400, { error: "invalid_user" }); return; }
+    if (action !== "add" && action !== "remove") { sendJson(response, 400, { error: "invalid_action" }); return; }
+    if (action === "add") {
+      const profiles = await db.select("profiles", `select=user_id,role&user_id=eq.${userId}`);
+      if (profiles?.[0]?.role !== "admin") { sendJson(response, 400, { error: "invalid_user" }); return; }
+      // Upsert: agregar dos veces al mismo miembro es idempotente.
+      await db.upsert("skool_thread_members", { client_id: clientId, user_id: userId });
+    } else {
+      await db.remove("skool_thread_members", `client_id=eq.${clientId}&user_id=eq.${userId}`);
+    }
+    const members = await db.select(
+      "skool_thread_members",
+      `select=*,profiles(name,photo_url)&client_id=eq.${clientId}&order=added_at.asc`,
+    );
+    sendJson(response, 200, { members: members ?? [] });
+    return;
+  }
+
+  // Lista de admins (admin): selector de "agregar al grupo".
+  if (path === "/admins" && method === "GET") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const admins = await db.select("profiles", "select=user_id,name,photo_url&role=eq.admin&order=name.asc");
+    sendJson(response, 200, { admins: admins ?? [] });
+    return;
+  }
+
   sendJson(response, 404, { error: "not_found" });
 }

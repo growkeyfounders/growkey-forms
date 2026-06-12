@@ -2,14 +2,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PhaseConfig } from "../../shared/program.mjs";
 import { PROGRAM, phaseById } from "../../shared/program.mjs";
 import { apiDelete, apiGet, apiPost } from "../api";
+import { ChatThread, ThreadMembersManager, threadMemberToChatMember } from "../components/ChatThread";
 import { PhaseTimeline } from "../components/PhaseTimeline";
 import { formConfigs, type FormValues } from "../formSchema";
+import { useSession } from "../session";
 import type {
   AdminContext,
   ClientView,
   EventRow,
   SubmissionRow,
   TaskRow,
+  ThreadMemberRow,
   ToggleResponse,
 } from "../skoolTypes";
 import { loadSubmissions, type Submission } from "../storage";
@@ -39,6 +42,8 @@ function rowToSubmission(row: SubmissionRow): Submission {
 type Toast = { kind: "ok" | "error"; message: string };
 
 export function AdminClientDetail({ clientId }: { clientId: string }) {
+  const { me } = useSession();
+  const meId = me?.profile?.userId ?? "";
   const [data, setData] = useState<AdminContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<"auth" | "network" | null>(null);
@@ -189,7 +194,7 @@ export function AdminClientDetail({ clientId }: { clientId: string }) {
     );
   }
 
-  const { client, events, submissions } = data;
+  const { client, events, submissions, threadMembers } = data;
 
   // El mensaje depende de la vía: invite directo o recover (ya tenía cuenta).
   async function resendInvite() {
@@ -254,12 +259,31 @@ export function AdminClientDetail({ clientId }: { clientId: string }) {
         <div className="detail-col">
           <EventsCard events={events} />
           <NotesCard busy={actionBusy} clientId={client.id} onAction={runAction} />
-          <section className="admin-card admin-card--empty" aria-label="Chat">
-            <p className="eyebrow">Chat del hilo</p>
-            <h2>El chat llega en la siguiente entrega</h2>
-            <p className="route-status">
-              Aquí vas a conversar con {client.name || "el cliente"} y tu equipo en tiempo real.
-            </p>
+          <section className="admin-card" aria-label="Chat del hilo">
+            <header className="admin-card__header">
+              <div>
+                <p className="eyebrow">Chat del hilo</p>
+                <h2>Conversación con {client.name || "el cliente"}</h2>
+              </div>
+            </header>
+            {meId ? (
+              <>
+                <ChatThread
+                  clientId={client.id}
+                  clientName={client.name || client.email}
+                  meId={meId}
+                  members={threadMembers.map(threadMemberToChatMember)}
+                  title={client.name || client.email}
+                />
+                <ThreadMembersManager
+                  clientId={client.id}
+                  members={threadMembers}
+                  onChanged={(members: ThreadMemberRow[]) =>
+                    setData((current) => (current ? { ...current, threadMembers: members } : current))
+                  }
+                />
+              </>
+            ) : null}
           </section>
         </div>
       </div>

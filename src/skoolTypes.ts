@@ -138,3 +138,22 @@ export type AdminContext = {
   messages: MessageRow[];
   threadMembers: ThreadMemberRow[];
 };
+
+// Perfil admin (GET /api/skool/admins) para el selector "agregar al grupo".
+export type AdminProfileRow = {
+  user_id: string;
+  name: string;
+  photo_url: string | null;
+};
+
+// GET /api/skool/inbox — bandeja de conversaciones del panel interno.
+export type InboxThread = {
+  client: Pick<ClientRow, "id" | "email" | "name" | "business" | "status">;
+  lastMessage: MessageRow | null;
+  unread: number;
+  members: ThreadMemberRow[];
+};
+
+export type InboxData = {
+  threads: InboxThread[];
+};

@@ -181,6 +181,240 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     return;
   }
 
-  // --- las rutas se agregan en las tareas siguientes ---
+  // Invitar cliente (admin): usuario en Auth + perfil + fila skool_clients + hilo.
+  if (path === "/clients" && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const { email, name = "", business = "" } = body;
+    if (!email || !/.+@.+\..+/.test(email)) { sendJson(response, 400, { error: "invalid_email" }); return; }
+
+    const invite = await db.authInvite(email, { name });
+    if (!invite.ok) { sendJson(response, 409, { error: "invite_failed", detail: invite.data?.msg }); return; }
+    const invited = invite.data;
+
+    await db.upsert("profiles", { user_id: invited.id, role: "client", name });
+    await db.upsert("skool_clients", { id: invited.id, email, name, business, status: "invited" });
+    await db.upsert("skool_thread_members", { client_id: invited.id, user_id: auth.userId });
+    await logEvent(invited.id, "status_change", { to: "invited" }, auth.userId);
+    sendJson(response, 200, await getClient(invited.id));
+    return;
+  }
+
+  // Listar clientes (admin) con vista derivada, progreso de fase y última actividad.
+  if (path === "/clients" && method === "GET") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clients = (await db.select("skool_clients", "select=*&order=created_at.desc")) ?? [];
+    if (!clients.length) { sendJson(response, 200, { clients: [] }); return; }
+
+    const ids = clients.map((client) => client.id).join(",");
+    const [allTasks, allSubmissions, allEvents, allMessages] = await Promise.all([
+      db.select("skool_client_tasks", `select=*&client_id=in.(${ids})&order=phase.asc,position.asc,created_at.asc`),
+      db.select("growkey_form_submissions", `select=client_id,form_slug&client_id=in.(${ids})`),
+      db.select("skool_events", "select=client_id,created_at&order=created_at.desc"),
+      db.select("skool_messages", "select=client_id,created_at&order=created_at.desc"),
+    ]);
+
+    const lastByClient = (rows, clientId) =>
+      (rows ?? []).find((row) => row.client_id === clientId)?.created_at ?? null;
+
+    const views = clients.map((client) => {
+      const tasks = (allTasks ?? []).filter((task) => task.client_id === client.id);
+      const slugs = (allSubmissions ?? [])
+        .filter((submission) => submission.client_id === client.id)
+        .map((submission) => submission.form_slug);
+      const phaseTasks = tasks.filter((task) => task.phase === client.current_phase);
+      const progressPct = phaseTasks.length
+        ? Math.round((phaseTasks.filter((task) => task.done).length / phaseTasks.length) * 100)
+        : 0;
+      const lastEvent = lastByClient(allEvents, client.id);
+      const lastMessage = lastByClient(allMessages, client.id);
+      const lastActivityAt = [lastEvent, lastMessage].filter(Boolean).sort().pop() ?? null;
+      return { ...clientView(client, tasks, slugs), progressPct, lastActivityAt };
+    });
+    sendJson(response, 200, { clients: views });
+    return;
+  }
+
+  // Contexto unificado del cliente (admin) — spec §10.
+  const ctxMatch = path.match(/^\/clients\/([0-9a-f-]+)\/context$/);
+  if (ctxMatch && method === "GET") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = ctxMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const [tasks, submissions, events, messages, members] = await Promise.all([
+      getTasks(clientId),
+      db.select("growkey_form_submissions", `select=*&client_id=eq.${clientId}&order=created_at.desc`),
+      db.select("skool_events", `select=*&client_id=eq.${clientId}&order=created_at.desc&limit=200`),
+      db.select("skool_messages", `select=*&client_id=eq.${clientId}&order=created_at.asc&limit=500`),
+      db.select("skool_thread_members", `select=*,profiles(name,photo_url)&client_id=eq.${clientId}`),
+    ]);
+    sendJson(response, 200, {
+      program: PROGRAM,
+      client: clientView(client, tasks, (submissions ?? []).map((s) => s.form_slug)),
+      submissions, events, messages, threadMembers: members,
+    });
+    return;
+  }
+
+  // Tarea custom (admin): nuevo requisito de la fase indicada.
+  const customTaskMatch = path.match(/^\/clients\/([0-9a-f-]+)\/tasks$/);
+  if (customTaskMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = customTaskMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const { title, phase, week = null, suggestedDay = null, classId = null } = body;
+    if (typeof title !== "string" || !title.trim()) { sendJson(response, 400, { error: "invalid_title" }); return; }
+    const phaseNum = Number(phase);
+    if (!PROGRAM.phases.some((p) => p.id === phaseNum)) { sendJson(response, 400, { error: "invalid_phase" }); return; }
+    if (classId && !phaseById(phaseNum).classes.some((c) => c.id === classId)) {
+      sendJson(response, 400, { error: "invalid_class" });
+      return;
+    }
+    const inserted = await db.insert("skool_client_tasks", {
+      client_id: clientId,
+      phase: phaseNum,
+      source: "custom",
+      title: title.trim(),
+      week: week ?? null,
+      suggested_day: suggestedDay ?? null,
+      class_id: classId ?? null,
+      // Después de las base (0..n-1): el checklist ordena custom al final.
+      position: phaseById(phaseNum).baseTasks.length,
+      created_by: auth.userId,
+    });
+    const task = inserted[0];
+    await logEvent(clientId, "task_added", { taskId: task.id, title: task.title, phase: phaseNum }, auth.userId);
+    sendJson(response, 200, task);
+    return;
+  }
+
+  // Eliminar tarea custom (admin). Las base no se borran: 409.
+  const deleteTaskMatch = path.match(/^\/tasks\/([0-9a-f-]+)$/);
+  if (deleteTaskMatch && method === "DELETE") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const taskId = deleteTaskMatch[1];
+    const rows = await db.select("skool_client_tasks", `select=*&id=eq.${taskId}`);
+    const task = rows?.[0];
+    if (!task) { sendJson(response, 404, { error: "not_found" }); return; }
+    if (task.source !== "custom") { sendJson(response, 409, { error: "base_task" }); return; }
+    await db.remove("skool_client_tasks", `id=eq.${taskId}`);
+    await logEvent(task.client_id, "task_deleted", { taskId, title: task.title }, auth.userId);
+    sendJson(response, 200, { ok: true });
+    return;
+  }
+
+  // Overrides del equipo (admin): fase, pausa/reactivación, fecha de inicio, completar.
+  const overrideMatch = path.match(/^\/clients\/([0-9a-f-]+)\/override$/);
+  if (overrideMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = overrideMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const action = String(body.action || "");
+
+    if (action === "set_phase") {
+      const phaseNum = Number(body.phase);
+      if (!PROGRAM.phases.some((p) => p.id === phaseNum)) { sendJson(response, 400, { error: "invalid_phase" }); return; }
+      const updated = await db.update("skool_clients", `id=eq.${clientId}`, {
+        current_phase: phaseNum,
+        phase_started_at: new Date().toISOString(),
+      });
+      await materializePhase(clientId, phaseNum);
+      await logEvent(clientId, "phase_override", { from: client.current_phase, to: phaseNum }, auth.userId);
+      sendJson(response, 200, updated[0]);
+      return;
+    }
+
+    if (action === "pause" || action === "resume") {
+      const status = action === "pause" ? "paused" : "active";
+      const updated = await db.update("skool_clients", `id=eq.${clientId}`, { status });
+      await logEvent(clientId, "status_change", { to: status }, auth.userId);
+      sendJson(response, 200, updated[0]);
+      return;
+    }
+
+    if (action === "set_start_date") {
+      const startDate = String(body.startDate || "");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
+      const firstActivation = !client.start_date;
+      const patch = { start_date: startDate };
+      if (firstActivation) {
+        // Primera activación por el equipo: equivale al /start-date del cliente.
+        patch.status = "active";
+        patch.phase_started_at = new Date().toISOString();
+      }
+      const updated = await db.update("skool_clients", `id=eq.${clientId}`, patch);
+      if (firstActivation) await materializePhase(clientId, client.current_phase);
+      await logEvent(clientId, "start_date_set", { startDate }, auth.userId);
+      sendJson(response, 200, updated[0]);
+      return;
+    }
+
+    if (action === "complete") {
+      const updated = await db.update("skool_clients", `id=eq.${clientId}`, { status: "completed" });
+      await logEvent(clientId, "status_change", { to: "completed" }, auth.userId);
+      sendJson(response, 200, updated[0]);
+      return;
+    }
+
+    sendJson(response, 400, { error: "invalid_action" });
+    return;
+  }
+
+  // Reenviar invitación (admin). Si el email ya está registrado (cliente que ya
+  // confirmó o entró con Google), GoTrue rechaza el invite: fallback a recover,
+  // que aterriza en el mismo flujo set-password del LoginPage vía type=recovery.
+  const resendMatch = path.match(/^\/clients\/([0-9a-f-]+)\/resend-invite$/);
+  if (resendMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const client = await getClient(resendMatch[1]);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const invite = await db.authInvite(client.email, { name: client.name });
+    if (invite.ok) { sendJson(response, 200, { ok: true, via: "invite" }); return; }
+    const recover = await db.authRecover(client.email);
+    if (!recover.ok) {
+      sendJson(response, 409, { error: "resend_failed", detail: invite.data?.msg ?? recover.data?.msg });
+      return;
+    }
+    sendJson(response, 200, { ok: true, via: "recover" });
+    return;
+  }
+
+  // Nota interna (admin): queda en la bitácora como evento `note`.
+  const notesMatch = path.match(/^\/clients\/([0-9a-f-]+)\/notes$/);
+  if (notesMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const client = await getClient(notesMatch[1]);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const text = typeof body.text === "string" ? body.text.trim() : "";
+    if (!text) { sendJson(response, 400, { error: "invalid_text" }); return; }
+    await logEvent(client.id, "note", { text }, auth.userId);
+    sendJson(response, 200, { ok: true });
+    return;
+  }
+
+  // Ligar submission histórica (admin): puede completar la fase actual → motor.
+  const linkMatch = path.match(/^\/clients\/([0-9a-f-]+)\/link-submission$/);
+  if (linkMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = linkMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const submissionId = String(body.submissionId || "");
+    if (!/^[0-9a-fA-F-]{36}$/.test(submissionId)) { sendJson(response, 400, { error: "invalid_submission_id" }); return; }
+    const updated = await db.update("growkey_form_submissions", `id=eq.${submissionId}`, { client_id: clientId });
+    if (!updated?.length) { sendJson(response, 404, { error: "submission_not_found" }); return; }
+    await logEvent(clientId, "form_submitted", { linked: true, submissionId, formSlug: updated[0].form_slug }, auth.userId);
+    const engine = await runEngine(clientId, auth.userId);
+    sendJson(response, 200, {
+      ok: true,
+      advanced: engine.advanced ?? false,
+      programCompleted: engine.programCompleted ?? false,
+    });
+    return;
+  }
+
+  // --- las rutas de chat se agregan en el chunk 5 ---
   sendJson(response, 404, { error: "not_found" });
 }

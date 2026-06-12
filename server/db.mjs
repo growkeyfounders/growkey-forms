@@ -28,6 +28,29 @@ export async function supabaseRequest(pathAndQuery, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+// GoTrue (Auth Admin) con service role. A diferencia de supabaseRequest NO
+// lanza en error HTTP: el caller inspecciona el status (ej. invitar un email
+// ya registrado responde 422 y tiene fallback a recover).
+async function authPost(pathname, payload) {
+  const response = await fetch(`${supabaseUrl}${pathname}`, {
+    method: "POST",
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const text = await response.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = { msg: text };
+  }
+  return { ok: response.ok, status: response.status, data };
+}
+
 // Helpers de tabla (PostgREST)
 export const db = {
   select: (table, query = "select=*") => supabaseRequest(`/rest/v1/${table}?${query}`),
@@ -51,4 +74,6 @@ export const db = {
     }),
   remove: (table, query) =>
     supabaseRequest(`/rest/v1/${table}?${query}`, { method: "DELETE" }),
+  authInvite: (email, data = {}) => authPost("/auth/v1/invite", { email, data }),
+  authRecover: (email) => authPost("/auth/v1/recover", { email }),
 };

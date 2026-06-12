@@ -3,6 +3,7 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { hasSupabase, supabaseRequest } from "./server/db.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -10,10 +11,7 @@ const dataDir = path.join(__dirname, "data");
 const submissionsFile = path.join(dataDir, "submissions.json");
 const submissionsCsvFile = path.join(dataDir, "submissions.csv");
 const port = Number(process.env.PORT || 5174);
-const supabaseUrl = normalizeSupabaseUrl(process.env.SUPABASE_URL);
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseTable = process.env.SUPABASE_TABLE || "growkey_form_submissions";
-const hasSupabase = Boolean(supabaseUrl && supabaseServiceRoleKey);
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -145,7 +143,7 @@ async function saveSubmission(submission) {
 
 async function readSupabaseSubmissions() {
   const rows = await supabaseRequest(
-    `${supabaseUrl}/rest/v1/${supabaseTable}?select=*&order=created_at.desc`,
+    `/rest/v1/${supabaseTable}?select=*&order=created_at.desc`,
   );
 
   return rows.map(rowToSubmission);
@@ -153,7 +151,7 @@ async function readSupabaseSubmissions() {
 
 async function createSupabaseSubmission(submission) {
   const formSlug = String(submission.values?.formSlug || inferFormSlug(submission.values || {}));
-  await supabaseRequest(`${supabaseUrl}/rest/v1/${supabaseTable}`, {
+  await supabaseRequest(`/rest/v1/${supabaseTable}`, {
     method: "POST",
     headers: {
       Prefer: "return=minimal",
@@ -174,30 +172,9 @@ async function createSupabaseSubmission(submission) {
 
 async function clearSupabaseSubmissions(formSlug) {
   const query = formSlug ? `?form_slug=eq.${encodeURIComponent(formSlug)}` : "";
-  await supabaseRequest(`${supabaseUrl}/rest/v1/${supabaseTable}${query}`, {
+  await supabaseRequest(`/rest/v1/${supabaseTable}${query}`, {
     method: "DELETE",
   });
-}
-
-async function supabaseRequest(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      apikey: supabaseServiceRoleKey,
-      Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Supabase request failed ${response.status}: ${text}`);
-  }
-
-  if (response.status === 204) return null;
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
 }
 
 function rowToSubmission(row) {
@@ -224,10 +201,6 @@ function normalizeValues(values) {
 function inferFormSlug(values) {
   if (values.business || values.mainProfile || values.email) return "growkey-onboarding-v1";
   return "growkey-offer-v1";
-}
-
-function normalizeSupabaseUrl(value) {
-  return value?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
 }
 
 async function writeCsvBackup(submissions) {

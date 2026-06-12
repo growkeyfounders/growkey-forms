@@ -53,20 +53,36 @@ export function AdminClientDetail({ clientId }: { clientId: string }) {
   const [toast, setToast] = useState<Toast | null>(null);
   const toastTimer = useRef<number | null>(null);
 
+  const showToast = useCallback((kind: Toast["kind"], message: string) => {
+    setToast({ kind, message });
+    if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 4200);
+  }, []);
+
   const load = useCallback(
     async (withSpinner = true) => {
-      if (withSpinner) setLoading(true);
-      setLoadError(null);
+      if (withSpinner) {
+        setLoading(true);
+        setLoadError(null);
+      }
       try {
         setData(await apiGet<AdminContext>(`/api/skool/clients/${clientId}/context`));
+        setLoadError(null);
       } catch (error) {
-        const code = error instanceof Error ? error.message : "";
-        setLoadError(code === "unauthorized" || code === "forbidden" ? "auth" : "network");
+        // El estado de error de página completa es solo para la carga inicial
+        // (withSpinner). Un refresh silencioso fallido (tras toggle, override,
+        // nota...) no debe tumbar la vista: toast y se conservan los datos.
+        if (withSpinner) {
+          const code = error instanceof Error ? error.message : "";
+          setLoadError(code === "unauthorized" || code === "forbidden" ? "auth" : "network");
+        } else {
+          showToast("error", "No pudimos actualizar la vista; estás viendo datos previos.");
+        }
       } finally {
         if (withSpinner) setLoading(false);
       }
     },
-    [clientId],
+    [clientId, showToast],
   );
 
   useEffect(() => {
@@ -80,21 +96,17 @@ export function AdminClientDetail({ clientId }: { clientId: string }) {
     [],
   );
 
-  const showToast = useCallback((kind: Toast["kind"], message: string) => {
-    setToast({ kind, message });
-    if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToast(null), 4200);
-  }, []);
-
-  // Acción de override genérica: ejecuta, refresca el contexto y avisa.
+  // Acción de override genérica: ejecuta, avisa y refresca el contexto.
+  // El toast de éxito va ANTES del refresh: si el refresh silencioso falla,
+  // su toast de "datos previos" es el que debe quedar visible.
   const runAction = useCallback(
     async (action: () => Promise<void>, okMessage: string, errorMessage: string) => {
       if (actionBusy) return;
       setActionBusy(true);
       try {
         await action();
-        await load(false);
         showToast("ok", okMessage);
+        await load(false);
       } catch {
         showToast("error", errorMessage);
       } finally {
@@ -1014,6 +1026,7 @@ function NotesCard({
       </header>
       <form className="notes-form" onSubmit={submit}>
         <textarea
+          aria-label="Nota interna"
           onChange={(event) => setText(event.currentTarget.value)}
           placeholder="Ej: En la llamada quedó de subir su contenido el viernes."
           rows={3}

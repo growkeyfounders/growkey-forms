@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PROGRAM } from "../../shared/program.mjs";
-import { apiGet, apiPost } from "../api";
+import { ApiError, apiGet, apiPost } from "../api";
 import { ChatThread, ThreadMembersManager, threadMemberToChatMember } from "../components/ChatThread";
 import { PhaseTimeline } from "../components/PhaseTimeline";
 import { OFFER_SLUG, ONBOARDING_SLUG } from "../formSchema";
@@ -33,6 +33,26 @@ export function statusKey(client: Pick<AdminClientView, "status" | "late">): Cli
   if (client.status === "paused") return "paused";
   if (client.status === "completed") return "completed";
   return client.late ? "late" : "ontrack";
+}
+
+// 401/403 = sesión expirada (mensaje con link al login); el resto, error de red.
+type LoadError = "auth" | "network" | null;
+
+function toLoadError(error: unknown): LoadError {
+  return error instanceof ApiError && (error.status === 401 || error.status === 403)
+    ? "auth"
+    : "network";
+}
+
+function SessionExpiredStatus() {
+  return (
+    <div className="portal-status">
+      <p className="route-status">Tu sesión expiró, vuelve a entrar.</p>
+      <a className="secondary-button" href="/login">
+        Ir al login
+      </a>
+    </div>
+  );
 }
 
 export function initials(name: string) {
@@ -73,16 +93,16 @@ export function AdminPanel({
 
   const [clients, setClients] = useState<AdminClientView[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<LoadError>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    setLoadError(false);
+    setLoadError(null);
     try {
       const data = await apiGet<ClientsData>("/api/skool/clients");
       setClients(data.clients);
-    } catch {
-      setLoadError(true);
+    } catch (error) {
+      setLoadError(toLoadError(error));
     } finally {
       setLoading(false);
     }
@@ -156,7 +176,7 @@ function ClientsTab({
 }: {
   clients: AdminClientView[];
   loading: boolean;
-  loadError: boolean;
+  loadError: LoadError;
   onRefresh: () => Promise<void>;
 }) {
   const [phaseFilter, setPhaseFilter] = useState<number | null>(null);
@@ -205,6 +225,10 @@ function ClientsTab({
         <p className="route-status">Cargando clientes…</p>
       </div>
     );
+  }
+
+  if (loadError === "auth") {
+    return <SessionExpiredStatus />;
   }
 
   if (loadError) {
@@ -457,7 +481,7 @@ function RoadmapTab({
 }: {
   clients: AdminClientView[];
   loading: boolean;
-  loadError: boolean;
+  loadError: LoadError;
   onRetry: () => Promise<void>;
 }) {
   if (loading) {
@@ -534,16 +558,16 @@ function ConversationsTab() {
 
   const [threads, setThreads] = useState<InboxThread[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const [loadError, setLoadError] = useState<LoadError>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoadError(false);
+    setLoadError(null);
     try {
       const data = await apiGet<InboxData>("/api/skool/inbox");
       setThreads(data.threads);
-    } catch {
-      setLoadError(true);
+    } catch (error) {
+      setLoadError(toLoadError(error));
     } finally {
       setLoading(false);
     }
@@ -576,6 +600,10 @@ function ConversationsTab() {
         <p className="route-status">Cargando conversaciones…</p>
       </div>
     );
+  }
+
+  if (loadError === "auth") {
+    return <SessionExpiredStatus />;
   }
 
   if (loadError) {
@@ -615,40 +643,43 @@ function ConversationsTab() {
       </header>
 
       <div className="inbox">
-        <div className="inbox-list" role="list">
+        {/* <ul>/<li> reales con el botón adentro: role="listitem" sobre el
+            button hacía que los lectores de pantalla perdieran la semántica
+            de botón. */}
+        <ul className="inbox-list">
           {threads.map((thread) => {
             const active = thread.client.id === selectedId;
             return (
-              <button
-                className={active ? "inbox-row inbox-row--active" : "inbox-row"}
-                key={thread.client.id}
-                onClick={() => open(thread)}
-                role="listitem"
-                type="button"
-              >
-                <span aria-hidden="true" className="admin-avatar">
-                  {initials(thread.client.name || thread.client.email)}
-                </span>
-                <span className="inbox-row__body">
-                  <strong>{thread.client.name || thread.client.email}</strong>
-                  <small>
-                    {thread.lastMessage
-                      ? thread.lastMessage.body
-                      : thread.client.business || "Sin mensajes todavía"}
-                  </small>
-                </span>
-                <span className="inbox-row__meta">
-                  {thread.lastMessage ? <small>{relativeTime(thread.lastMessage.created_at)}</small> : null}
-                  {thread.unread > 0 ? (
-                    <span aria-label={`${thread.unread} mensajes sin leer`} className="chat-badge">
-                      {thread.unread > 99 ? "99+" : thread.unread}
-                    </span>
-                  ) : null}
-                </span>
-              </button>
+              <li key={thread.client.id}>
+                <button
+                  className={active ? "inbox-row inbox-row--active" : "inbox-row"}
+                  onClick={() => open(thread)}
+                  type="button"
+                >
+                  <span aria-hidden="true" className="admin-avatar">
+                    {initials(thread.client.name || thread.client.email)}
+                  </span>
+                  <span className="inbox-row__body">
+                    <strong>{thread.client.name || thread.client.email}</strong>
+                    <small>
+                      {thread.lastMessage
+                        ? thread.lastMessage.body
+                        : thread.client.business || "Sin mensajes todavía"}
+                    </small>
+                  </span>
+                  <span className="inbox-row__meta">
+                    {thread.lastMessage ? <small>{relativeTime(thread.lastMessage.created_at)}</small> : null}
+                    {thread.unread > 0 ? (
+                      <span aria-label={`${thread.unread} mensajes sin leer`} className="chat-badge">
+                        {thread.unread > 99 ? "99+" : thread.unread}
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              </li>
             );
           })}
-        </div>
+        </ul>
 
         {selected && meId ? (
           <div className="inbox-thread">

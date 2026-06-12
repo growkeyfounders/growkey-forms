@@ -72,6 +72,7 @@ export function ChatThread({
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pollRef = useRef<number | null>(null);
@@ -86,19 +87,34 @@ export function ChatThread({
   }, [clientId, meId]);
 
   const fetchMessages = useCallback(async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("skool_messages")
       .select("*")
       .eq("client_id", clientId)
       .order("created_at", { ascending: true })
       .limit(MAX_MESSAGES);
-    if (data) setMessages((current) => mergeFetched(data as ChatMessage[], current));
+    // Un select fallido no es "todavía no hay mensajes": marcamos el error
+    // (la UI lo muestra solo si no hay nada cargado; un fallo de polling con
+    // mensajes en pantalla no los tapa).
+    if (error) {
+      setLoadFailed(true);
+      return;
+    }
+    setLoadFailed(false);
+    setMessages((current) => mergeFetched((data ?? []) as ChatMessage[], current));
+  }, [clientId]);
+
+  // El borrador es por hilo: en la bandeja el componente no va keyed por
+  // cliente, así que al cambiar de hilo el texto no debe arrastrarse.
+  useEffect(() => {
+    setDraft("");
   }, [clientId]);
 
   useEffect(() => {
     let active = true;
     setMessages([]);
     setLoading(true);
+    setLoadFailed(false);
 
     void fetchMessages().finally(() => {
       if (!active) return;
@@ -192,6 +208,12 @@ export function ChatThread({
     await persist(message);
   }
 
+  async function retryLoad() {
+    setLoading(true);
+    await fetchMessages();
+    setLoading(false);
+  }
+
   function senderName(senderId: string) {
     if (senderId === clientId) return clientName || "Cliente";
     return members.find((member) => member.user_id === senderId)?.name || "Equipo Growkey";
@@ -224,6 +246,13 @@ export function ChatThread({
           <p className="chat__status" role="status">
             Cargando la conversación…
           </p>
+        ) : loadFailed && messages.length === 0 ? (
+          <div className="chat__status" role="alert">
+            No pudimos cargar el chat.{" "}
+            <button className="chat-msg__retry" onClick={() => void retryLoad()} type="button">
+              Reintentar
+            </button>
+          </div>
         ) : messages.length === 0 ? (
           <p className="chat__status">Todavía no hay mensajes. Escribe el primero.</p>
         ) : (

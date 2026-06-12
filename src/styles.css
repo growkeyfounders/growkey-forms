@@ -2952,6 +2952,10 @@ a.secondary-button {
   display: grid;
   align-content: start;
   gap: 6px;
+  /* Ahora es un <ul> real: sin viñetas ni padding/margin por defecto. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .inbox-row {

@@ -5,6 +5,7 @@ import {
   currentWeek,
   expectedPhaseForDay,
   isLate,
+  isValidDateIso,
   milestoneDate,
   phaseById,
   programDay,
@@ -50,6 +51,27 @@ describe("fechas", () => {
   it("weekRange", () => {
     expect(weekRange("2026-05-12", 1)).toEqual({ from: "2026-05-12", to: "2026-05-18" });
     expect(weekRange("2026-05-12", 4)).toEqual({ from: "2026-06-02", to: "2026-06-08" });
+  });
+});
+
+describe("isValidDateIso", () => {
+  it("acepta fechas reales en formato YYYY-MM-DD", () => {
+    expect(isValidDateIso("2026-06-12")).toBe(true);
+    expect(isValidDateIso("2026-01-01")).toBe(true);
+    expect(isValidDateIso("2024-02-29")).toBe(true); // bisiesto
+  });
+  it("rechaza formato inválido", () => {
+    expect(isValidDateIso("")).toBe(false);
+    expect(isValidDateIso("12/06/2026")).toBe(false);
+    expect(isValidDateIso("2026-6-12")).toBe(false);
+    expect(isValidDateIso("2026-06-12T00:00:00Z")).toBe(false);
+  });
+  it("rechaza fechas imposibles que sí pasan el regex", () => {
+    expect(isValidDateIso("2026-99-99")).toBe(false);
+    expect(isValidDateIso("2026-02-30")).toBe(false);
+    expect(isValidDateIso("2025-02-29")).toBe(false); // no bisiesto
+    expect(isValidDateIso("2026-00-10")).toBe(false);
+    expect(isValidDateIso("2026-13-01")).toBe(false);
   });
 });
 

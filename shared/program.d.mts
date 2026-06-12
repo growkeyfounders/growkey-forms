@@ -9,6 +9,7 @@ export type PhaseConfig = {
 };
 export const MS_DAY: number;
 export const PROGRAM: { totalDays: number; goal: string; phases: PhaseConfig[] };
+export function isValidDateIso(value: string): boolean;
 export function programDay(startDateIso: string, todayIso: string): number;
 export function currentWeek(day: number): number;
 export function addDays(dateIso: string, days: number): string;

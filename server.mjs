@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { hasSupabase, supabaseRequest } from "./server/db.mjs";
 import { authenticate } from "./server/auth.mjs";
-import { handleSkool } from "./server/skool.mjs";
+import { handleSkool, runEngine } from "./server/skool.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -100,6 +100,12 @@ async function handleSubmissions(request, response, url) {
     // a un cliente cuando llega con token de cliente válido (spec §3).
     saved.clientId = auth && auth.role === "client" ? auth.userId : null;
     await saveSubmission(saved);
+    // El formulario recién ligado puede completar la fase actual del cliente.
+    if (saved.clientId) {
+      const engine = await runEngine(auth.userId, auth.userId);
+      sendJson(response, 200, { ...saved, advanced: engine.advanced });
+      return;
+    }
     sendJson(response, 200, saved);
     return;
   }

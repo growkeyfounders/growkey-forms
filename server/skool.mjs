@@ -64,7 +64,7 @@ function clientView(client, tasks, submittedSlugs) {
 
 // Corre el motor y aplica el avance si corresponde. Devuelve {advanced, programCompleted, client}.
 // Idempotente: relee el cliente y solo escribe si la fase no cambió debajo.
-async function runEngine(clientId, actorId) {
+export async function runEngine(clientId, actorId) {
   const client = await getClient(clientId);
   if (!client || client.status !== "active" || !client.start_date) return { advanced: false, client };
   const [tasks, submitted] = await Promise.all([getTasks(clientId), getSubmittedSlugs(clientId)]);
@@ -110,6 +110,43 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       sendJson(response, 400, { error: "invalid_json" });
       return;
     }
+  }
+
+  if (path === "/me" && method === "GET") {
+    const client = auth.role === "client" ? await getClient(auth.userId) : null;
+    sendJson(response, 200, {
+      profile: { userId: auth.userId, role: auth.role, name: auth.name },
+      client,
+      program: PROGRAM,
+    });
+    return;
+  }
+
+  if (path === "/start-date" && method === "POST") {
+    if (auth.role !== "client") { sendJson(response, 403, { error: "forbidden" }); return; }
+    const startDate = String(body.startDate || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
+    const existing = await getClient(auth.userId);
+    if (!existing) { sendJson(response, 404, { error: "not_found" }); return; }
+    if (existing.start_date) { sendJson(response, 409, { error: "already_started" }); return; }
+    const updated = await db.update("skool_clients", `id=eq.${auth.userId}`, {
+      start_date: startDate,
+      status: "active",
+      phase_started_at: new Date().toISOString(),
+    });
+    await materializePhase(auth.userId, 1);
+    await logEvent(auth.userId, "start_date_set", { startDate }, auth.userId);
+    sendJson(response, 200, updated[0]);
+    return;
+  }
+
+  if (path === "/portal" && method === "GET") {
+    if (auth.role !== "client") { sendJson(response, 403, { error: "forbidden" }); return; }
+    const client = await getClient(auth.userId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const [tasks, submitted] = await Promise.all([getTasks(auth.userId), getSubmittedSlugs(auth.userId)]);
+    sendJson(response, 200, { program: PROGRAM, client: clientView(client, tasks, submitted) });
+    return;
   }
 
   // --- las rutas se agregan en las tareas siguientes ---

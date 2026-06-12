@@ -61,6 +61,7 @@ export async function saveSubmission(submission: Submission, formSlug = FORM_SLU
     const { data } = await supabase.auth.getSession();
     if (data.session) authHeader = { Authorization: `Bearer ${data.session.access_token}` };
   } catch { /* formulario público sin supabase configurado */ }
+  const hasSession = Boolean(authHeader.Authorization);
 
   try {
     const response = await fetch("/api/submissions", {
@@ -69,8 +70,16 @@ export async function saveSubmission(submission: Submission, formSlug = FORM_SLU
       body: JSON.stringify(submissionWithForm),
     });
     if (response.ok) return (await response.json()) as Submission;
-  } catch {
-    // Local fallback for pure static previews.
+    // Con sesión activa el flujo embebido depende de este POST (liga la
+    // submission y corre el motor): un fallo debe propagarse para que la UI
+    // muestre error en vez de un falso "Información recibida".
+    if (hasSession) {
+      const body = (await response.json().catch(() => ({}))) as { error?: string };
+      throw new ApiError(body.error || `http_${response.status}`, response.status);
+    }
+  } catch (error) {
+    if (hasSession) throw error;
+    // Fallback local SOLO para el formulario público sin sesión (preview estática).
   }
 
   const current = await loadSubmissions();

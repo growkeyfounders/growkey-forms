@@ -3,7 +3,11 @@ import { authenticate } from "./auth.mjs";
 import { evaluateAdvance } from "./engine.mjs";
 import { PROGRAM, currentWeek, isLate, isValidDateIso, phaseById, programDay } from "../shared/program.mjs";
 
-const todayIso = () => new Date().toISOString().slice(0, 10);
+// El "día" del programa se calcula con la fecha de Colombia (America/Bogota),
+// NO con UTC: entre las 7pm y medianoche locales UTC ya cambió de día y el
+// programa se adelantaría uno. en-CA formatea como YYYY-MM-DD.
+const todayIso = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date());
 
 async function logEvent(clientId, type, payload, actorId) {
   await db.insert("skool_events", { client_id: clientId, type, payload, actor_id: actorId ?? null }, "return=minimal");

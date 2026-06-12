@@ -26,6 +26,7 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
   const [submitted, setSubmitted] = useState(false);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const completion = useMemo(() => getCompletion(values, currentFields), [currentFields, values]);
   const visibleFieldIds = useMemo(() => getVisibleFieldIds(values, currentFields), [currentFields, values]);
@@ -40,6 +41,7 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
     setAttemptedSubmit(true);
     if (!isFormValid(values, currentFields)) return;
     setIsSaving(true);
+    setSubmitError(false);
 
     const score = buildScore(values, form.slug);
     const submission: Submission = {
@@ -63,6 +65,10 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
       setAttemptedSubmit(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
       onSubmitted?.();
+    } catch {
+      // saveSubmission lanza cuando hay sesión activa y el POST falló: avisamos
+      // sin tocar `values` para que el cliente no pierda lo que escribió.
+      setSubmitError(true);
     } finally {
       setIsSaving(false);
     }
@@ -149,6 +155,12 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
               Después podrás acceder a esta información desde el panel interno.
             </p>
           </section>
+        ) : null}
+
+        {submitError ? (
+          <p className="login-error" role="alert">
+            No pudimos enviar el formulario. Revisa tu conexión e intenta de nuevo.
+          </p>
         ) : null}
 
         <div className="submit-row">

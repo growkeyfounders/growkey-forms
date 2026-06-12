@@ -10,6 +10,8 @@ export type Submission = {
   values: FormValues;
   score: number;
   stage: string;
+  // Cliente de Agentic Skool al que quedó ligada (null/ausente = huérfana).
+  clientId?: string | null;
 };
 
 export async function loadSubmissions(formSlug: string | null = FORM_SLUG): Promise<Submission[]> {

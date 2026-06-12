@@ -16,9 +16,9 @@ const TABS: Array<{ id: AdminTab; label: string }> = [
 ];
 
 // Estado operativo derivado para filtros y badges del panel.
-type ClientStatusKey = "ontrack" | "late" | "paused" | "invited" | "completed";
+export type ClientStatusKey = "ontrack" | "late" | "paused" | "invited" | "completed";
 
-const STATUS_LABEL: Record<ClientStatusKey, string> = {
+export const STATUS_LABEL: Record<ClientStatusKey, string> = {
   ontrack: "al día",
   late: "atrasado",
   paused: "pausado",
@@ -26,7 +26,7 @@ const STATUS_LABEL: Record<ClientStatusKey, string> = {
   completed: "completado",
 };
 
-function statusKey(client: AdminClientView): ClientStatusKey {
+export function statusKey(client: Pick<AdminClientView, "status" | "late">): ClientStatusKey {
   if (client.status === "invited") return "invited";
   if (client.status === "paused") return "paused";
   if (client.status === "completed") return "completed";

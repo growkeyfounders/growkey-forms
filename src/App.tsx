@@ -8,6 +8,7 @@ import {
   type FormConfig,
 } from "./formSchema";
 import { useSession } from "./session";
+import { AdminClientDetail } from "./pages/AdminClientDetail";
 import { AdminPanel } from "./pages/AdminPanel";
 import { ClientPortal } from "./pages/ClientPortal";
 import { FormPage } from "./pages/FormPage";
@@ -29,6 +30,25 @@ export function App() {
         </header>
         <FormPage form={form} />
       </div>
+    );
+  }
+
+  const clientDetailMatch = path.match(/^\/admin\/clients\/([0-9a-fA-F-]+)$/);
+  if (clientDetailMatch) {
+    return (
+      <RequireRole role="admin">
+        <div className="app-shell">
+          <header className="topbar">
+            <a className="brand" href="/admin" aria-label="Panel interno">
+              <img src={logoUrl} alt="" />
+              <strong>Growkey</strong>
+              <span>Panel interno</span>
+            </a>
+            <SignOutButton />
+          </header>
+          <AdminClientDetail clientId={clientDetailMatch[1]} />
+        </div>
+      </RequireRole>
     );
   }
 

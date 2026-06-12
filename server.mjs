@@ -251,6 +251,8 @@ function rowToSubmission(row) {
     },
     score: row.score ?? 0,
     stage: row.stage || "",
+    // El panel admin filtra por esto para "ligar respuesta existente".
+    clientId: row.client_id ?? null,
   };
 }
 

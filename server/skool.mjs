@@ -149,6 +149,38 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     return;
   }
 
+  // Toggle de tarea: cliente sobre sus tareas (solo fase actual), admin sobre cualquiera.
+  // Regla (spec §6): desmarcar NO corre el motor ni retrocede fase.
+  const toggleMatch = path.match(/^\/tasks\/([0-9a-f-]+)\/toggle$/);
+  if (toggleMatch && method === "POST") {
+    const taskId = toggleMatch[1];
+    const rows = await db.select("skool_client_tasks", `select=*&id=eq.${taskId}`);
+    const task = rows?.[0];
+    if (!task) { sendJson(response, 404, { error: "not_found" }); return; }
+    if (!isAdmin && task.client_id !== auth.userId) { sendJson(response, 403, { error: "forbidden" }); return; }
+
+    const client = await getClient(task.client_id);
+    if (!isAdmin && task.phase !== client.current_phase) { sendJson(response, 409, { error: "not_current_phase" }); return; }
+
+    const nextDone = !task.done;
+    const updated = await db.update("skool_client_tasks", `id=eq.${taskId}`, {
+      done: nextDone,
+      done_at: nextDone ? new Date().toISOString() : null,
+    });
+    await logEvent(task.client_id, nextDone ? "task_done" : "task_undone", { taskId, title: task.title }, auth.userId);
+
+    const engine = nextDone ? await runEngine(task.client_id, auth.userId) : { advanced: false };
+    const [tasks, submitted] = await Promise.all([getTasks(task.client_id), getSubmittedSlugs(task.client_id)]);
+    const freshClient = await getClient(task.client_id);
+    sendJson(response, 200, {
+      task: updated[0],
+      advanced: engine.advanced ?? false,
+      programCompleted: engine.programCompleted ?? false,
+      client: clientView(freshClient, tasks, submitted),
+    });
+    return;
+  }
+
   // --- las rutas se agregan en las tareas siguientes ---
   sendJson(response, 404, { error: "not_found" });
 }

@@ -27,7 +27,14 @@ export async function authenticate(request, { fetchImpl = fetch, loadProfile = d
   if (!response.ok) return null;
   const user = await response.json();
 
-  const profile = await loadProfile(user.id);
+  // Un perfil ilegible (tabla profiles caída o query rota) también es "no
+  // autenticado": 401 en vez de tumbar el handler con un 500.
+  let profile;
+  try {
+    profile = await loadProfile(user.id);
+  } catch {
+    return null;
+  }
   if (!profile) return null;
   return { userId: user.id, role: profile.role, name: profile.name };
 }

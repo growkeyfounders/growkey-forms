@@ -89,7 +89,18 @@ async function handleSubmissions(request, response, url) {
   if (request.method === "POST") {
     const auth = await authenticate(request); // null es válido aquí (endpoint público)
     const body = await readBody(request);
-    const submission = JSON.parse(body);
+    let submission;
+    try {
+      submission = JSON.parse(body);
+    } catch {
+      sendJson(response, 400, { error: "invalid_json" });
+      return;
+    }
+    // JSON.parse acepta "null" o "5": exigimos un objeto para leer campos.
+    if (submission === null || typeof submission !== "object") {
+      sendJson(response, 400, { error: "invalid_json" });
+      return;
+    }
     const saved = {
       ...submission,
       id: submission.id || crypto.randomUUID(),
@@ -102,8 +113,16 @@ async function handleSubmissions(request, response, url) {
     await saveSubmission(saved);
     // El formulario recién ligado puede completar la fase actual del cliente.
     if (saved.clientId) {
-      const engine = await runEngine(auth.userId, auth.userId);
-      sendJson(response, 200, { ...saved, advanced: engine.advanced });
+      // La submission ya quedó persistida: si el motor falla aquí respondemos
+      // 200 sin avance — un 500 provocaría reintentos y submissions duplicadas.
+      let advanced = false;
+      try {
+        const engine = await runEngine(auth.userId, auth.userId);
+        advanced = engine.advanced ?? false;
+      } catch (error) {
+        console.error("runEngine falló después de guardar la submission", error);
+      }
+      sendJson(response, 200, { ...saved, advanced });
       return;
     }
     sendJson(response, 200, saved);

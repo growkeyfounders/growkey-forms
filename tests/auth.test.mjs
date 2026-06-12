@@ -22,6 +22,11 @@ describe("authenticate", () => {
     const result = await authenticate(requestWith("Bearer good"), { fetchImpl, loadProfile });
     expect(result).toEqual({ userId: "u1", role: "admin", name: "Majo" });
   });
+  it("null si la consulta del perfil falla (tabla profiles caída)", async () => {
+    const fetchImpl = async () => ({ ok: true, json: async () => ({ id: "u3" }) });
+    const loadProfile = async () => { throw new Error("db down"); };
+    expect(await authenticate(requestWith("Bearer good"), { fetchImpl, loadProfile })).toBeNull();
+  });
   it("null si no hay perfil (usuario no invitado)", async () => {
     const fetchImpl = async () => ({ ok: true, json: async () => ({ id: "u2" }) });
     const loadProfile = async () => null;

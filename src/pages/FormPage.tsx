@@ -15,6 +15,13 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
     () => form.sections.flatMap((section) => section.fields),
     [form],
   );
+  // ?embedded=1: el cliente llegó desde su portal (/app). Tras enviar, si el
+  // server reporta avance de fase volvemos al portal celebrando; si no,
+  // ofrecemos el botón "Volver a mi panel".
+  const embedded = useMemo(
+    () => new URLSearchParams(window.location.search).get("embedded") === "1",
+    [],
+  );
   const [values, setValues] = useState<FormValues>(() => createEmptyValues(form.sections));
   const [submitted, setSubmitted] = useState(false);
   const [attemptedSubmit, setAttemptedSubmit] = useState(false);
@@ -44,7 +51,13 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
     };
 
     try {
-      await saveSubmission(submission, form.slug);
+      // POST /api/submissions devuelve {...saved, advanced} cuando hay sesión
+      // de cliente: el server liga la submission y corre el motor (spec §6).
+      const saved = await saveSubmission(submission, form.slug);
+      if (embedded && (saved as Submission & { advanced?: boolean }).advanced === true) {
+        window.location.assign("/app?celebrate=1");
+        return;
+      }
       setSubmitted(true);
       setValues(createEmptyValues(form.sections));
       setAttemptedSubmit(false);
@@ -90,6 +103,11 @@ export function FormPage({ form, onSubmitted }: { form: FormConfig; onSubmitted?
             <p className="eyebrow">Información recibida</p>
             <h3>{form.thanksTitle}</h3>
             <p>{form.thanksCopy}</p>
+            {embedded ? (
+              <a className="primary-button thanks-panel__action" href="/app">
+                Volver a mi panel
+              </a>
+            ) : null}
           </section>
         ) : null}
 

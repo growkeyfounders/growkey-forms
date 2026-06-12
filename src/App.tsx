@@ -8,6 +8,7 @@ import {
   type FormConfig,
 } from "./formSchema";
 import { useSession } from "./session";
+import { ClientPortal } from "./pages/ClientPortal";
 import { FormPage } from "./pages/FormPage";
 import { LoginPage } from "./pages/LoginPage";
 import { SubmissionsPage } from "./pages/SubmissionsPage";
@@ -61,13 +62,33 @@ export function App() {
   if (path === "/app" || path.startsWith("/app/")) {
     return (
       <RequireRole role="client">
-        <p>Próximamente</p>
+        <div className="app-shell">
+          <header className="topbar">
+            <a className="brand" href="/app" aria-label="Mi camino">
+              <img src={logoUrl} alt="" />
+              <strong>Growkey</strong>
+              <span>Mi camino</span>
+            </a>
+            <SignOutButton />
+          </header>
+          <ClientPortal />
+        </div>
       </RequireRole>
     );
   }
 
   // "/" y "/login" (y cualquier otra ruta) → login
   return <LoginPage />;
+}
+
+function SignOutButton() {
+  const { signOut } = useSession();
+  // Al cerrar sesión, RequireRole detecta la sesión nula y redirige a /login.
+  return (
+    <button className="ghost-button" onClick={() => void signOut()} type="button">
+      Cerrar sesión
+    </button>
+  );
 }
 
 function RequireRole({ role, children }: { role: "admin" | "client"; children: React.ReactNode }) {

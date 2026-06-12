@@ -31,6 +31,8 @@ Evolución del proyecto existente (Opción A elegida por John):
 - **Repo único**: `~/Code/growkey-forms` (clon de `growkeyfounders/growkey-forms`). Se abandona el flujo de desarrollo en `growkey/examples/onboarding` + copia manual al repo de deploy: el Desktop sufre eviction de iCloud (git/builds se congelan) y la copia en el monorepo no está versionada.
 - **Autenticación**: Supabase Auth. Login con Google OAuth y email+contraseña. Altas solo vía invitación (`inviteUserByEmail` desde el servidor). Roles en tabla `profiles`: `admin` | `client`.
 - **Autorización en servidor**: `server.mjs` valida el JWT de Supabase (`auth.getUser(token)`) en todos los endpoints protegidos. La service role key vive solo en el servidor. RLS activo en todas las tablas como segunda barrera.
+- **Endpoints existentes que pasan a ser solo-admin**: `GET /api/submissions`, `GET /api/submissions.csv` y `DELETE /api/submissions` (hoy son públicos — fuga de datos que se cierra). `POST /api/submissions` sigue público porque los formularios públicos lo necesitan.
+- **Bootstrap de admins**: el primer admin se crea con un script seed (o SQL manual en Supabase) que asigna `role = 'admin'` en `profiles`; desde ahí, los admins pueden invitar a otros miembros del equipo desde el panel interno.
 - **Tiempo real**: Supabase Realtime para el chat (canal por hilo de cliente), con fallback a polling.
 - **Rutas SPA**:
   - `/` → login
@@ -91,9 +93,12 @@ Tablas nuevas (prefijo `skool_`), junto a la existente:
 - **Regla de cierre de fase N**: todas las tareas de fase N (base + custom) con `done = true` **y** todos los `requiredForms` de N con submission ligada al cliente.
 - **Acción de avance**: `current_phase = N+1`, `phase_started_at = now()`, materializar `baseTasks` de N+1 como filas en `skool_client_tasks` (si no existen), registrar evento `phase_advanced`. La respuesta al cliente activa la pantalla de celebración.
 - **Validación siempre en servidor** (revalida condiciones antes de escribir; idempotente — dos requests simultáneos no avanzan dos fases).
+- **Desmarcar una tarea** solo actualiza esa tarea (y registra evento); nunca retrocede de fase. La condición de cierre se reevalúa en el siguiente disparador.
+- **Cierre del programa**: cuando se cumplen los requisitos de la fase 4, el motor pone `status = 'completed'` (misma regla de cierre, sin fase 5) y se muestra la celebración final. La meta +$10K MRR del día 120 es un hito informativo, no una condición.
 - **Tarea custom agregada** a la fase en curso → nuevo requisito para avanzar. Agregada a una fase ya completada → no retrocede al cliente (solo override manual).
 - **Overrides del admin**: mover de fase (adelante/atrás), pausar/reactivar, editar `start_date`. Todo queda en `skool_events`.
 - **Semáforo "atrasado"**: día calendario del cliente (`hoy - start_date`) > `endDay` de su fase actual → atrasado. Pausado nunca marca atrasado.
+- **La pausa no detiene el reloj del programa**: las fechas no se desplazan solas. El mecanismo intencional para recalibrar después de una pausa larga es que el admin ajuste `start_date` desde el detalle del cliente.
 - **Semana actual**: `floor((hoy - start_date) / 7) + 1`; fechas reales de hitos: `start_date + day`.
 
 ## 7. Panel del cliente (`/app`)

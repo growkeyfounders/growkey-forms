@@ -998,7 +998,7 @@ textarea:focus {
 
 .tl-milestones {
   position: relative;
-  height: 52px;
+  height: 56px;
   margin-top: 2px;
 }
 
@@ -1007,7 +1007,7 @@ textarea:focus {
   top: 0;
   display: grid;
   gap: 2px;
-  max-width: 180px;
+  max-width: 132px;
 }
 
 .tl-milestone strong {
@@ -1023,8 +1023,8 @@ textarea:focus {
 }
 
 .tl-milestone--end {
+  right: 0;
   text-align: right;
-  transform: translateX(-100%);
 }
 
 .timeline--compact {
@@ -1053,5 +1053,348 @@ textarea:focus {
 
   .tl-milestone {
     max-width: 120px;
+  }
+}
+
+/* ===== Agentic Skool: semana y checklist ===== */
+
+.week-view,
+.checklist {
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-soft);
+}
+
+.week-view__header,
+.checklist__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.week-view__header h3,
+.checklist__header h3 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.week-view__header small {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.checklist__header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.checklist__count {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.week-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.day-chip {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-height: 58px;
+  padding: 9px 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  text-align: center;
+}
+
+.day-chip span {
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.day-chip strong {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.day-chip--today {
+  border-color: rgba(255, 122, 89, 0.55);
+  background: var(--green-soft);
+  box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.12);
+}
+
+.day-chip--today span {
+  color: var(--green-dark);
+}
+
+.day-chip__dot {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--green-dark);
+  transform: translateX(-50%);
+}
+
+.week-milestone {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 11px 14px;
+  border: 1px solid rgba(255, 122, 89, 0.28);
+  border-radius: var(--radius);
+  background: var(--green-soft);
+}
+
+.week-milestone strong {
+  font-size: 14px;
+}
+
+.week-milestone small {
+  margin-left: auto;
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.week-tasks {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.week-task {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fbfcfa;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.week-task small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.week-task--done span {
+  color: var(--dim);
+  text-decoration: line-through;
+}
+
+.week-task--empty {
+  justify-content: flex-start;
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted);
+}
+
+.checklist__items {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  transition: background 0.15s ease;
+}
+
+.check-item--done {
+  background: #fbfcfa;
+}
+
+.check-toggle {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  padding: 0;
+  border: 2px solid var(--border-strong);
+  border-radius: 7px;
+  background: #fff;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+button.check-toggle:not(:disabled):hover {
+  border-color: var(--green);
+}
+
+.check-toggle[aria-checked="true"],
+.check-toggle--on {
+  border-color: var(--green);
+  background: var(--green);
+}
+
+.check-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.check-toggle--static {
+  cursor: default;
+}
+
+.check-toggle--busy {
+  animation: check-busy 0.9s ease-in-out infinite;
+}
+
+@keyframes check-busy {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.check-item__body {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.check-item__title {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.check-item--done .check-item__title {
+  color: var(--dim);
+  text-decoration: line-through;
+}
+
+.check-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.coach-badge,
+.form-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.coach-badge {
+  background: rgba(40, 197, 255, 0.16);
+  color: #0c7ca6;
+}
+
+.form-badge {
+  background: #f1ece7;
+  color: var(--muted);
+}
+
+.class-link {
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.class-link:hover {
+  text-decoration: underline;
+}
+
+.check-item__action {
+  align-self: center;
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.form-status {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  flex: 0 0 auto;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .week-days {
+    gap: 4px;
+  }
+
+  .day-chip {
+    min-height: 52px;
+    padding: 7px 2px 12px;
+  }
+
+  .check-item {
+    flex-wrap: wrap;
+  }
+
+  .check-item__action,
+  .form-status {
+    margin-left: 36px;
   }
 }

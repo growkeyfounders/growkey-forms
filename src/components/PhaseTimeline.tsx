@@ -67,7 +67,9 @@ export function PhaseTimeline({
               <div
                 className={m.day >= total ? "tl-milestone tl-milestone--end" : "tl-milestone"}
                 key={m.day}
-                style={{ left: pct(m.day) }}
+                // El hito final se ancla con right: 0 (CSS): con left + translateX
+                // el ancho shrink-to-fit queda en cero y el texto se rompe.
+                style={m.day >= total ? undefined : { left: pct(m.day) }}
               >
                 <strong>
                   Día {m.day}

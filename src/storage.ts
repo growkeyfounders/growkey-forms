@@ -38,10 +38,17 @@ export async function saveSubmission(submission: Submission, formSlug = FORM_SLU
     },
   };
 
+  let authHeader: Record<string, string> = {};
+  try {
+    const { supabase } = await import("./supabaseClient");
+    const { data } = await supabase.auth.getSession();
+    if (data.session) authHeader = { Authorization: `Bearer ${data.session.access_token}` };
+  } catch { /* formulario público sin supabase configurado */ }
+
   try {
     const response = await fetch("/api/submissions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify(submissionWithForm),
     });
     if (response.ok) return (await response.json()) as Submission;

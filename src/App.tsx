@@ -8,10 +8,10 @@ import {
   type FormConfig,
 } from "./formSchema";
 import { useSession } from "./session";
+import { AdminPanel } from "./pages/AdminPanel";
 import { ClientPortal } from "./pages/ClientPortal";
 import { FormPage } from "./pages/FormPage";
 import { LoginPage } from "./pages/LoginPage";
-import { SubmissionsPage } from "./pages/SubmissionsPage";
 
 export function App() {
   const path = useMemo(() => window.location.pathname, []);
@@ -33,6 +33,8 @@ export function App() {
   }
 
   if (path === "/admin" || path.startsWith("/admin/")) {
+    // /admin/onboarding y /admin/offer (links existentes) abren la pestaña
+    // Formularios con el filtro correspondiente; /admin abre Clientes.
     const adminFilterSlug = path.startsWith("/admin/onboarding")
       ? ONBOARDING_SLUG
       : path.startsWith("/admin/offer")
@@ -47,13 +49,12 @@ export function App() {
               <strong>Growkey</strong>
               <span>Panel interno</span>
             </a>
-            <nav className="topbar__nav" aria-label="Vistas">
-              <a className={adminFilterSlug === ONBOARDING_SLUG ? "nav-button nav-button--active" : "nav-button"} href="/admin/onboarding">Onboarding</a>
-              <a className={adminFilterSlug === OFFER_SLUG ? "nav-button nav-button--active" : "nav-button"} href="/admin/offer">Oferta</a>
-              <a className={adminFilterSlug === null ? "nav-button nav-button--active" : "nav-button"} href="/admin">Todos</a>
-            </nav>
+            <SignOutButton />
           </header>
-          <SubmissionsPage filterSlug={adminFilterSlug} />
+          <AdminPanel
+            initialFormsFilter={adminFilterSlug}
+            initialTab={adminFilterSlug ? "forms" : "clients"}
+          />
         </div>
       </RequireRole>
     );

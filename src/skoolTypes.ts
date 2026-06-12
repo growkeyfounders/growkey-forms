@@ -67,3 +67,74 @@ export type ToggleResponse = {
   programCompleted: boolean;
   client: ClientView;
 };
+
+// GET /api/skool/clients — vista por cliente para el panel interno:
+// ClientView + progreso de la fase actual y última actividad registrada.
+export type AdminClientView = ClientView & {
+  progressPct: number;
+  lastActivityAt: string | null;
+};
+
+export type ClientsData = {
+  clients: AdminClientView[];
+};
+
+// Fila cruda de growkey_form_submissions (snake_case, como llega del context).
+export type SubmissionRow = {
+  id: string;
+  form_slug: string;
+  created_at: string;
+  score: number;
+  stage: string;
+  client_id: string | null;
+  values: Record<string, unknown>;
+};
+
+export type SkoolEventType =
+  | "task_done"
+  | "task_undone"
+  | "task_added"
+  | "task_deleted"
+  | "form_submitted"
+  | "phase_advanced"
+  | "phase_override"
+  | "status_change"
+  | "start_date_set"
+  | "note";
+
+// Fila de skool_events.
+export type EventRow = {
+  id: string;
+  client_id: string;
+  type: SkoolEventType | string;
+  payload: Record<string, unknown>;
+  actor_id: string | null;
+  created_at: string;
+};
+
+// Fila de skool_messages.
+export type MessageRow = {
+  id: string;
+  client_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+};
+
+// Fila de skool_thread_members con el perfil embebido por PostgREST.
+export type ThreadMemberRow = {
+  client_id: string;
+  user_id: string;
+  added_at: string;
+  profiles?: { name: string; photo_url: string | null } | null;
+};
+
+// GET /api/skool/clients/:id/context — contexto unificado (spec §10).
+export type AdminContext = {
+  program: ProgramConfig;
+  client: ClientView;
+  submissions: SubmissionRow[];
+  events: EventRow[];
+  messages: MessageRow[];
+  threadMembers: ThreadMemberRow[];
+};

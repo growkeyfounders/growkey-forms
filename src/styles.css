@@ -1813,3 +1813,466 @@ a.secondary-button {
     min-height: auto;
   }
 }
+
+/* ===== Agentic Skool: panel interno ===== */
+
+.admin-panel {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  padding: clamp(22px, 4vw, 52px);
+}
+
+.admin-tabs,
+.admin-subnav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: start;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-subnav {
+  box-shadow: none;
+}
+
+.admin-forms {
+  display: grid;
+  gap: 16px;
+}
+
+/* La vista de submissions ya trae su propio ancho/padding de página:
+   dentro del panel se neutraliza para que herede el contenedor. */
+.admin-forms .ops-layout {
+  width: 100%;
+  min-height: auto;
+  padding: 0;
+}
+
+.admin-metrics {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-metrics .metric strong {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.metric--alert {
+  border-color: rgba(255, 196, 77, 0.65);
+  background: #fff7e6;
+}
+
+.admin-card {
+  padding: clamp(20px, 3vw, 30px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-soft);
+}
+
+.admin-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.admin-card__header h2 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 28px);
+  line-height: 1.05;
+}
+
+.admin-card__hint {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-card--empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: clamp(28px, 5vw, 48px);
+}
+
+.admin-card--empty h2 {
+  margin: 0;
+  max-width: 560px;
+  font-size: clamp(24px, 3.4vw, 32px);
+  line-height: 1.1;
+}
+
+.admin-card--empty .route-status {
+  max-width: 520px;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.admin-filter {
+  display: grid;
+  gap: 4px;
+}
+
+.admin-filter span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-filter select {
+  min-height: 42px;
+  min-width: 150px;
+}
+
+.admin-invite-button {
+  min-width: 0;
+  padding: 0 18px;
+}
+
+.admin-invite-sent {
+  margin: 0 0 14px;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  padding: 0 14px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 700;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table__row {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-table__row:hover {
+  background: var(--surface-soft);
+}
+
+.admin-table__muted {
+  color: var(--muted);
+}
+
+.admin-client {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-client__name {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-client__name a {
+  color: var(--text);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.admin-client__name a:hover {
+  color: var(--green-dark);
+}
+
+.admin-client__name small {
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.admin-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-progress__bar {
+  display: block;
+  width: 110px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5ece1;
+}
+
+.admin-progress__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--green), var(--lime));
+}
+
+.admin-progress small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.status-badge--ontrack {
+  background: var(--green-soft);
+  color: var(--green-dark);
+}
+
+.status-badge--late {
+  background: #fff3da;
+  color: #8a6414;
+}
+
+.status-badge--paused {
+  background: #f1ece7;
+  color: var(--muted);
+}
+
+.status-badge--invited {
+  background: rgba(40, 197, 255, 0.16);
+  color: #0c7ca6;
+}
+
+.status-badge--completed {
+  background: var(--surface-strong);
+  color: #fff;
+}
+
+/* --- swimlanes del roadmap --- */
+
+.swimlanes {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.swimlane {
+  position: relative;
+  display: block;
+  height: 56px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fbfcfa;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.swimlane:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-soft);
+}
+
+.swimlane__grid i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.swimlane__marker {
+  position: absolute;
+  top: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 12px);
+  transform: translate(-19px, -50%);
+}
+
+.swimlane__marker .admin-avatar {
+  box-shadow: 0 0 0 3px var(--green), 0 4px 10px rgba(20, 23, 20, 0.16);
+}
+
+.swimlane__marker--late .admin-avatar {
+  box-shadow: 0 0 0 3px var(--yellow), 0 4px 10px rgba(20, 23, 20, 0.16);
+}
+
+.swimlane__label {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swimlane__label small {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+/* --- modal --- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(16, 20, 17, 0.46);
+  backdrop-filter: blur(6px);
+  animation: celebration-fade 0.2s ease both;
+}
+
+.modal__card {
+  display: grid;
+  gap: 12px;
+  width: min(440px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  padding: clamp(22px, 4vw, 30px);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: var(--shadow);
+  animation: celebration-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal__header h3 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.1;
+}
+
+.modal__close {
+  min-height: 34px;
+  font-size: 15px;
+}
+
+.modal__copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.modal__form {
+  display: grid;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.modal__actions .primary-button {
+  min-width: 0;
+  padding: 0 18px;
+}
+
+@media (max-width: 980px) {
+  .admin-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-tabs {
+    display: flex;
+    justify-self: stretch;
+  }
+
+  .admin-tabs .nav-button {
+    flex: 1;
+    padding: 0 8px;
+  }
+
+  .admin-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-toolbar {
+    width: 100%;
+  }
+
+  .admin-filter {
+    flex: 1;
+  }
+
+  .admin-filter select {
+    min-width: 0;
+    width: 100%;
+  }
+}

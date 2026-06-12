@@ -14,9 +14,16 @@ export async function authenticate(request, { fetchImpl = fetch, loadProfile = d
   if (!header.startsWith("Bearer ")) return null;
   const token = header.slice(7);
 
-  const response = await fetchImpl(`${supabaseUrl}/auth/v1/user`, {
-    headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
-  });
+  // Si Supabase Auth no responde (red caída o env sin configurar), tratamos la
+  // request como no autenticada en vez de tumbar el handler con un 500.
+  let response;
+  try {
+    response = await fetchImpl(`${supabaseUrl}/auth/v1/user`, {
+      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return null;
+  }
   if (!response.ok) return null;
   const user = await response.json();
 

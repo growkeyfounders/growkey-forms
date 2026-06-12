@@ -12,6 +12,10 @@ describe("authenticate", () => {
     const fetchImpl = async () => ({ ok: false });
     expect(await authenticate(requestWith("Bearer bad"), { fetchImpl })).toBeNull();
   });
+  it("null si el fetch a supabase auth falla (red caída o env sin configurar)", async () => {
+    const fetchImpl = async () => { throw new Error("network down"); };
+    expect(await authenticate(requestWith("Bearer any"), { fetchImpl })).toBeNull();
+  });
   it("devuelve userId+role cuando token y perfil existen", async () => {
     const fetchImpl = async () => ({ ok: true, json: async () => ({ id: "u1" }) });
     const loadProfile = async (id) => ({ user_id: id, role: "admin", name: "Majo" });

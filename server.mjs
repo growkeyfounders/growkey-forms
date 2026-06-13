@@ -3,6 +3,9 @@ import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { hasSupabase, supabaseRequest } from "./server/db.mjs";
+import { authenticate } from "./server/auth.mjs";
+import { handleSkool, runEngine } from "./server/skool.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, "dist");
@@ -10,10 +13,7 @@ const dataDir = path.join(__dirname, "data");
 const submissionsFile = path.join(dataDir, "submissions.json");
 const submissionsCsvFile = path.join(dataDir, "submissions.csv");
 const port = Number(process.env.PORT || 5174);
-const supabaseUrl = normalizeSupabaseUrl(process.env.SUPABASE_URL);
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseTable = process.env.SUPABASE_TABLE || "growkey_form_submissions";
-const hasSupabase = Boolean(supabaseUrl && supabaseServiceRoleKey);
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -50,7 +50,12 @@ const server = createServer(async (request, response) => {
     }
 
     if (url.pathname === "/api/submissions.csv") {
-      await handleSubmissionsCsv(response, url);
+      await handleSubmissionsCsv(request, response, url);
+      return;
+    }
+
+    if (url.pathname.startsWith("/api/skool/")) {
+      await handleSkool(request, response, url, { sendJson, readBody });
       return;
     }
 
@@ -68,25 +73,72 @@ server.listen(port, "0.0.0.0", () => {
 
 async function handleSubmissions(request, response, url) {
   if (request.method === "GET") {
+    const auth = await authenticate(request);
+    if (!auth) {
+      sendJson(response, 401, { error: "unauthorized" });
+      return;
+    }
+    if (auth.role !== "admin") {
+      sendJson(response, 403, { error: "forbidden" });
+      return;
+    }
     sendJson(response, 200, filterSubmissions(await readSubmissions(), url.searchParams.get("form")));
     return;
   }
 
   if (request.method === "POST") {
+    const auth = await authenticate(request); // null es válido aquí (endpoint público)
     const body = await readBody(request);
-    const submission = JSON.parse(body);
+    let submission;
+    try {
+      submission = JSON.parse(body);
+    } catch {
+      sendJson(response, 400, { error: "invalid_json" });
+      return;
+    }
+    // JSON.parse acepta "null" o "5": exigimos un objeto para leer campos.
+    if (submission === null || typeof submission !== "object") {
+      sendJson(response, 400, { error: "invalid_json" });
+      return;
+    }
     const saved = {
       ...submission,
       id: submission.id || crypto.randomUUID(),
       createdAt: submission.createdAt || new Date().toISOString(),
       values: normalizeValues(submission.values || {}),
     };
+    // Nunca confiar en el clientId del body: la submission solo queda ligada
+    // a un cliente cuando llega con token de cliente válido (spec §3).
+    saved.clientId = auth && auth.role === "client" ? auth.userId : null;
     await saveSubmission(saved);
+    // El formulario recién ligado puede completar la fase actual del cliente.
+    if (saved.clientId) {
+      // La submission ya quedó persistida: si el motor falla aquí respondemos
+      // 200 sin avance — un 500 provocaría reintentos y submissions duplicadas.
+      let advanced = false;
+      try {
+        const engine = await runEngine(auth.userId, auth.userId);
+        advanced = engine.advanced ?? false;
+      } catch (error) {
+        console.error("runEngine falló después de guardar la submission", error);
+      }
+      sendJson(response, 200, { ...saved, advanced });
+      return;
+    }
     sendJson(response, 200, saved);
     return;
   }
 
   if (request.method === "DELETE") {
+    const auth = await authenticate(request);
+    if (!auth) {
+      sendJson(response, 401, { error: "unauthorized" });
+      return;
+    }
+    if (auth.role !== "admin") {
+      sendJson(response, 403, { error: "forbidden" });
+      return;
+    }
     if (hasSupabase && process.env.ALLOW_ADMIN_DELETE !== "true") {
       sendJson(response, 403, { error: "delete_disabled" });
       return;
@@ -101,7 +153,16 @@ async function handleSubmissions(request, response, url) {
   sendJson(response, 405, { error: "method_not_allowed" });
 }
 
-async function handleSubmissionsCsv(response, url) {
+async function handleSubmissionsCsv(request, response, url) {
+  const auth = await authenticate(request);
+  if (!auth) {
+    sendJson(response, 401, { error: "unauthorized" });
+    return;
+  }
+  if (auth.role !== "admin") {
+    sendJson(response, 403, { error: "forbidden" });
+    return;
+  }
   const submissions = filterSubmissions(await readSubmissions(), url.searchParams.get("form"));
   const csv = buildCsv(submissions);
   response.writeHead(200, {
@@ -145,7 +206,7 @@ async function saveSubmission(submission) {
 
 async function readSupabaseSubmissions() {
   const rows = await supabaseRequest(
-    `${supabaseUrl}/rest/v1/${supabaseTable}?select=*&order=created_at.desc`,
+    `/rest/v1/${supabaseTable}?select=*&order=created_at.desc`,
   );
 
   return rows.map(rowToSubmission);
@@ -153,7 +214,7 @@ async function readSupabaseSubmissions() {
 
 async function createSupabaseSubmission(submission) {
   const formSlug = String(submission.values?.formSlug || inferFormSlug(submission.values || {}));
-  await supabaseRequest(`${supabaseUrl}/rest/v1/${supabaseTable}`, {
+  await supabaseRequest(`/rest/v1/${supabaseTable}`, {
     method: "POST",
     headers: {
       Prefer: "return=minimal",
@@ -164,6 +225,7 @@ async function createSupabaseSubmission(submission) {
       created_at: submission.createdAt,
       score: Number(submission.score || 0),
       stage: String(submission.stage || ""),
+      client_id: submission.clientId ?? null,
       values: {
         ...submission.values,
         formSlug,
@@ -174,30 +236,9 @@ async function createSupabaseSubmission(submission) {
 
 async function clearSupabaseSubmissions(formSlug) {
   const query = formSlug ? `?form_slug=eq.${encodeURIComponent(formSlug)}` : "";
-  await supabaseRequest(`${supabaseUrl}/rest/v1/${supabaseTable}${query}`, {
+  await supabaseRequest(`/rest/v1/${supabaseTable}${query}`, {
     method: "DELETE",
   });
-}
-
-async function supabaseRequest(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      apikey: supabaseServiceRoleKey,
-      Authorization: `Bearer ${supabaseServiceRoleKey}`,
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Supabase request failed ${response.status}: ${text}`);
-  }
-
-  if (response.status === 204) return null;
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
 }
 
 function rowToSubmission(row) {
@@ -210,6 +251,8 @@ function rowToSubmission(row) {
     },
     score: row.score ?? 0,
     stage: row.stage || "",
+    // El panel admin filtra por esto para "ligar respuesta existente".
+    clientId: row.client_id ?? null,
   };
 }
 
@@ -224,10 +267,6 @@ function normalizeValues(values) {
 function inferFormSlug(values) {
   if (values.business || values.mainProfile || values.email) return "growkey-onboarding-v1";
   return "growkey-offer-v1";
-}
-
-function normalizeSupabaseUrl(value) {
-  return value?.replace(/\/rest\/v1\/?$/, "").replace(/\/$/, "");
 }
 
 async function writeCsvBackup(submissions) {

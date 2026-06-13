@@ -1,0 +1,20 @@
+export type Milestone = { day: number; title: string; type: "call" | "launch" | "goal" };
+export type SkoolClass = { id: string; title: string; url: string };
+export type BaseTask = { id: string; title: string; week: number; suggestedDay?: number; classId?: string };
+export type PhaseConfig = {
+  id: number; name: string; headline: string;
+  startDay: number; endDay: number;
+  milestones: Milestone[]; classes: SkoolClass[]; baseTasks: BaseTask[];
+  requiredForms: string[];
+};
+export const MS_DAY: number;
+export const PROGRAM: { totalDays: number; goal: string; phases: PhaseConfig[] };
+export function isValidDateIso(value: string): boolean;
+export function programDay(startDateIso: string, todayIso: string): number;
+export function currentWeek(day: number): number;
+export function addDays(dateIso: string, days: number): string;
+export function milestoneDate(startDateIso: string, milestoneDay: number): string;
+export function weekRange(startDateIso: string, week: number): { from: string; to: string };
+export function phaseById(id: number): PhaseConfig;
+export function expectedPhaseForDay(day: number): PhaseConfig;
+export function isLate(currentPhaseId: number, day: number): boolean;

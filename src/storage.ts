@@ -1,7 +1,17 @@
+import { ApiError, apiDelete, apiGet, apiGetBlob } from "./api";
 import { OFFER_SLUG, ONBOARDING_SLUG, type FormValues } from "./formSchema";
 
 const STORAGE_KEY = "client-intake:submissions";
 export const FORM_SLUG = OFFER_SLUG;
+
+// El server rechazó el token (401/403): la sesión expiró o no alcanza.
+// NO es un error de red — no aplica el fallback a localStorage.
+export class SessionExpiredError extends Error {
+  constructor() {
+    super("session_expired");
+    this.name = "SessionExpiredError";
+  }
+}
 
 export type Submission = {
   id: string;
@@ -9,13 +19,20 @@ export type Submission = {
   values: FormValues;
   score: number;
   stage: string;
+  // Cliente de Agentic Skool al que quedó ligada (null/ausente = huérfana).
+  clientId?: string | null;
 };
 
 export async function loadSubmissions(formSlug: string | null = FORM_SLUG): Promise<Submission[]> {
   try {
-    const response = await fetch(formSlug ? `/api/submissions?form=${formSlug}` : "/api/submissions");
-    if (response.ok) return (await response.json()) as Submission[];
-  } catch {
+    // GET /api/submissions requiere token de admin (apiGet lo adjunta).
+    return await apiGet<Submission[]>(formSlug ? `/api/submissions?form=${formSlug}` : "/api/submissions");
+  } catch (error) {
+    // 401/403 NO cae en silencio a localStorage: la vista debe avisar que la
+    // sesión expiró. El resto de errores (red, server caído) sí usa fallback.
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      throw new SessionExpiredError();
+    }
     // Local fallback for pure static previews.
   }
 
@@ -38,15 +55,31 @@ export async function saveSubmission(submission: Submission, formSlug = FORM_SLU
     },
   };
 
+  let authHeader: Record<string, string> = {};
+  try {
+    const { supabase } = await import("./supabaseClient");
+    const { data } = await supabase.auth.getSession();
+    if (data.session) authHeader = { Authorization: `Bearer ${data.session.access_token}` };
+  } catch { /* formulario público sin supabase configurado */ }
+  const hasSession = Boolean(authHeader.Authorization);
+
   try {
     const response = await fetch("/api/submissions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeader },
       body: JSON.stringify(submissionWithForm),
     });
     if (response.ok) return (await response.json()) as Submission;
-  } catch {
-    // Local fallback for pure static previews.
+    // Con sesión activa el flujo embebido depende de este POST (liga la
+    // submission y corre el motor): un fallo debe propagarse para que la UI
+    // muestre error en vez de un falso "Información recibida".
+    if (hasSession) {
+      const body = (await response.json().catch(() => ({}))) as { error?: string };
+      throw new ApiError(body.error || `http_${response.status}`, response.status);
+    }
+  } catch (error) {
+    if (hasSession) throw error;
+    // Fallback local SOLO para el formulario público sin sesión (preview estática).
   }
 
   const current = await loadSubmissions();
@@ -59,12 +92,20 @@ export async function saveSubmission(submission: Submission, formSlug = FORM_SLU
 
 export async function clearSubmissions() {
   try {
-    const response = await fetch("/api/submissions", { method: "DELETE" });
-    if (response.ok) return;
+    // DELETE /api/submissions requiere token de admin (apiDelete lo adjunta).
+    await apiDelete<{ ok: boolean }>("/api/submissions");
+    return;
   } catch {
     // Local fallback for pure static previews.
   }
   window.localStorage.removeItem(STORAGE_KEY);
+}
+
+export async function exportCsv(formSlug: string | null = FORM_SLUG) {
+  // window.location.href no puede llevar el header Authorization:
+  // descargamos el CSV vía fetch autenticado + blob.
+  const blob = await apiGetBlob(formSlug ? `/api/submissions.csv?form=${formSlug}` : "/api/submissions.csv");
+  downloadBlob("client-intake-submissions.csv", blob);
 }
 
 export function exportJson(submissions: Submission[]) {
@@ -76,7 +117,10 @@ export function exportJson(submissions: Submission[]) {
 }
 
 function download(fileName: string, content: string, type: string) {
-  const blob = new Blob([content], { type });
+  downloadBlob(fileName, new Blob([content], { type }));
+}
+
+function downloadBlob(fileName: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;

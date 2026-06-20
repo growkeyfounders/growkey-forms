@@ -13,10 +13,10 @@ import {
 } from "../shared/program.mjs";
 
 describe("PROGRAM config", () => {
-  it("tiene 4 fases contiguas que cubren 0..120", () => {
+  it("tiene 4 fases contiguas que cubren 0..112", () => {
     expect(PROGRAM.phases.map((p) => p.id)).toEqual([1, 2, 3, 4]);
     expect(PROGRAM.phases[0].startDay).toBe(0);
-    expect(PROGRAM.phases[3].endDay).toBe(120);
+    expect(PROGRAM.phases[3].endDay).toBe(112);
     for (let i = 1; i < 4; i++) {
       expect(PROGRAM.phases[i].startDay).toBe(PROGRAM.phases[i - 1].endDay);
     }
@@ -78,19 +78,19 @@ describe("isValidDateIso", () => {
 describe("fases", () => {
   it("expectedPhaseForDay", () => {
     expect(expectedPhaseForDay(0).id).toBe(1);
-    expect(expectedPhaseForDay(13).id).toBe(1);
-    expect(expectedPhaseForDay(14).id).toBe(2);
-    expect(expectedPhaseForDay(28).id).toBe(3);
-    expect(expectedPhaseForDay(50).id).toBe(4);
+    expect(expectedPhaseForDay(27).id).toBe(1);
+    expect(expectedPhaseForDay(28).id).toBe(2);
+    expect(expectedPhaseForDay(56).id).toBe(3);
+    expect(expectedPhaseForDay(84).id).toBe(4);
     expect(expectedPhaseForDay(500).id).toBe(4);
   });
   it("isLate compara contra endDay de la fase ACTUAL del cliente", () => {
     expect(isLate(1, 10)).toBe(false);
-    expect(isLate(1, 15)).toBe(true);
-    expect(isLate(2, 20)).toBe(false);
+    expect(isLate(1, 29)).toBe(true);
+    expect(isLate(2, 40)).toBe(false);
     expect(isLate(4, 200)).toBe(true);
   });
   it("phaseById", () => {
-    expect(phaseById(2).name).toBe("Blueprint");
+    expect(phaseById(2).name).toBe("Motor de Arranque: DM en Frío + Primeras Ventas");
   });
 });

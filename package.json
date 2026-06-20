@@ -6,7 +6,7 @@
   "description": "Standalone Growkey client onboarding form and intake dashboard.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc -p tsconfig.build.json --noEmit && vite build",
     "start": "node server.mjs",
     "serve": "node server.mjs",
     "preview": "vite preview",

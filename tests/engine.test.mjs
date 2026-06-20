@@ -9,21 +9,22 @@ describe("evaluateAdvance", () => {
       evaluateAdvance({ currentPhaseId: 2, tasks: tasks(2, [true, false]), submittedFormSlugs: [] }),
     ).toEqual({ complete: false });
   });
-  it("no avanza si falta un formulario requerido (fase 1)", () => {
+  it("la fase 1 avanza solo con tareas: el programa no exige formularios", () => {
+    // Agentic Sail avanza por entregables/tareas, no por formularios (requiredForms vacío).
     expect(
       evaluateAdvance({
         currentPhaseId: 1,
         tasks: tasks(1, [true, true]),
-        submittedFormSlugs: ["growkey-onboarding-v1"],
+        submittedFormSlugs: [],
       }),
-    ).toEqual({ complete: false });
+    ).toEqual({ complete: true, nextPhaseId: 2 });
   });
-  it("avanza cuando tareas y formularios están completos", () => {
+  it("avanza cuando todas las tareas de la fase están completas", () => {
     expect(
       evaluateAdvance({
         currentPhaseId: 1,
         tasks: tasks(1, [true, true, true]),
-        submittedFormSlugs: ["growkey-onboarding-v1", "growkey-offer-v1"],
+        submittedFormSlugs: [],
       }),
     ).toEqual({ complete: true, nextPhaseId: 2 });
   });

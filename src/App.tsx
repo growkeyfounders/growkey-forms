@@ -142,7 +142,7 @@ function RequireRole({ role, children }: { role: "admin" | "client"; children: R
         <h1>Sin acceso</h1>
         <div className="login-card">
           <p className="route-status">
-            Tu cuenta no tiene acceso a Agentic Skool. Si crees que es un error,
+            Tu cuenta no tiene acceso a Agentic Sales. Si crees que es un error,
             escríbele al equipo Growkey.
           </p>
           <button className="secondary-button" onClick={() => void signOut()} type="button">

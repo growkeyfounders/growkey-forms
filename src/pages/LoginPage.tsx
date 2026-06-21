@@ -51,7 +51,7 @@ export function LoginPage() {
   return (
     <div className="login-shell">
       <img src={logoUrl} alt="" width={56} />
-      <h1>Agentic Skool</h1>
+      <h1>Agentic Sales</h1>
       {mode === "set-password" ? (
         <form onSubmit={setNewPassword} className="login-card">
           <h2>Crea tu contraseña</h2>

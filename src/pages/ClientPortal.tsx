@@ -286,12 +286,12 @@ function Welcome({
   return (
     <main className="portal portal--welcome">
       <section className="welcome-card">
-        <p className="eyebrow">Agentic Skool · {program.goal}</p>
+        <p className="eyebrow">Agentic Sales · {program.goal}</p>
         <h1>Hola, {firstName(client.name)}.</h1>
         <p className="welcome-copy">
           Te espera un camino de {program.totalDays} días en {program.phases.length} fases para
-          lanzar tu comunidad y escalarla junto a tu equipo Growkey. Elige tu fecha de inicio y
-          activamos tu checklist de la fase 1.
+          validar tu oferta, conseguir tus primeras ventas y escalar junto a tu equipo Growkey.
+          Elige tu fecha de inicio y activamos tu checklist de la fase 1.
         </p>
         <ol className="welcome-phases">
           {program.phases.map((phase) => (
@@ -339,7 +339,7 @@ function PortalHeader({ data }: { data: PortalData }) {
   return (
     <header className="portal-header">
       <div>
-        <p className="eyebrow">Agentic Skool · {program.goal}</p>
+        <p className="eyebrow">Agentic Sales · {program.goal}</p>
         <h1>Hola, {firstName(client.name)}</h1>
         {client.business ? <p className="portal-business">{client.business}</p> : null}
       </div>

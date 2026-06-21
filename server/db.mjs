@@ -108,6 +108,15 @@ export const db = {
     const data = await response.json();
     return (data.users || []).find((user) => user.email === email) || null;
   },
+  // Lista usuarios de Auth (para mostrar emails del equipo). Base chica: per_page=200.
+  authListUsers: async () => {
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=200`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.users || [];
+  },
 };
 
 // Envío de correo transaccional vía Resend. Si no hay RESEND_API_KEY configurada,

@@ -8,7 +8,7 @@ import { useSession } from "../session";
 import type { AdminClientView, ClientsData, InboxData, InboxThread, ThreadMemberRow } from "../skoolTypes";
 import { SubmissionsPage } from "./SubmissionsPage";
 
-export type AdminTab = "clients" | "requests" | "roadmap" | "conversations" | "forms";
+export type AdminTab = "clients" | "requests" | "roadmap" | "conversations" | "forms" | "team";
 
 const TABS: Array<{ id: AdminTab; label: string }> = [
   { id: "clients", label: "Clientes" },
@@ -16,6 +16,7 @@ const TABS: Array<{ id: AdminTab; label: string }> = [
   { id: "roadmap", label: "Roadmap" },
   { id: "conversations", label: "Conversaciones" },
   { id: "forms", label: "Formularios" },
+  { id: "team", label: "Equipo" },
 ];
 
 // Estado operativo derivado para filtros y badges del panel.
@@ -143,6 +144,7 @@ export function AdminPanel({
         <RoadmapTab clients={clients} loadError={loadError} loading={loading} onRetry={load} />
       ) : null}
       {tab === "conversations" ? <ConversationsTab /> : null}
+      {tab === "team" ? <TeamTab /> : null}
       {tab === "forms" ? (
         <section className="admin-forms">
           <nav className="admin-subnav" aria-label="Filtro de formularios">
@@ -669,6 +671,253 @@ function RequestsTab({
         </ul>
       )}
     </section>
+  );
+}
+
+// ===== Pestaña Equipo (admins) =====
+
+type TeamMember = { userId: string; name: string | null; email: string | null; isSelf: boolean };
+
+function TeamTab() {
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const data = await apiGet<{ team: TeamMember[] }>("/api/skool/team");
+      setTeam(data.team);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  async function remove(member: TeamMember) {
+    if (busyId) return;
+    if (!window.confirm(`¿Quitar el acceso de admin a ${member.name || member.email}?`)) return;
+    setBusyId(member.userId);
+    try {
+      await apiPost(`/api/skool/team/${member.userId}/remove`);
+    } catch {
+      /* el refresh mostrará el estado real */
+    }
+    setBusyId(null);
+    void load();
+  }
+
+  if (loading) {
+    return (
+      <div className="portal-status" role="status">
+        <span className="spinner" aria-hidden="true" />
+        <p className="route-status">Cargando equipo…</p>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="portal-status">
+        <p className="route-status">No pudimos cargar el equipo. Intenta de nuevo.</p>
+        <button className="secondary-button" onClick={() => void load()} type="button">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section className="admin-card" aria-label="Equipo">
+      <header className="admin-card__header">
+        <div>
+          <p className="eyebrow">Equipo</p>
+          <h2>{team.length === 1 ? "1 admin" : `${team.length} admins`}</h2>
+        </div>
+        <button className="primary-button" onClick={() => setInviteOpen(true)} type="button">
+          Invitar admin
+        </button>
+      </header>
+      <p className="route-status">
+        Los admins entran por la puerta del equipo y pueden ver clientes, aprobar solicitudes y chatear.
+      </p>
+      <ul className="request-list">
+        {team.map((member) => (
+          <li className="request-row" key={member.userId}>
+            <div className="request-who">
+              <strong>
+                {member.name || member.email}
+                {member.isSelf ? " (tú)" : ""}
+              </strong>
+              <small>{member.email}</small>
+            </div>
+            <div className="request-actions">
+              {member.isSelf ? (
+                <span className="route-status">—</span>
+              ) : (
+                <button
+                  className="secondary-button"
+                  disabled={busyId === member.userId}
+                  onClick={() => void remove(member)}
+                  type="button"
+                >
+                  Quitar acceso
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      {inviteOpen ? (
+        <InviteAdminModal
+          onClose={() => setInviteOpen(false)}
+          onInvited={() => {
+            setInviteOpen(false);
+            void load();
+          }}
+        />
+      ) : null}
+    </section>
+  );
+}
+
+function InviteAdminModal({ onClose, onInvited }: { onClose: () => void; onInvited: () => void }) {
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [link, setLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (sending) return;
+    setSending(true);
+    setError(null);
+    try {
+      const result = await apiPost<{ activationLink?: string | null }>("/api/skool/team", {
+        email: email.trim(),
+        name: name.trim(),
+      });
+      setLink(result.activationLink ?? "");
+    } catch (cause) {
+      const code = cause instanceof Error ? cause.message : "";
+      setError(
+        code === "invalid_email"
+          ? "Revisa el email: no parece válido."
+          : "No pudimos crear el admin, intenta de nuevo.",
+      );
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function copyLink() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* el input es seleccionable como fallback */
+    }
+  }
+
+  if (link !== null) {
+    return (
+      <div aria-label="Admin creado" aria-modal="true" className="modal" role="dialog">
+        <div className="modal__card">
+          <header className="modal__header">
+            <h3>Admin creado ✓</h3>
+            <button aria-label="Cerrar" className="ghost-button modal__close" onClick={onInvited} type="button">
+              ✕
+            </button>
+          </header>
+          {link ? (
+            <>
+              <p className="modal__copy">
+                Envíale este enlace a la persona. Al abrirlo crea su contraseña y entra como admin por la
+                puerta del equipo.
+              </p>
+              <div className="modal__form">
+                <input className="field" onFocus={(event) => event.currentTarget.select()} readOnly value={link} />
+                <div className="modal__actions">
+                  <button className="secondary-button" onClick={copyLink} type="button">
+                    {copied ? "¡Copiado!" : "Copiar enlace"}
+                  </button>
+                  <button className="primary-button" onClick={onInvited} type="button">
+                    Listo
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="modal__copy">El admin se creó, pero no pudimos generar el enlace ahora.</p>
+              <div className="modal__actions">
+                <button className="primary-button" onClick={onInvited} type="button">
+                  Listo
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div aria-label="Invitar admin" aria-modal="true" className="modal" role="dialog">
+      <div className="modal__card">
+        <header className="modal__header">
+          <h3>Invitar admin</h3>
+          <button aria-label="Cerrar" className="ghost-button modal__close" onClick={onClose} type="button">
+            ✕
+          </button>
+        </header>
+        <p className="modal__copy">
+          Se crea su cuenta de admin y te damos un enlace para enviarle. Al abrirlo, crea su contraseña y
+          entra al panel del equipo.
+        </p>
+        <form className="modal__form" onSubmit={submit}>
+          <label className="field">
+            <span className="field__label">Email</span>
+            <input
+              autoFocus
+              onChange={(event) => setEmail(event.currentTarget.value)}
+              placeholder="persona@correo.com"
+              required
+              type="email"
+              value={email}
+            />
+          </label>
+          <label className="field">
+            <span className="field__label">Nombre</span>
+            <input
+              onChange={(event) => setName(event.currentTarget.value)}
+              placeholder="Nombre y apellido"
+              value={name}
+            />
+          </label>
+          {error ? <p className="login-error">{error}</p> : null}
+          <div className="modal__actions">
+            <button className="ghost-button" onClick={onClose} type="button">
+              Cancelar
+            </button>
+            <button className="primary-button" disabled={sending || !email.trim()} type="submit">
+              {sending ? "Creando…" : "Crear admin"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 

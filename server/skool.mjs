@@ -390,6 +390,63 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     return;
   }
 
+  // ===== Equipo (admins) =====
+
+  // Listar el equipo (admins) con su email.
+  if (path === "/team" && method === "GET") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const [admins, users] = await Promise.all([
+      db.select("profiles", "select=user_id,name,photo_url&role=eq.admin&order=name.asc"),
+      db.authListUsers(),
+    ]);
+    const emailById = new Map((users ?? []).map((user) => [user.id, user.email]));
+    const team = (admins ?? []).map((admin) => ({
+      userId: admin.user_id,
+      name: admin.name,
+      email: emailById.get(admin.user_id) ?? null,
+      isSelf: admin.user_id === auth.userId,
+    }));
+    sendJson(response, 200, { team });
+    return;
+  }
+
+  // Invitar/ascender admin: crea (o reusa) la cuenta con rol admin y devuelve el
+  // enlace de acceso para compartir. El nuevo admin define su contraseña al abrirlo.
+  if (path === "/team" && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const email = String(body.email || "").trim();
+    const name = String(body.name || "").trim();
+    if (!email || !/.+@.+\..+/.test(email)) { sendJson(response, 400, { error: "invalid_email" }); return; }
+    let userId;
+    const created = await db.authCreateUser(email, { name });
+    if (created.ok) {
+      userId = created.data.id;
+    } else {
+      const existing = await db.authFindUserByEmail(email);
+      if (!existing) { sendJson(response, 409, { error: "invite_failed", detail: created.data?.msg }); return; }
+      userId = existing.id;
+    }
+    await db.upsert("profiles", { user_id: userId, role: "admin", name });
+    const activationLink = await buildActivationLink(request, email);
+    sendJson(response, 200, { ok: true, activationLink });
+    return;
+  }
+
+  // Quitar acceso a un admin (no a uno mismo).
+  const teamRemoveMatch = path.match(/^\/team\/([0-9a-f-]+)\/remove$/);
+  if (teamRemoveMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const targetId = teamRemoveMatch[1];
+    if (targetId === auth.userId) { sendJson(response, 400, { error: "cannot_remove_self" }); return; }
+    await db.remove("skool_thread_members", `user_id=eq.${targetId}`);
+    await db.remove("profiles", `user_id=eq.${targetId}`);
+    // Borrar la cuenta es best-effort: si falla por referencias, el perfil ya
+    // quedó eliminado y por tanto el acceso revocado.
+    await db.authDeleteUser(targetId);
+    sendJson(response, 200, { ok: true });
+    return;
+  }
+
   // Contexto unificado del cliente (admin) — spec §10.
   const ctxMatch = path.match(/^\/clients\/([0-9a-f-]+)\/context$/);
   if (ctxMatch && method === "GET") {

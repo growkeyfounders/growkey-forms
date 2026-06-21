@@ -8,10 +8,11 @@ import { useSession } from "../session";
 import type { AdminClientView, ClientsData, InboxData, InboxThread, ThreadMemberRow } from "../skoolTypes";
 import { SubmissionsPage } from "./SubmissionsPage";
 
-export type AdminTab = "clients" | "roadmap" | "conversations" | "forms";
+export type AdminTab = "clients" | "requests" | "roadmap" | "conversations" | "forms";
 
 const TABS: Array<{ id: AdminTab; label: string }> = [
   { id: "clients", label: "Clientes" },
+  { id: "requests", label: "Solicitudes" },
   { id: "roadmap", label: "Roadmap" },
   { id: "conversations", label: "Conversaciones" },
   { id: "forms", label: "Formularios" },
@@ -112,6 +113,8 @@ export function AdminPanel({
     void load();
   }, [load]);
 
+  const pendingCount = clients.filter((client) => client.pending).length;
+
   return (
     <main className="admin-panel">
       <nav className="admin-tabs" aria-label="Secciones del panel">
@@ -123,12 +126,18 @@ export function AdminPanel({
             type="button"
           >
             {item.label}
+            {item.id === "requests" && pendingCount > 0 ? (
+              <span className="nav-badge">{pendingCount}</span>
+            ) : null}
           </button>
         ))}
       </nav>
 
       {tab === "clients" ? (
         <ClientsTab clients={clients} loadError={loadError} loading={loading} onRefresh={load} />
+      ) : null}
+      {tab === "requests" ? (
+        <RequestsTab clients={clients} loadError={loadError} loading={loading} onRefresh={load} />
       ) : null}
       {tab === "roadmap" ? (
         <RoadmapTab clients={clients} loadError={loadError} loading={loading} onRetry={load} />
@@ -183,7 +192,6 @@ function ClientsTab({
   const [statusFilter, setStatusFilter] = useState<ClientStatusKey | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
-  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
   const sentTimer = useRef<number | null>(null);
 
   useEffect(
@@ -205,38 +213,13 @@ function ClientsTab({
     };
   }, [clients]);
 
-  const pendingClients = clients.filter((client) => client.pending);
+  const approvedCount = clients.filter((client) => !client.pending).length;
   const visible = clients.filter((client) => {
-    if (client.pending) return false; // las solicitudes van en su propia sección
+    if (client.pending) return false; // las solicitudes van en su propia pestaña
     if (phaseFilter !== null && client.current_phase !== phaseFilter) return false;
     if (statusFilter !== null && statusKey(client) !== statusFilter) return false;
     return true;
   });
-
-  async function approve(client: AdminClientView) {
-    if (actionBusyId) return;
-    setActionBusyId(client.id);
-    try {
-      await apiPost(`/api/skool/clients/${client.id}/approve`);
-    } catch {
-      /* el refresh mostrará el estado real */
-    }
-    setActionBusyId(null);
-    void onRefresh();
-  }
-
-  async function reject(client: AdminClientView) {
-    if (actionBusyId) return;
-    if (!window.confirm(`¿Rechazar y borrar la solicitud de ${client.name || client.email}?`)) return;
-    setActionBusyId(client.id);
-    try {
-      await apiPost(`/api/skool/clients/${client.id}/reject`);
-    } catch {
-      /* idem */
-    }
-    setActionBusyId(null);
-    void onRefresh();
-  }
 
   function onInvited() {
     setInviteOpen(false);
@@ -272,52 +255,6 @@ function ClientsTab({
 
   return (
     <>
-      {pendingClients.length > 0 ? (
-        <section className="admin-card admin-requests">
-          <header className="admin-card__header">
-            <div>
-              <p className="eyebrow">Solicitudes</p>
-              <h2>
-                {pendingClients.length === 1
-                  ? "1 solicitud de acceso"
-                  : `${pendingClients.length} solicitudes de acceso`}
-              </h2>
-            </div>
-          </header>
-          <ul className="request-list">
-            {pendingClients.map((client) => (
-              <li className="request-row" key={client.id}>
-                <div className="request-who">
-                  <strong>{client.name || client.email}</strong>
-                  <small>
-                    {client.email}
-                    {client.business ? ` · ${client.business}` : ""}
-                  </small>
-                </div>
-                <div className="request-actions">
-                  <button
-                    className="primary-button"
-                    disabled={actionBusyId === client.id}
-                    onClick={() => void approve(client)}
-                    type="button"
-                  >
-                    {actionBusyId === client.id ? "…" : "Aprobar"}
-                  </button>
-                  <button
-                    className="secondary-button"
-                    disabled={actionBusyId === client.id}
-                    onClick={() => void reject(client)}
-                    type="button"
-                  >
-                    Rechazar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
       <div className="admin-metrics">
         <div className="metric">
           <span>Clientes activos</span>
@@ -339,7 +276,7 @@ function ClientsTab({
         <header className="admin-card__header">
           <div>
             <p className="eyebrow">Panel interno</p>
-            <h2>{clients.length === 1 ? "1 cliente" : `${clients.length} clientes`}</h2>
+            <h2>{approvedCount === 1 ? "1 cliente" : `${approvedCount} clientes`}</h2>
           </div>
           <div className="admin-toolbar">
             <label className="admin-filter">
@@ -611,6 +548,127 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
         </form>
       </div>
     </div>
+  );
+}
+
+// ===== Pestaña Solicitudes (auto-registro pendiente de aprobación) =====
+
+function RequestsTab({
+  clients,
+  loading,
+  loadError,
+  onRefresh,
+}: {
+  clients: AdminClientView[];
+  loading: boolean;
+  loadError: LoadError;
+  onRefresh: () => Promise<void>;
+}) {
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
+  const pending = clients.filter((client) => client.pending);
+
+  async function approve(client: AdminClientView) {
+    if (actionBusyId) return;
+    setActionBusyId(client.id);
+    try {
+      await apiPost(`/api/skool/clients/${client.id}/approve`);
+    } catch {
+      /* el refresh mostrará el estado real */
+    }
+    setActionBusyId(null);
+    void onRefresh();
+  }
+
+  async function reject(client: AdminClientView) {
+    if (actionBusyId) return;
+    if (!window.confirm(`¿Rechazar y borrar la solicitud de ${client.name || client.email}?`)) return;
+    setActionBusyId(client.id);
+    try {
+      await apiPost(`/api/skool/clients/${client.id}/reject`);
+    } catch {
+      /* idem */
+    }
+    setActionBusyId(null);
+    void onRefresh();
+  }
+
+  if (loading) {
+    return (
+      <div className="portal-status" role="status">
+        <span className="spinner" aria-hidden="true" />
+        <p className="route-status">Cargando solicitudes…</p>
+      </div>
+    );
+  }
+  if (loadError === "auth") return <SessionExpiredStatus />;
+  if (loadError) {
+    return (
+      <div className="portal-status">
+        <p className="route-status">No pudimos cargar las solicitudes. Intenta de nuevo.</p>
+        <button className="secondary-button" onClick={() => void onRefresh()} type="button">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <section className="admin-card admin-requests" aria-label="Solicitudes de acceso">
+      <header className="admin-card__header">
+        <div>
+          <p className="eyebrow">Solicitudes</p>
+          <h2>
+            {pending.length === 0
+              ? "Sin solicitudes pendientes"
+              : pending.length === 1
+                ? "1 solicitud de acceso"
+                : `${pending.length} solicitudes de acceso`}
+          </h2>
+        </div>
+        <button className="secondary-button" onClick={() => void onRefresh()} type="button">
+          Actualizar
+        </button>
+      </header>
+
+      {pending.length === 0 ? (
+        <p className="route-status">
+          Cuando alguien cree una cuenta desde la página de clientes, su solicitud aparece aquí para
+          que la apruebes o la rechaces.
+        </p>
+      ) : (
+        <ul className="request-list">
+          {pending.map((client) => (
+            <li className="request-row" key={client.id}>
+              <div className="request-who">
+                <strong>{client.name || client.email}</strong>
+                <small>
+                  {client.email}
+                  {client.business ? ` · ${client.business}` : ""}
+                </small>
+              </div>
+              <div className="request-actions">
+                <button
+                  className="primary-button"
+                  disabled={actionBusyId === client.id}
+                  onClick={() => void approve(client)}
+                  type="button"
+                >
+                  {actionBusyId === client.id ? "…" : "Aprobar"}
+                </button>
+                <button
+                  className="secondary-button"
+                  disabled={actionBusyId === client.id}
+                  onClick={() => void reject(client)}
+                  type="button"
+                >
+                  Rechazar
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 

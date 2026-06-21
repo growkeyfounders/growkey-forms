@@ -1,22 +1,52 @@
 import { useEffect, useState } from "react";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabase } from "../supabaseClient";
 import { useSession } from "../session";
 import logoUrl from "../assets/growkey-mascot.png";
+
+const activationTokenHash = () =>
+  new URLSearchParams(window.location.search).get("token_hash");
 
 export function LoginPage() {
   const { session, me, loading } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Estado del enlace de activación (?token_hash=...): lo canjeamos con verifyOtp
+  // para abrir sesión y dejar que el cliente cree su contraseña, sin depender del
+  // redirect configurado en Supabase ni de emails.
+  const [linkState, setLinkState] = useState<"none" | "checking" | "ready" | "error">(() =>
+    activationTokenHash() ? "checking" : "none",
+  );
   // Capturar el hash SINCRÓNICAMENTE en el initializer: supabase-js
   // (detectSessionInUrl) consume y borra el hash de forma asíncrona,
   // así que un useEffect puede llegar tarde y saltarse el set-password.
   const [mode, setMode] = useState<"login" | "set-password">(() =>
-    window.location.hash.includes("type=invite") || window.location.hash.includes("type=recovery")
+    activationTokenHash() ||
+    window.location.hash.includes("type=invite") ||
+    window.location.hash.includes("type=recovery")
       ? "set-password"
       : "login",
   );
   const [busy, setBusy] = useState(false);
+
+  // Canjea el token del enlace de acceso por una sesión (verifyOtp).
+  useEffect(() => {
+    const tokenHash = activationTokenHash();
+    if (!tokenHash) return;
+    const type = (new URLSearchParams(window.location.search).get("type") || "recovery") as EmailOtpType;
+    void (async () => {
+      const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+      if (error) {
+        setLinkState("error");
+        setError("El enlace de acceso no es válido o ya expiró. Pídele uno nuevo al equipo.");
+      } else {
+        setLinkState("ready");
+        // Quitar el token de la URL (que no quede en el historial).
+        window.history.replaceState({}, "", "/activar");
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (loading || !session || mode === "set-password") return;
@@ -55,9 +85,16 @@ export function LoginPage() {
       {mode === "set-password" ? (
         <form onSubmit={setNewPassword} className="login-card">
           <h2>Crea tu contraseña</h2>
-          <input type="password" placeholder="Nueva contraseña" value={password} minLength={8} required
-            onChange={(e) => setPassword(e.currentTarget.value)} />
-          <button className="primary-button" disabled={busy} type="submit">Guardar y entrar</button>
+          {linkState === "checking" ? (
+            <p className="route-status">Validando tu enlace de acceso…</p>
+          ) : linkState === "error" ? null : (
+            <>
+              <p className="login-divider">Define tu contraseña para entrar a tu camino.</p>
+              <input type="password" placeholder="Nueva contraseña" value={password} minLength={8} required
+                onChange={(e) => setPassword(e.currentTarget.value)} />
+              <button className="primary-button" disabled={busy} type="submit">Guardar y entrar</button>
+            </>
+          )}
         </form>
       ) : (
         <form onSubmit={loginPassword} className="login-card">

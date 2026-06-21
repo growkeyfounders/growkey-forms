@@ -13,6 +13,18 @@ async function logEvent(clientId, type, payload, actorId) {
   await db.insert("skool_events", { client_id: clientId, type, payload, actor_id: actorId ?? null }, "return=minimal");
 }
 
+// Arma el enlace de activación apuntando a NUESTRO dominio. Detrás de caddy el
+// host real llega en x-forwarded-*. El front canjea el token con verifyOtp y
+// muestra "Crea tu contraseña" — sin depender de email ni del redirect de Supabase.
+async function buildActivationLink(request, email) {
+  const link = await db.authGenerateLink(email, "recovery");
+  if (!link.ok || !link.data?.hashed_token) return null;
+  const proto = request.headers["x-forwarded-proto"] || "https";
+  const host = request.headers["x-forwarded-host"] || request.headers["host"];
+  if (!host) return null;
+  return `${proto}://${host}/activar?token_hash=${encodeURIComponent(link.data.hashed_token)}&type=recovery`;
+}
+
 async function getClient(clientId) {
   const rows = await db.select("skool_clients", `select=*&id=eq.${clientId}`);
   return rows?.[0] ?? null;
@@ -220,21 +232,43 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     return;
   }
 
-  // Invitar cliente (admin): usuario en Auth + perfil + fila skool_clients + hilo.
+  // Invitar cliente (admin): usuario en Auth (confirmado, sin contraseña) + perfil
+  // + fila skool_clients + hilo, y devuelve un enlace de acceso para compartir.
   if (path === "/clients" && method === "POST") {
     if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
     const { email, name = "", business = "" } = body;
     if (!email || !/.+@.+\..+/.test(email)) { sendJson(response, 400, { error: "invalid_email" }); return; }
 
-    const invite = await db.authInvite(email, { name });
-    if (!invite.ok) { sendJson(response, 409, { error: "invite_failed", detail: invite.data?.msg }); return; }
-    const invited = invite.data;
+    // Crear el usuario en Auth (confirmado, sin contraseña). Si ya existe, reusarlo.
+    let userId;
+    const created = await db.authCreateUser(email, { name });
+    if (created.ok) {
+      userId = created.data.id;
+    } else {
+      const existing = await db.authFindUserByEmail(email);
+      if (!existing) { sendJson(response, 409, { error: "invite_failed", detail: created.data?.msg }); return; }
+      userId = existing.id;
+    }
 
-    await db.upsert("profiles", { user_id: invited.id, role: "client", name });
-    await db.upsert("skool_clients", { id: invited.id, email, name, business, status: "invited" });
-    await db.upsert("skool_thread_members", { client_id: invited.id, user_id: auth.userId });
-    await logEvent(invited.id, "status_change", { to: "invited" }, auth.userId);
-    sendJson(response, 200, await getClient(invited.id));
+    await db.upsert("profiles", { user_id: userId, role: "client", name });
+    await db.upsert("skool_clients", { id: userId, email, name, business, status: "invited" });
+    await db.upsert("skool_thread_members", { client_id: userId, user_id: auth.userId });
+    await logEvent(userId, "status_change", { to: "invited" }, auth.userId);
+
+    const activationLink = await buildActivationLink(request, email);
+    sendJson(response, 200, { ...(await getClient(userId)), activationLink });
+    return;
+  }
+
+  // Regenerar enlace de acceso (admin): para reenviar/compartir de nuevo.
+  const activationMatch = path.match(/^\/clients\/([0-9a-f-]+)\/activation-link$/);
+  if (activationMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const client = await getClient(activationMatch[1]);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    const activationLink = await buildActivationLink(request, client.email);
+    if (!activationLink) { sendJson(response, 502, { error: "link_failed" }); return; }
+    sendJson(response, 200, { activationLink });
     return;
   }
 

@@ -393,6 +393,9 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
   const [business, setBusiness] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Tras crear la cuenta, mostramos el enlace de acceso para compartir (null = aún en el formulario).
+  const [link, setLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -400,20 +403,86 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
     setSending(true);
     setError(null);
     try {
-      await apiPost("/api/skool/clients", { email: email.trim(), name: name.trim(), business: business.trim() });
-      onInvited();
+      const result = await apiPost<{ activationLink?: string | null }>("/api/skool/clients", {
+        email: email.trim(),
+        name: name.trim(),
+        business: business.trim(),
+      });
+      setLink(result.activationLink ?? "");
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       setError(
         code === "invalid_email"
           ? "Revisa el email: no parece válido."
           : code === "invite_failed"
-            ? "No pudimos enviar la invitación. ¿Ya existe una cuenta con ese email?"
-            : "No pudimos enviar la invitación, intenta de nuevo.",
+            ? "No pudimos crear la cuenta. ¿Ya existe una con ese email?"
+            : "No pudimos crear la cuenta, intenta de nuevo.",
       );
     } finally {
       setSending(false);
     }
+  }
+
+  async function copyLink() {
+    if (!link) return;
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* el input es seleccionable como fallback */
+    }
+  }
+
+  if (link !== null) {
+    return (
+      <div aria-label="Cliente creado" aria-modal="true" className="modal" role="dialog">
+        <div className="modal__card">
+          <header className="modal__header">
+            <h3>Cliente creado ✓</h3>
+            <button aria-label="Cerrar" className="ghost-button modal__close" onClick={onInvited} type="button">
+              ✕
+            </button>
+          </header>
+          {link ? (
+            <>
+              <p className="modal__copy">
+                Envíale este enlace al cliente (WhatsApp, etc.). Al abrirlo crea su contraseña y entra a su
+                camino. El enlace es de un solo uso.
+              </p>
+              <div className="modal__form">
+                <input
+                  className="field"
+                  onFocus={(event) => event.currentTarget.select()}
+                  readOnly
+                  value={link}
+                />
+                <div className="modal__actions">
+                  <button className="secondary-button" onClick={copyLink} type="button">
+                    {copied ? "¡Copiado!" : "Copiar enlace"}
+                  </button>
+                  <button className="primary-button" onClick={onInvited} type="button">
+                    Listo
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="modal__copy">
+                La cuenta se creó, pero no pudimos generar el enlace ahora. Genera uno desde el detalle del
+                cliente con “Copiar enlace de acceso”.
+              </p>
+              <div className="modal__actions">
+                <button className="primary-button" onClick={onInvited} type="button">
+                  Listo
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -426,7 +495,7 @@ function InviteModal({ onClose, onInvited }: { onClose: () => void; onInvited: (
           </button>
         </header>
         <p className="modal__copy">
-          Le llega un correo con el link para activar su cuenta y entrar a su camino.
+          Se crea su cuenta y te damos un enlace para enviarle. Al abrirlo, crea su contraseña y entra.
         </p>
         <form className="modal__form" onSubmit={submit}>
           <label className="field">

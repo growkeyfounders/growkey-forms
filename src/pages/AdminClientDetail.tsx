@@ -208,22 +208,23 @@ export function AdminClientDetail({ clientId }: { clientId: string }) {
 
   const { client, events, submissions, threadMembers } = data;
 
-  // El mensaje depende de la vía: invite directo o recover (ya tenía cuenta).
-  async function resendInvite() {
+  // Genera un enlace de acceso de un solo uso y lo copia al portapapeles, para
+  // enviárselo al cliente (WhatsApp, etc.). No depende de email.
+  async function copyAccessLink() {
     if (actionBusy) return;
     setActionBusy(true);
     try {
-      const result = await apiPost<{ ok: boolean; via: "invite" | "recover" }>(
-        `/api/skool/clients/${client.id}/resend-invite`,
+      const result = await apiPost<{ activationLink: string }>(
+        `/api/skool/clients/${client.id}/activation-link`,
       );
-      showToast(
-        "ok",
-        result.via === "invite"
-          ? "Invitación reenviada."
-          : "Ya tenía cuenta: le enviamos un correo para restablecer su contraseña.",
-      );
+      try {
+        await navigator.clipboard.writeText(result.activationLink);
+        showToast("ok", "Enlace de acceso copiado. Envíaselo al cliente (WhatsApp, etc.).");
+      } catch {
+        showToast("ok", `Enlace de acceso: ${result.activationLink}`);
+      }
     } catch {
-      showToast("error", "No pudimos reenviar la invitación, intenta de nuevo.");
+      showToast("error", "No pudimos generar el enlace, intenta de nuevo.");
     } finally {
       setActionBusy(false);
     }
@@ -239,7 +240,7 @@ export function AdminClientDetail({ clientId }: { clientId: string }) {
         busy={actionBusy}
         client={client}
         onAction={runAction}
-        onResendInvite={() => void resendInvite()}
+        onResendInvite={() => void copyAccessLink()}
       />
 
       <section className="admin-card" aria-label="Camino del cliente">
@@ -444,7 +445,7 @@ function DetailHero({
               Marcar completado
             </button>
             <button className="secondary-button" disabled={busy} onClick={onResendInvite} type="button">
-              Reenviar invitación
+              Copiar enlace de acceso
             </button>
           </div>
         </div>

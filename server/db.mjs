@@ -76,4 +76,23 @@ export const db = {
     supabaseRequest(`/rest/v1/${table}?${query}`, { method: "DELETE" }),
   authInvite: (email, data = {}) => authPost("/auth/v1/invite", { email, data }),
   authRecover: (email) => authPost("/auth/v1/recover", { email }),
+  // Crea un usuario YA confirmado y sin contraseña: el cliente la define al abrir
+  // su enlace de acceso. No depende de email/SMTP.
+  authCreateUser: (email, data = {}) =>
+    authPost("/auth/v1/admin/users", { email, email_confirm: true, user_metadata: data }),
+  // Genera un enlace de un solo uso; usamos su hashed_token para armar un link
+  // a NUESTRO dominio (el front lo canjea con verifyOtp, sin depender del redirect
+  // configurado en Supabase).
+  authGenerateLink: (email, type = "recovery") =>
+    authPost("/auth/v1/admin/generate_link", { type, email }),
+  // Busca un usuario por email (base chica: lista y filtra). Para reusar cuando
+  // "Invitar" recibe un email que ya existe en Auth.
+  authFindUserByEmail: async (email) => {
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=200`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return (data.users || []).find((user) => user.email === email) || null;
+  },
 };

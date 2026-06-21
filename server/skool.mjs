@@ -1,4 +1,4 @@
-import { db, supabaseRequest } from "./db.mjs";
+import { db, sendEmail, supabaseRequest } from "./db.mjs";
 import { authenticate } from "./auth.mjs";
 import { evaluateAdvance } from "./engine.mjs";
 import { PROGRAM, currentWeek, isLate, isValidDateIso, phaseById, programDay } from "../shared/program.mjs";
@@ -131,9 +131,6 @@ export async function runEngine(clientId, actorId) {
 }
 
 export async function handleSkool(request, response, url, { sendJson, readBody }) {
-  const auth = await authenticate(request);
-  if (!auth) { sendJson(response, 401, { error: "unauthorized" }); return; }
-  const isAdmin = auth.role === "admin";
   const path = url.pathname.replace("/api/skool", "");
   const method = request.method;
   let body = null;
@@ -150,6 +147,35 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       return;
     }
   }
+
+  // ===== PÚBLICO: auto-registro (solicitar acceso) — sin sesión =====
+  // Crea el usuario en Auth con su contraseña (confirmado) y una fila skool_clients,
+  // pero SIN perfil → queda "pendiente de aprobación" (no puede acceder aún).
+  if (path === "/request-access" && method === "POST") {
+    const email = String(body.email || "").trim();
+    const name = String(body.name || "").trim();
+    const business = String(body.business || "").trim();
+    const password = String(body.password || "");
+    if (!email || !/.+@.+\..+/.test(email)) { sendJson(response, 400, { error: "invalid_email" }); return; }
+    if (password.length < 8) { sendJson(response, 400, { error: "weak_password" }); return; }
+    const created = await db.authCreateUser(email, { name }, password);
+    if (!created.ok) {
+      const exists =
+        created.status === 422 ||
+        /already|registered|exists/i.test(JSON.stringify(created.data || ""));
+      sendJson(response, exists ? 409 : 502, { error: exists ? "already_exists" : "signup_failed" });
+      return;
+    }
+    const userId = created.data.id;
+    await db.upsert("skool_clients", { id: userId, email, name, business, status: "invited" });
+    await logEvent(userId, "status_change", { to: "requested" }, null);
+    sendJson(response, 200, { ok: true });
+    return;
+  }
+
+  const auth = await authenticate(request);
+  if (!auth) { sendJson(response, 401, { error: "unauthorized" }); return; }
+  const isAdmin = auth.role === "admin";
 
   if (path === "/me" && method === "GET") {
     const client = auth.role === "client" ? await getClient(auth.userId) : null;
@@ -279,7 +305,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     if (!clients.length) { sendJson(response, 200, { clients: [] }); return; }
 
     const ids = clients.map((client) => client.id).join(",");
-    const [allTasks, allSubmissions, allEvents, allMessages] = await Promise.all([
+    const [allTasks, allSubmissions, allEvents, allMessages, clientProfiles] = await Promise.all([
       db.select("skool_client_tasks", `select=*&client_id=in.(${ids})&order=phase.asc,position.asc,created_at.asc`),
       db.select("growkey_form_submissions", `select=client_id,form_slug&client_id=in.(${ids})`),
       // limit mitiga el volumen mientras la base es chica: los más recientes
@@ -287,7 +313,10 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       // agregación (max(created_at) group by client_id) en vez de traer filas.
       db.select("skool_events", "select=client_id,created_at&order=created_at.desc&limit=2000"),
       db.select("skool_messages", "select=client_id,created_at&order=created_at.desc&limit=2000"),
+      // Un cliente SIN perfil es una solicitud de acceso pendiente de aprobación.
+      db.select("profiles", `select=user_id&user_id=in.(${ids})&role=eq.client`),
     ]);
+    const approvedIds = new Set((clientProfiles ?? []).map((profile) => profile.user_id));
 
     const lastByClient = (rows, clientId) =>
       (rows ?? []).find((row) => row.client_id === clientId)?.created_at ?? null;
@@ -304,9 +333,60 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       const lastEvent = lastByClient(allEvents, client.id);
       const lastMessage = lastByClient(allMessages, client.id);
       const lastActivityAt = [lastEvent, lastMessage].filter(Boolean).sort().pop() ?? null;
-      return { ...clientView(client, tasks, slugs), progressPct, lastActivityAt };
+      return {
+        ...clientView(client, tasks, slugs),
+        progressPct,
+        lastActivityAt,
+        pending: !approvedIds.has(client.id),
+      };
     });
     sendJson(response, 200, { clients: views });
+    return;
+  }
+
+  // Aprobar solicitud (admin): crea el perfil (rol client) + hilo → la persona ya
+  // puede entrar, y le avisamos por correo (Resend) si está configurado.
+  const approveMatch = path.match(/^\/clients\/([0-9a-f-]+)\/approve$/);
+  if (approveMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = approveMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    await db.upsert("profiles", { user_id: clientId, role: "client", name: client.name || "" });
+    await db.upsert("skool_thread_members", { client_id: clientId, user_id: auth.userId });
+    await logEvent(clientId, "status_change", { to: "approved" }, auth.userId);
+
+    const proto = request.headers["x-forwarded-proto"] || "https";
+    const host = request.headers["x-forwarded-host"] || request.headers["host"];
+    const loginUrl = `${proto}://${host}/login`;
+    const email = await sendEmail({
+      to: client.email,
+      subject: "¡Tu acceso a Agentic Sales fue aprobado! 🎉",
+      html: `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:auto">
+        <h2>¡Bienvenido a Agentic Sales!</h2>
+        <p>Hola ${client.name || ""}, tu solicitud fue aprobada. Ya puedes entrar a tu camino con el correo y la contraseña que registraste.</p>
+        <p><a href="${loginUrl}" style="display:inline-block;background:#111;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none">Entrar ahora</a></p>
+        <p style="color:#888;font-size:13px">O abre: ${loginUrl}</p>
+      </div>`,
+    });
+    sendJson(response, 200, { ok: true, emailSent: email.ok === true, emailSkipped: email.skipped === true });
+    return;
+  }
+
+  // Rechazar solicitud (admin): borra la cuenta y sus datos.
+  const rejectMatch = path.match(/^\/clients\/([0-9a-f-]+)\/reject$/);
+  if (rejectMatch && method === "POST") {
+    if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
+    const clientId = rejectMatch[1];
+    const client = await getClient(clientId);
+    if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
+    await db.remove("skool_client_tasks", `client_id=eq.${clientId}`);
+    await db.remove("skool_thread_members", `client_id=eq.${clientId}`);
+    await db.remove("skool_events", `client_id=eq.${clientId}`);
+    await db.remove("skool_clients", `id=eq.${clientId}`);
+    await db.remove("profiles", `user_id=eq.${clientId}`);
+    await db.authDeleteUser(clientId);
+    sendJson(response, 200, { ok: true });
     return;
   }
 

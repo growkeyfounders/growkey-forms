@@ -73,6 +73,7 @@ export type ToggleResponse = {
 export type AdminClientView = ClientView & {
   progressPct: number;
   lastActivityAt: string | null;
+  pending?: boolean;
 };
 
 export type ClientsData = {

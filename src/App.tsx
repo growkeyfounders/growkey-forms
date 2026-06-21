@@ -139,11 +139,11 @@ function RequireRole({ role, children }: { role: "admin" | "client"; children: R
     return (
       <div className="login-shell">
         <img src={logoUrl} alt="" width={56} />
-        <h1>Sin acceso</h1>
+        <h1>Cuenta en revisión</h1>
         <div className="login-card">
           <p className="route-status">
-            Tu cuenta no tiene acceso a Agentic Sales. Si crees que es un error,
-            escríbele al equipo Growkey.
+            Tu cuenta está en revisión. Te avisaremos por correo cuando se apruebe y
+            podrás entrar. Si crees que es un error, escríbele al equipo.
           </p>
           <button className="secondary-button" onClick={() => void signOut()} type="button">
             Cerrar sesión

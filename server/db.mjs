@@ -76,10 +76,23 @@ export const db = {
     supabaseRequest(`/rest/v1/${table}?${query}`, { method: "DELETE" }),
   authInvite: (email, data = {}) => authPost("/auth/v1/invite", { email, data }),
   authRecover: (email) => authPost("/auth/v1/recover", { email }),
-  // Crea un usuario YA confirmado y sin contraseña: el cliente la define al abrir
-  // su enlace de acceso. No depende de email/SMTP.
-  authCreateUser: (email, data = {}) =>
-    authPost("/auth/v1/admin/users", { email, email_confirm: true, user_metadata: data }),
+  // Crea un usuario YA confirmado. Si se pasa password, el cliente entra con ella;
+  // si no, la define luego al abrir su enlace de acceso.
+  authCreateUser: (email, data = {}, password) =>
+    authPost("/auth/v1/admin/users", {
+      email,
+      email_confirm: true,
+      user_metadata: data,
+      ...(password ? { password } : {}),
+    }),
+  // Borra un usuario de Auth (para rechazar solicitudes).
+  authDeleteUser: async (id) => {
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users/${id}`, {
+      method: "DELETE",
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    });
+    return { ok: response.ok, status: response.status };
+  },
   // Genera un enlace de un solo uso; usamos su hashed_token para armar un link
   // a NUESTRO dominio (el front lo canjea con verifyOtp, sin depender del redirect
   // configurado en Supabase).
@@ -96,3 +109,22 @@ export const db = {
     return (data.users || []).find((user) => user.email === email) || null;
   },
 };
+
+// Envío de correo transaccional vía Resend. Si no hay RESEND_API_KEY configurada,
+// no falla: devuelve {skipped:true} para que el flujo (aprobar) siga funcionando
+// aunque el correo esté apagado. RESEND_FROM permite usar un dominio verificado.
+export async function sendEmail({ to, subject, html, text }) {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return { ok: false, skipped: true };
+  const from = process.env.RESEND_FROM || "Agentic Sales <onboarding@resend.dev>";
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ from, to: [to], subject, html, text }),
+    });
+    return { ok: response.ok, status: response.status };
+  } catch {
+    return { ok: false, error: true };
+  }
+}

@@ -887,6 +887,61 @@ textarea:focus {
   background: var(--border);
 }
 
+.link-button {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+}
+
+.link-button:hover {
+  color: var(--ink, #111);
+}
+
+.admin-requests {
+  border: 1px solid var(--border);
+  box-shadow: 0 0 0 2px rgba(255, 170, 60, 0.18);
+}
+
+.request-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.request-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.request-who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.request-who small {
+  color: var(--dim);
+}
+
+.request-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .login-error {
   margin: 0;
   color: var(--danger);

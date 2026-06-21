@@ -183,6 +183,7 @@ function ClientsTab({
   const [statusFilter, setStatusFilter] = useState<ClientStatusKey | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
+  const [actionBusyId, setActionBusyId] = useState<string | null>(null);
   const sentTimer = useRef<number | null>(null);
 
   useEffect(
@@ -204,11 +205,38 @@ function ClientsTab({
     };
   }, [clients]);
 
+  const pendingClients = clients.filter((client) => client.pending);
   const visible = clients.filter((client) => {
+    if (client.pending) return false; // las solicitudes van en su propia sección
     if (phaseFilter !== null && client.current_phase !== phaseFilter) return false;
     if (statusFilter !== null && statusKey(client) !== statusFilter) return false;
     return true;
   });
+
+  async function approve(client: AdminClientView) {
+    if (actionBusyId) return;
+    setActionBusyId(client.id);
+    try {
+      await apiPost(`/api/skool/clients/${client.id}/approve`);
+    } catch {
+      /* el refresh mostrará el estado real */
+    }
+    setActionBusyId(null);
+    void onRefresh();
+  }
+
+  async function reject(client: AdminClientView) {
+    if (actionBusyId) return;
+    if (!window.confirm(`¿Rechazar y borrar la solicitud de ${client.name || client.email}?`)) return;
+    setActionBusyId(client.id);
+    try {
+      await apiPost(`/api/skool/clients/${client.id}/reject`);
+    } catch {
+      /* idem */
+    }
+    setActionBusyId(null);
+    void onRefresh();
+  }
 
   function onInvited() {
     setInviteOpen(false);
@@ -244,6 +272,52 @@ function ClientsTab({
 
   return (
     <>
+      {pendingClients.length > 0 ? (
+        <section className="admin-card admin-requests">
+          <header className="admin-card__header">
+            <div>
+              <p className="eyebrow">Solicitudes</p>
+              <h2>
+                {pendingClients.length === 1
+                  ? "1 solicitud de acceso"
+                  : `${pendingClients.length} solicitudes de acceso`}
+              </h2>
+            </div>
+          </header>
+          <ul className="request-list">
+            {pendingClients.map((client) => (
+              <li className="request-row" key={client.id}>
+                <div className="request-who">
+                  <strong>{client.name || client.email}</strong>
+                  <small>
+                    {client.email}
+                    {client.business ? ` · ${client.business}` : ""}
+                  </small>
+                </div>
+                <div className="request-actions">
+                  <button
+                    className="primary-button"
+                    disabled={actionBusyId === client.id}
+                    onClick={() => void approve(client)}
+                    type="button"
+                  >
+                    {actionBusyId === client.id ? "…" : "Aprobar"}
+                  </button>
+                  <button
+                    className="secondary-button"
+                    disabled={actionBusyId === client.id}
+                    onClick={() => void reject(client)}
+                    type="button"
+                  >
+                    Rechazar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <div className="admin-metrics">
         <div className="metric">
           <span>Clientes activos</span>

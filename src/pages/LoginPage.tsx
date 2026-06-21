@@ -29,6 +29,9 @@ export function LoginPage() {
       : "login",
   );
   const [busy, setBusy] = useState(false);
+  // Entrada del equipo: subdominio "admin." o "equipo." → mostramos una pista.
+  const isTeamHost =
+    window.location.hostname.startsWith("admin") || window.location.hostname.startsWith("equipo");
 
   // Canjea el token del enlace de acceso por una sesión (verifyOtp).
   useEffect(() => {
@@ -62,13 +65,6 @@ export function LoginPage() {
     setBusy(false);
   }
 
-  async function loginGoogle() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + "/login" },
-    });
-  }
-
   async function setNewPassword(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true); setError(null);
@@ -82,6 +78,7 @@ export function LoginPage() {
     <div className="login-shell">
       <img src={logoUrl} alt="" width={56} />
       <h1>Agentic Sales</h1>
+      {isTeamHost ? <p className="login-divider">Acceso del equipo</p> : null}
       {mode === "set-password" ? (
         <form onSubmit={setNewPassword} className="login-card">
           <h2>Crea tu contraseña</h2>
@@ -98,8 +95,6 @@ export function LoginPage() {
         </form>
       ) : (
         <form onSubmit={loginPassword} className="login-card">
-          <button className="secondary-button" onClick={loginGoogle} type="button">Entrar con Google</button>
-          <span className="login-divider">o con tu correo</span>
           <input type="email" placeholder="Correo" value={email} required onChange={(e) => setEmail(e.currentTarget.value)} />
           <input type="password" placeholder="Contraseña" value={password} required onChange={(e) => setPassword(e.currentTarget.value)} />
           <button className="primary-button" disabled={busy} type="submit">Entrar</button>

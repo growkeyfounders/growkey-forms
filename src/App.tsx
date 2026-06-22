@@ -89,7 +89,7 @@ export function App() {
   if (path === "/app" || path.startsWith("/app/")) {
     return (
       <RequireRole role="client">
-        <div className="app-shell">
+        <div className="app-shell app-shell--client">
           <header className="topbar">
             <a className="brand" href="/app" aria-label="Mi camino">
               <img src={logoUrl} alt="" />

@@ -4189,3 +4189,235 @@ a.secondary-button {
   font-size: 12.5px;
   color: #8b8f88;
 }
+
+/* === Tema oscuro de la experiencia del cliente (shell, topbar, login) === */
+.app-shell--client {
+  background:
+    radial-gradient(120% 70% at 50% -8%, rgba(182, 242, 74, 0.08), rgba(10, 11, 10, 0) 58%),
+    #0a0b0a;
+  color: #fff;
+}
+.app-shell--client .topbar {
+  background: rgba(10, 11, 10, 0.82);
+  border-bottom: 1px solid #1d211c;
+}
+.app-shell--client .brand {
+  color: #fff;
+}
+.app-shell--client .brand span {
+  color: #8b8f88;
+  border-color: #2a2f26;
+}
+.app-shell--client .ghost-button {
+  color: #9aa094;
+}
+.app-shell--client .ghost-button:hover {
+  color: #b6f24a;
+}
+
+.login-shell {
+  background:
+    radial-gradient(120% 70% at 50% -8%, rgba(182, 242, 74, 0.08), rgba(10, 11, 10, 0) 58%),
+    #0a0b0a;
+  color: #fff;
+}
+.login-shell h1 {
+  color: #fff;
+}
+.login-shell .login-card {
+  background: #141612;
+  border-color: #262a22;
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+}
+.login-shell .route-status,
+.login-shell label {
+  color: #9aa094;
+}
+.login-shell input,
+.app-shell--client input[type="date"],
+.app-shell--client input[type="text"],
+.app-shell--client input[type="email"] {
+  background: #0e1109;
+  border: 1px solid #2a3022;
+  color: #fff;
+}
+.login-shell input::placeholder {
+  color: #6f746c;
+}
+.login-shell .primary-button,
+.app-shell--client .primary-button {
+  background: #b6f24a;
+  color: #0c0e0c;
+}
+.login-shell .secondary-button {
+  background: transparent;
+  border: 1px solid #2a3022;
+  color: #cfd3c9;
+}
+
+/* === Layout web de la vista diaria (2 columnas en desktop) === */
+.daily {
+  width: min(900px, 100%);
+}
+.daily__grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.daily__main,
+.daily__side {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  min-width: 0;
+}
+.daily__main .daily-mission,
+.daily__side .daily-phase,
+.daily__side .daily-streak-card {
+  margin-bottom: 0;
+}
+.daily__main .daily-mission {
+  height: 100%;
+}
+@media (max-width: 760px) {
+  .daily__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Onboarding (bienvenida + calendario + timeline) en oscuro === */
+.app-shell--client {
+  --bg: #0a0b0a;
+  --surface: #141612;
+  --text: #ffffff;
+  --muted: #9aa094;
+  --dim: #6f746c;
+  --border: #262a22;
+  --border-strong: #323829;
+}
+.app-shell--client .welcome-card {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(182, 242, 74, 0.07), rgba(20, 22, 18, 0) 52%),
+    #0e100d;
+  border-color: #1f231b;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+}
+.app-shell--client .welcome-card h1 {
+  color: #fff;
+}
+.app-shell--client .welcome-copy {
+  color: #9aa094;
+}
+.app-shell--client .eyebrow {
+  color: #b6f24a;
+}
+.app-shell--client .welcome-form {
+  background: #141612;
+  border-color: #262a22;
+  box-shadow: none;
+}
+.app-shell--client .field__label {
+  color: #fff;
+}
+.app-shell--client .field__hint {
+  color: #8b8f88;
+}
+.app-shell--client input[type="date"] {
+  color-scheme: dark;
+  background: #0e1109;
+  border-color: #2a3022;
+  color: #fff;
+}
+.app-shell--client .pcal-month {
+  background: #121410;
+  border-color: #20241d;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+.app-shell--client .pcal-cell {
+  background: color-mix(in srgb, var(--hue) 15%, #121410);
+  border-color: #23271f;
+}
+.app-shell--client .pcal-cell--rest {
+  background: transparent;
+  border-color: transparent;
+}
+.app-shell--client .pcal-cell__date {
+  color: #fff;
+}
+.app-shell--client .pcal-cell--rest .pcal-cell__date {
+  color: #5f645a;
+}
+.app-shell--client .pcal-cell__mission {
+  color: #dfe3d9;
+}
+.app-shell--client .pcal-cell--today {
+  border-color: var(--hue);
+  background: color-mix(in srgb, var(--hue) 32%, #121410);
+}
+.app-shell--client .pcal-cell--hero {
+  background: color-mix(in srgb, #f5b81f 20%, #121410);
+  border-color: color-mix(in srgb, #f5b81f 44%, #121410);
+}
+.app-shell--client .pcal-wd {
+  color: #6f746c;
+}
+.app-shell--client .pcal__hint {
+  color: #8b8f88;
+}
+.app-shell--client .pcal__ics {
+  background: #141612;
+  border-color: #323829;
+  color: #fff;
+}
+.app-shell--client .pcal__ics:hover {
+  background: #1b1e16;
+}
+.app-shell--client .pcal-cell[role="button"]:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+.app-shell--client .jtl__l-nm {
+  color: #fff;
+}
+.app-shell--client .jtl__l-hr {
+  color: #9aa094;
+}
+.app-shell--client .jtl__seg + .jtl__seg {
+  box-shadow: inset 2px 0 0 #0a0b0a;
+}
+.app-shell--client .jtl__goal {
+  background: #0a0b0a;
+  border-color: #fff;
+}
+.app-shell--client .jtl__goal-lbl {
+  color: #fff;
+}
+.app-shell--client .jtl__dot::before {
+  background: #b6f24a;
+  border-color: #0a0b0a;
+  box-shadow: 0 0 0 2px rgba(182, 242, 74, 0.25), 0 0 14px rgba(182, 242, 74, 0.5);
+}
+.app-shell--client .jtl__dot-lbl {
+  background: #b6f24a;
+  color: #0c0e0c;
+}
+.app-shell--client .jtl__dot-lbl::after {
+  border-top-color: #b6f24a;
+}
+.app-shell--client .pcal-modal__card {
+  background: #141612;
+}
+.app-shell--client .pcal-modal__action {
+  color: #9aa094;
+}
+.app-shell--client .pcal-modal__deliver {
+  background: color-mix(in srgb, var(--hue) 14%, #121410);
+  color: #fff;
+}
+.app-shell--client .pcal-modal__close {
+  color: #8b8f88;
+}
+.app-shell--client .pcal-modal__close:hover {
+  background: #23271f;
+  color: #fff;
+}

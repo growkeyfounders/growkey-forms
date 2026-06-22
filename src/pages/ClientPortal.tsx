@@ -506,73 +506,79 @@ function DailyHome({
         })}
       </div>
 
-      {focusTask ? (
-        <div className="daily-mission">
-          <span className="daily-mission__eyebrow">{todayTask ? "Tu misión de hoy" : "Tu próxima misión"}</span>
-          <strong className="daily-mission__title">{missionOf(focusTask)}</strong>
+      <div className="daily__grid">
+        <div className="daily__main">
+          {focusTask ? (
+            <div className="daily-mission">
+              <span className="daily-mission__eyebrow">{todayTask ? "Tu misión de hoy" : "Tu próxima misión"}</span>
+              <strong className="daily-mission__title">{missionOf(focusTask)}</strong>
 
-          {cls ? (
-            <div className="daily-row">
-              <span className="daily-row__ic">
-                <IconPlay />
-              </span>
-              <span className="daily-row__txt">
-                <b>Ver la clase</b>
-                <small>{cls.title}</small>
-              </span>
+              {cls ? (
+                <div className="daily-row">
+                  <span className="daily-row__ic">
+                    <IconPlay />
+                  </span>
+                  <span className="daily-row__txt">
+                    <b>Ver la clase</b>
+                    <small>{cls.title}</small>
+                  </span>
+                </div>
+              ) : null}
+              {deliverable ? (
+                <div className="daily-row">
+                  <span className="daily-row__ic">
+                    <IconFile />
+                  </span>
+                  <span className="daily-row__txt">
+                    <b>Entregable</b>
+                    <small>{deliverable}</small>
+                  </span>
+                </div>
+              ) : null}
+
+              <button
+                className={`daily-cta${focusDone ? " is-done" : ""}`}
+                disabled={busyTaskId === focusTask.id}
+                onClick={() => onToggle(focusTask)}
+                type="button"
+              >
+                <IconCircleCheck />
+                {focusDone ? "¡Completada! Toca para deshacer" : "Marcar como completada"}
+              </button>
             </div>
           ) : null}
-          {deliverable ? (
-            <div className="daily-row">
-              <span className="daily-row__ic">
-                <IconFile />
+        </div>
+
+        <aside className="daily__side">
+          <div className="daily-phase">
+            <div className="daily-phase__top">
+              <span>
+                Fase {phase.id} · {phase.name}
               </span>
-              <span className="daily-row__txt">
-                <b>Entregable</b>
-                <small>{deliverable}</small>
-              </span>
+              <small>
+                {phaseDone} / {phaseTasks.length} misiones
+              </small>
             </div>
-          ) : null}
-
-          <button
-            className={`daily-cta${focusDone ? " is-done" : ""}`}
-            disabled={busyTaskId === focusTask.id}
-            onClick={() => onToggle(focusTask)}
-            type="button"
-          >
-            <IconCircleCheck />
-            {focusDone ? "¡Completada! Toca para deshacer" : "Marcar como completada"}
-          </button>
-        </div>
-      ) : null}
-
-      <div className="daily-phase">
-        <div className="daily-phase__top">
-          <span>
-            Fase {phase.id} · {phase.name}
-          </span>
-          <small>
-            {phaseDone} / {phaseTasks.length} misiones
-          </small>
-        </div>
-        <div className="daily-phase__bar">
-          <i style={{ width: `${phasePct}%` }} />
-        </div>
-        {nextHero ? (
-          <div className="daily-phase__hero">
-            <IconTrophy />
-            Próximo logro: <b>{nextHero.title}</b>
-            {heroInMissions > 0 ? ` · en ${heroInMissions} ${heroInMissions === 1 ? "misión" : "misiones"}` : ""}
+            <div className="daily-phase__bar">
+              <i style={{ width: `${phasePct}%` }} />
+            </div>
+            {nextHero ? (
+              <div className="daily-phase__hero">
+                <IconTrophy />
+                Próximo logro: <b>{nextHero.title}</b>
+                {heroInMissions > 0 ? ` · en ${heroInMissions} ${heroInMissions === 1 ? "misión" : "misiones"}` : ""}
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
 
-      <div className="daily-streak-card">
-        <span className="daily-streak-card__flame">🔥</span>
-        <div>
-          <strong>{streak > 0 ? `¡Vas ${streak} ${streak === 1 ? "día" : "días"} seguidos!` : "¡Arranca tu racha hoy!"}</strong>
-          <span>{focusDone ? "Racha asegurada por hoy. Vuelve mañana." : "Completa tu misión para no romper la racha."}</span>
-        </div>
+          <div className="daily-streak-card">
+            <span className="daily-streak-card__flame">🔥</span>
+            <div>
+              <strong>{streak > 0 ? `¡Vas ${streak} ${streak === 1 ? "día" : "días"} seguidos!` : "¡Arranca tu racha hoy!"}</strong>
+              <span>{focusDone ? "Racha asegurada por hoy. Vuelve mañana." : "Completa tu misión para no romper la racha."}</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

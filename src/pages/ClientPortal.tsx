@@ -294,49 +294,38 @@ function Welcome({
 
   return (
     <main className="portal portal--welcome">
-      <section className="welcome-hero">
-        <div className="welcome-hero__content">
-          <h1 className="welcome-headline">Bienvenido, {firstName(client.name)}</h1>
-          <p className="welcome-sub">
-            Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un
-            sistema de ventas predecible y escalable con tu conocimiento, que te trae clientes de
-            forma constante. Estos son los 4 pasos en los que trabajarás día a día para conseguirlo:
-            oferta, primeras ventas, validación y escala.
-          </p>
-          <p className="welcome-kicker">
-            La bola está en tu campo. Trabaja con obsesión todos los días hasta obtener resultados —
-            estás a pocas semanas de cambiar tu vida para siempre.
-          </p>
-          <form id="reservar" className="welcome-form" onSubmit={onSubmit}>
-            <label className="field">
-              <span className="field__label">¿Qué día arrancas?</span>
-              <span className="field__hint">
-                Tu día 1 es hoy y se actualiza solo. Las misiones corren de lunes a viernes.
-              </span>
-              <input
-                min={addDays(localTodayIso(), -30)}
-                onChange={(event) => onChangeStartDate(event.currentTarget.value)}
-                required
-                type="date"
-                value={startDate}
-              />
-            </label>
-            <button className="primary-button" disabled={starting || !startDate} type="submit">
-              {starting ? "Guardando…" : "Empezar mi camino"}
-            </button>
-          </form>
-          <a className="welcome-cta-ghost" href="#mapa">
-            Ver el mapa del programa ↓
-          </a>
-        </div>
-        <a className="welcome-scroll" href="#mapa" aria-hidden="true">
-          Desliza para ver tu camino ↓
-        </a>
-      </section>
+      <div className="welcome-hero__content">
+        <h1 className="welcome-headline">Bienvenido, {firstName(client.name)}</h1>
+        <p className="welcome-sub">
+          Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un sistema
+          de ventas predecible y escalable con tu conocimiento, que te trae clientes de forma
+          constante.
+        </p>
+        <p className="welcome-kicker">
+          La bola está en tu campo. Trabaja con obsesión todos los días hasta obtener resultados —
+          estás a pocas semanas de cambiar tu vida para siempre.
+        </p>
+        <form id="reservar" className="welcome-form" onSubmit={onSubmit}>
+          <label className="field">
+            <span className="field__label">¿Qué día arrancas?</span>
+            <span className="field__hint">
+              Tu día 1 es hoy y se actualiza solo. Las misiones corren de lunes a viernes.
+            </span>
+            <input
+              min={addDays(localTodayIso(), -30)}
+              onChange={(event) => onChangeStartDate(event.currentTarget.value)}
+              required
+              type="date"
+              value={startDate}
+            />
+          </label>
+          <button className="primary-button" disabled={starting || !startDate} type="submit">
+            {starting ? "Guardando…" : "Empezar mi camino"}
+          </button>
+        </form>
+      </div>
 
-      <section id="mapa" className="welcome-roadmap">
-        <p className="eyebrow">Tu mapa de 16 semanas</p>
-        <h2 className="welcome-roadmap__title">Las 16 semanas, día a día.</h2>
+      <section className="welcome-roadmap">
         <ProgramCalendar phases={program.phases} startDate={startDate} todayIso={localTodayIso()} />
       </section>
     </main>

@@ -251,19 +251,25 @@ function JourneyTimeline({
   const todayDay = schedule.dateToTask.get(todayIso)?.task.suggestedDay;
   return (
     <div className="jtl">
-      <div className="jtl__marker" style={{ left: `${pct}%` }}>
-        <span className="jtl__bubble">Hoy{todayDay ? ` · día ${todayDay}` : ""}</span>
-        <span className="jtl__pin" aria-hidden="true" />
+      <div className="jtl__line">
+        {phases.map((p, i) => (
+          <span className="jtl__seg" key={p.id} style={{ "--hue": HUES[i] } as CSSProperties} />
+        ))}
+        <span className="jtl__goal" aria-hidden="true" />
+        <span className="jtl__goal-lbl">Objetivo</span>
+        <div className="jtl__dot" style={{ left: `${pct}%` }}>
+          <span className="jtl__dot-lbl">Hoy{todayDay ? ` · día ${todayDay}` : ""}</span>
+        </div>
       </div>
-      <div className="jtl__track">
+      <div className="jtl__labels">
         {phases.map((p, i) => {
           const hero = p.milestones.find((m) => m.type === "hero");
           return (
-            <div className="jtl__seg" key={p.id} style={{ "--hue": HUES[i] } as CSSProperties}>
-              <span className="jtl__ph">Fase {p.id}</span>
-              <span className="jtl__nm">{p.name}</span>
+            <div className="jtl__label" key={p.id} style={{ "--hue": HUES[i] } as CSSProperties}>
+              <span className="jtl__l-ph">Fase {p.id}</span>
+              <span className="jtl__l-nm">{p.name}</span>
               {hero ? (
-                <span className="jtl__hr">
+                <span className="jtl__l-hr">
                   <TrophyIcon /> {hero.title}
                 </span>
               ) : null}

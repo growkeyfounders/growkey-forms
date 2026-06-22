@@ -1975,85 +1975,133 @@ a.secondary-button {
 }
 .rdmap2__legend strong { color: var(--text); }
 
-/* === Línea de tiempo = título del calendario, con punto "Hoy" que avanza === */
+/* === Línea de tiempo real: una línea con un punto "Hoy" que avanza === */
 .jtl {
   position: relative;
-  margin: 8px 0 22px;
-  padding-top: 34px;
+  margin: 16px 0 22px;
+  padding-top: 30px;
 }
-.jtl__track {
+.jtl__line {
+  position: relative;
   display: flex;
-  gap: 14px;
+  height: 8px;
+  border-radius: 999px;
 }
 .jtl__seg {
   flex: 1 1 0;
-  min-width: 0;
   background: var(--hue);
-  color: #fff;
-  border-radius: 13px;
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
 }
-.jtl__ph {
-  font-size: 9.5px;
+.jtl__seg:first-child {
+  border-radius: 999px 0 0 999px;
+}
+.jtl__seg:last-child {
+  border-radius: 0 999px 999px 0;
+}
+.jtl__seg + .jtl__seg {
+  box-shadow: inset 2px 0 0 #fff;
+}
+.jtl__goal {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--text, #141714);
+  z-index: 2;
+}
+.jtl__goal-lbl {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  right: 0;
+  transform: translateX(50%);
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.82;
-}
-.jtl__nm {
-  font-size: 17px;
-  font-weight: 800;
-  line-height: 1.1;
+  letter-spacing: 0.06em;
+  color: var(--text, #141714);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.jtl__hr {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-top: 2px;
-  font-size: 11.5px;
-  font-weight: 600;
-  opacity: 0.95;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.jtl__hr svg {
-  flex: 0 0 auto;
-}
-.jtl__marker {
+.jtl__dot {
   position: absolute;
-  top: 0;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-  pointer-events: none;
-  transition: left 0.4s ease;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  transition: left 0.45s ease;
 }
-.jtl__bubble {
+.jtl__dot::before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--text, #141714);
+  border: 4px solid #fff;
+  box-shadow: 0 0 0 2px rgba(20, 23, 20, 0.16), 0 3px 9px rgba(20, 23, 20, 0.32);
+}
+.jtl__dot-lbl {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text, #141714);
+  color: #fff;
   font-size: 11px;
   font-weight: 800;
-  color: #fff;
-  background: var(--text, #141714);
   padding: 3px 11px;
   border-radius: 999px;
   white-space: nowrap;
-  box-shadow: 0 3px 10px rgba(20, 23, 20, 0.22);
+  box-shadow: 0 3px 10px rgba(20, 23, 20, 0.24);
 }
-.jtl__pin {
-  width: 0;
-  height: 0;
+.jtl__dot-lbl::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--text, #141714);
+}
+.jtl__labels {
+  display: flex;
+  margin-top: 16px;
+}
+.jtl__label {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-right: 16px;
+}
+.jtl__l-ph {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--hue);
+}
+.jtl__l-nm {
+  display: block;
+  margin-top: 1px;
+  font-size: 15.5px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text, #141714);
+}
+.jtl__l-hr {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   margin-top: 3px;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid var(--text, #141714);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted, #746b68);
+}
+.jtl__l-hr svg {
+  flex: 0 0 auto;
+  color: var(--hue);
 }
 
 /* === Calendario del programa: las 4 fases a la vez, anclado a HOY === */

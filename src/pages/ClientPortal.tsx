@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import type { PhaseConfig } from "../../shared/program.mjs";
 import { addDays, currentWeek } from "../../shared/program.mjs";
 import logoUrl from "../assets/growkey-mascot.png";
@@ -381,12 +381,12 @@ function initialsOf(name: string) {
 
 const WEEK_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie"];
 
-// Paleta vibrante por fase para el riel de progreso de la vista diaria.
+// Paleta vibrante por fase (tarjetas glossy) para la vista diaria.
 const PHASE_HUES = [
-  { from: "#f0997b", to: "#e24b4a", label: "#993c1d" }, // F1 Oferta — coral/rojo
-  { from: "#97c459", to: "#639922", label: "#3b6d11" }, // F2 Ventas — lima/verde (marca)
-  { from: "#5dcaa5", to: "#1d9e75", label: "#0f6e56" }, // F3 Validar — teal/cyan
-  { from: "#85b7eb", to: "#378add", label: "#185fa5" }, // F4 Escalar — azul
+  { from: "#fb7185", to: "#ef4444", glow: "rgba(239,68,68,.5)", label: "#c0392f" }, // F1 Oferta — coral/rojo
+  { from: "#86d549", to: "#16a34a", glow: "rgba(22,163,74,.45)", label: "#3b6d11" }, // F2 Ventas — lima/verde (marca)
+  { from: "#2dd4bf", to: "#0891b2", glow: "rgba(8,145,178,.45)", label: "#0e7490" }, // F3 Validar — teal/cyan
+  { from: "#60a5fa", to: "#4f46e5", glow: "rgba(79,70,229,.45)", label: "#3858c7" }, // F4 Escalar — azul/índigo
 ] as const;
 
 const SHORT_PHASE: Record<number, string> = {
@@ -507,7 +507,6 @@ function DailyHome({
       {(() => {
         const phaseCount = program.phases.length;
         const curIdx = phase.id - 1;
-        const fillPct = phaseCount > 1 ? (curIdx / (phaseCount - 1)) * 100 : 0;
         const shortOf = (p: PhaseConfig) => SHORT_PHASE[p.id] ?? p.name.split(" ")[0];
         const stateOf = (i: number) => (i < curIdx ? "done" : i === curIdx ? "current" : "soon");
         const stateLbl = (i: number) =>
@@ -515,46 +514,34 @@ function DailyHome({
         return (
           <section className="grail" aria-label={`Fase ${phase.id} de ${phaseCount}: ${phase.name}`}>
             <div className="grail__head">
-              <div className="grail__id">
-                <span className="grail__eyebrow" style={{ color: PHASE_HUES[curIdx].label }}>
-                  Fase {phase.id} de {phaseCount}
-                </span>
-                <strong>{phase.name}</strong>
-              </div>
+              <span className="grail__eyebrow" style={{ color: PHASE_HUES[curIdx].label }}>
+                Fase {phase.id} de {phaseCount} · {phase.name}
+              </span>
               <span className="grail__pct">{progPct}%</span>
             </div>
 
-            <div className="grail__rail">
-              <div className="grail__track" />
-              <div className="grail__fill" style={{ width: `${fillPct}%` }} />
+            <ol className="grail__cards">
               {program.phases.map((p, i) => {
                 const state = stateOf(i);
                 const hue = PHASE_HUES[i] ?? PHASE_HUES[PHASE_HUES.length - 1];
-                const left = phaseCount > 1 ? (i / (phaseCount - 1)) * 100 : 0;
                 return (
-                  <span
+                  <li
                     key={p.id}
-                    className={`grail__node grail__node--${state}`}
+                    className={`gcard gcard--${state}`}
                     style={
-                      state === "soon"
-                        ? { left: `${left}%` }
-                        : { left: `${left}%`, background: `linear-gradient(150deg, ${hue.from}, ${hue.to})` }
+                      {
+                        "--from": hue.from,
+                        "--to": hue.to,
+                        "--glow": hue.glow,
+                      } as CSSProperties
                     }
                     aria-current={state === "current" ? "step" : undefined}
                   >
-                    {state === "done" ? <IconCheck size={14} /> : p.id}
-                  </span>
-                );
-              })}
-            </div>
-
-            <ol className="grail__labels">
-              {program.phases.map((p, i) => {
-                const state = stateOf(i);
-                return (
-                  <li key={p.id} className={`grail__lbl grail__lbl--${state}`}>
-                    <b style={state === "current" ? { color: "#4d7c0f" } : undefined}>{shortOf(p)}</b>
-                    <i>{stateLbl(i)}</i>
+                    <span className="gcard__badge">
+                      {state === "done" ? <IconCheck size={15} /> : p.id}
+                    </span>
+                    <strong className="gcard__name">{shortOf(p)}</strong>
+                    <span className="gcard__pill">{stateLbl(i)}</span>
                   </li>
                 );
               })}

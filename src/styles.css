@@ -5293,37 +5293,26 @@ a.secondary-button {
   color: #14180f;
 }
 
-/* ===== Riel de progreso vibrante "grail" — tope de la vista diaria ===== */
+/* ===== Tarjetas de fase vibrantes "grail" — tope de la vista diaria (estilo referente) ===== */
 .grail {
   margin-bottom: 18px;
 }
 .grail__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
 }
-.grail__id {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
 .grail__eyebrow {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-}
-.grail__id strong {
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #111310;
-  white-space: nowrap;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .grail__pct {
   flex: 0 0 auto;
@@ -5335,125 +5324,91 @@ a.secondary-button {
   border-radius: 999px;
   padding: 4px 11px;
 }
-.grail__rail {
-  position: relative;
-  height: 32px;
-  margin: 4px 6px 0;
-}
-.grail__track,
-.grail__fill {
-  position: absolute;
-  top: 50%;
-  height: 8px;
-  transform: translateY(-50%);
-  border-radius: 999px;
-}
-.grail__track {
-  left: 0;
-  right: 0;
-  background: #ececea;
-}
-.grail__fill {
-  left: 0;
-  background: linear-gradient(90deg, #e24b4a, #d4537e 34%, #639922 60%, #1d9e75 80%, #378add);
-  box-shadow: 0 1px 4px rgba(99, 153, 34, 0.22);
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.grail__node {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-weight: 800;
-  line-height: 1;
-  box-shadow: 0 0 0 4px #fff, 0 3px 9px rgba(20, 22, 18, 0.18);
-}
-.grail__node:first-of-type {
-  transform: translate(-2px, -50%);
-}
-.grail__node:last-of-type {
-  transform: translate(calc(-100% + 2px), -50%);
-}
-.grail__node--done {
-  width: 25px;
-  height: 25px;
-  color: #fff;
-}
-.grail__node--current {
-  width: 30px;
-  height: 30px;
-  font-size: 13px;
-  color: #fff;
-  outline: 2px solid #84cc16;
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px #fff, 0 4px 12px rgba(132, 204, 22, 0.4);
-}
-.grail__node--soon {
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
-  color: #888780;
-  background: #f1efe8;
-  box-shadow: 0 0 0 4px #fff;
-  border: 2px solid #d3d1c7;
-}
-.grail__labels {
+/* Fila de 4 tarjetas glossy */
+.grail__cards {
   list-style: none;
-  margin: 9px 2px 0;
+  margin: 0;
   padding: 0;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
-.grail__lbl {
-  flex: 1;
+.gcard {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  min-width: 0;
+  min-height: 110px;
+  padding: 13px 14px 12px;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(150deg, var(--from), var(--to));
+  box-shadow: 0 12px 24px -10px var(--glow), 0 1px 2px rgba(20, 22, 18, 0.12);
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-.grail__lbl:first-child {
-  text-align: left;
-  align-items: flex-start;
+.gcard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 85% at 100% 0%, rgba(255, 255, 255, 0.4), transparent 58%);
+  pointer-events: none;
 }
-.grail__lbl:last-child {
-  text-align: right;
-  align-items: flex-end;
-}
-.grail__lbl:not(:first-child):not(:last-child) {
-  text-align: center;
+.gcard__badge {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
   align-items: center;
-}
-.grail__lbl b {
-  font-size: 11px;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.26);
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
   font-weight: 800;
-  letter-spacing: -0.01em;
-  color: #b4b2a9;
+  font-size: 14px;
 }
-.grail__lbl i {
-  font-size: 8.5px;
+.gcard__name {
+  position: relative;
+  margin-top: 11px;
+  font-size: 16px;
   font-weight: 800;
-  font-style: normal;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+.gcard__pill {
+  position: relative;
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: 9.5px;
+  font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #c2c0b7;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  color: rgba(255, 255, 255, 0.95);
 }
-.grail__lbl--done b {
-  color: #6f6e67;
+/* Fase actual: elevada + anillo lima de marca */
+.gcard--current {
+  outline: 2.5px solid #84cc16;
+  outline-offset: 2px;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 30px -10px var(--glow), 0 0 0 4px rgba(132, 204, 22, 0.16);
 }
-.grail__lbl--done i {
-  color: #9a9a94;
+.gcard--current .gcard__pill {
+  background: #ffffff;
+  color: #14180f;
 }
-.grail__lbl--current i {
-  color: #4d7c0f;
+.gcard--soon {
+  opacity: 0.9;
 }
+/* Misión del día (piel verde de marca, mismo lenguaje que .daily-mission) */
 .grail__mission {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 15px;
+  margin-top: 16px;
   padding: 13px 14px;
   border-radius: 16px;
   background: radial-gradient(120% 120% at 100% 0%, rgba(163, 230, 53, 0.16), rgba(255, 255, 255, 0) 60%), #fbfbfa;
@@ -5490,9 +5445,8 @@ a.secondary-button {
   line-height: 1.2;
   color: #111310;
 }
-@media (max-width: 420px) {
-  .grail__id strong { font-size: 15.5px; }
-  .grail__rail { margin-left: 4px; margin-right: 4px; }
-  .grail__node--current { width: 28px; height: 28px; }
-  .grail__lbl b { font-size: 10px; }
+@media (max-width: 560px) {
+  .grail__cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }

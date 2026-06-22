@@ -582,8 +582,11 @@ function DailyHome({
           const state = t.done ? "done" : today ? "today" : (t.suggested_day ?? 0) < prog ? "miss" : "soon";
           return (
             <div className={`daily-day daily-day--${state}`} key={t.id}>
-              <span className="daily-day__dot">{t.done ? <IconCheck /> : null}</span>
-              <span className="daily-day__lbl">{WEEK_LABELS[i] ?? ""}</span>
+              <span className="daily-day__top">
+                <span className="daily-day__lbl">{WEEK_LABELS[i] ?? ""}</span>
+                <span className="daily-day__dot">{t.done ? <IconCheck size={12} /> : null}</span>
+              </span>
+              <span className="daily-day__mission">{missionOf(t)}</span>
             </div>
           );
         })}

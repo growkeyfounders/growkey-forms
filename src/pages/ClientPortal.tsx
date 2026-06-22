@@ -289,10 +289,6 @@ function Welcome({
       <section className="welcome-card">
         <div className="welcome-top">
           <div className="welcome-intro">
-            <p className="eyebrow">
-              Agentic Sales · Construye tu marca personal, crea un sistema de contenido, crea tu
-              oferta, arma un sistema de ventas, ten tus primeras ventas y escala tu oferta.
-            </p>
             <h1>Hola, {firstName(client.name)}.</h1>
             <p className="welcome-copy">
               Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un

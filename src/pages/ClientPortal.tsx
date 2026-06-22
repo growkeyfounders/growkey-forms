@@ -284,24 +284,25 @@ function Welcome({
   onChangeStartDate: (value: string) => void;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }) {
+  useEffect(() => {
+    // El hero premium del onboarding necesita la topbar como pill flotante glass:
+    // activamos el modificador solo mientras el Welcome está montado.
+    const shell = document.querySelector(".app-shell--client");
+    shell?.classList.add("app-shell--onboarding");
+    return () => shell?.classList.remove("app-shell--onboarding");
+  }, []);
+
   return (
     <main className="portal portal--welcome">
-      <section className="welcome-card">
-        <div className="welcome-top">
-          <div className="welcome-intro">
-            <h1>Hola, {firstName(client.name)}.</h1>
-            <p className="welcome-copy">
-              Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un
-              sistema de ventas predecible y escalable con tu conocimiento, que te trae clientes de
-              forma constante. Estos son los 4 pasos en los que trabajarás día a día para conseguirlo:
-              oferta, primeras ventas, validación y escala.
-            </p>
-            <p className="welcome-kicker">
-              La bola está en tu campo. Trabaja con obsesión todos los días hasta obtener
-              resultados — estás a pocas semanas de cambiar tu vida para siempre.
-            </p>
-          </div>
-          <form className="welcome-form" onSubmit={onSubmit}>
+      <section className="welcome-hero">
+        <div className="welcome-hero__content">
+          <span className="welcome-badge">Hola, {firstName(client.name)} · Agentic Sales</span>
+          <h1 className="welcome-headline">Tu conocimiento, convertido en un sistema que vende.</h1>
+          <p className="welcome-sub">
+            En 16 semanas construyes la marca, la oferta y el sistema de ventas que te traen
+            clientes de forma constante. Sereno, con método, paso a paso.
+          </p>
+          <form id="reservar" className="welcome-form" onSubmit={onSubmit}>
             <label className="field">
               <span className="field__label">¿Qué día arrancas?</span>
               <span className="field__hint">
@@ -319,7 +320,18 @@ function Welcome({
               {starting ? "Guardando…" : "Empezar mi camino"}
             </button>
           </form>
+          <a className="welcome-cta-ghost" href="#mapa">
+            Ver el mapa del programa ↓
+          </a>
         </div>
+        <a className="welcome-scroll" href="#mapa" aria-hidden="true">
+          Desliza para ver tu camino ↓
+        </a>
+      </section>
+
+      <section id="mapa" className="welcome-roadmap">
+        <p className="eyebrow">Tu mapa de 16 semanas</p>
+        <h2 className="welcome-roadmap__title">Las 16 semanas, día a día.</h2>
         <ProgramCalendar phases={program.phases} startDate={startDate} todayIso={localTodayIso()} />
       </section>
     </main>

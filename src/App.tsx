@@ -91,10 +91,16 @@ export function App() {
       <RequireRole role="client">
         <div className="app-shell app-shell--client">
           <header className="topbar">
-            <a className="brand" href="/app" aria-label="Mi camino">
-              <img src={logoUrl} alt="" />
-              <strong>Agentic Sales</strong>
-              <span>Mi camino</span>
+            <a className="brand" href="/app" aria-label="Agentic Sales">
+              <span className="as-logo" aria-hidden="true">
+                <span className="as-logo__a">Agentic</span>
+                <span className="as-logo__s">
+                  SALES
+                  <svg className="as-logo__spark" viewBox="0 0 24 24">
+                    <path d="M12 1.5 L14 10 L22.5 12 L14 14 L12 22.5 L10 14 L1.5 12 L10 10 Z" />
+                  </svg>
+                </span>
+              </span>
             </a>
             <div className="topbar-actions">
               <ViewSwitch current="client" />

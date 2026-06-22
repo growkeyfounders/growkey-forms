@@ -3917,9 +3917,10 @@ a.secondary-button {
   line-height: 1.2;
 }
 .daily__hi strong {
-  font-size: 17px;
+  font-size: 18px;
   font-weight: 800;
-  color: #1a1c18;
+  letter-spacing: -0.02em;
+  color: #111310;
 }
 .daily__hi span {
   font-size: 12.5px;
@@ -4048,9 +4049,10 @@ a.secondary-button {
 }
 .daily-mission__title {
   display: block;
-  font-size: 23px;
+  font-size: 24px;
   font-weight: 800;
-  line-height: 1.15;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
   color: #111310;
   margin-bottom: 15px;
 }
@@ -4147,6 +4149,7 @@ a.secondary-button {
 .daily-phase__top span {
   font-size: 14px;
   font-weight: 800;
+  letter-spacing: -0.01em;
   color: #1a1c18;
 }
 .daily-phase__top small {
@@ -4622,16 +4625,11 @@ a.secondary-button {
 }
 
 /* Logo Agentic Sales (recreado, nítido) — arriba a la izquierda */
-.app-shell--onboarding .as-logo {
-  position: absolute;
-  top: clamp(14px, 2.4vh, 22px);
-  left: clamp(16px, 3vw, 30px);
-  z-index: 40;
+/* Logo Agentic Sales (pastilla recreada) — base reutilizable (onboarding + daily) */
+.as-logo {
   display: inline-flex;
   align-items: stretch;
   height: 34px;
-  transform: scale(1.3);
-  transform-origin: top left;
   border-radius: 999px;
   background: #16190f;
   box-shadow:
@@ -4641,14 +4639,14 @@ a.secondary-button {
   font-weight: 800;
   letter-spacing: -0.01em;
 }
-.app-shell--onboarding .as-logo__a {
+.as-logo__a {
   display: flex;
   align-items: center;
   padding: 0 10px 0 15px;
   color: #ffffff;
   font-size: 14.5px;
 }
-.app-shell--onboarding .as-logo__s {
+.as-logo__s {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -4660,13 +4658,22 @@ a.secondary-button {
   font-size: 12.5px;
   letter-spacing: 0.04em;
 }
-.app-shell--onboarding .as-logo__spark {
+.as-logo__spark {
   width: 13px;
   height: 13px;
   flex: none;
 }
-.app-shell--onboarding .as-logo__spark path {
+.as-logo__spark path {
   fill: #84cc16;
+}
+/* Onboarding: flotante arriba-izquierda, 30% más grande */
+.app-shell--onboarding .as-logo {
+  position: absolute;
+  top: clamp(14px, 2.4vh, 22px);
+  left: clamp(16px, 3vw, 30px);
+  z-index: 40;
+  transform: scale(1.3);
+  transform-origin: top left;
 }
 .app-shell--onboarding .welcome-headline {
   margin: 0;

@@ -93,7 +93,7 @@ export function App() {
           <header className="topbar">
             <a className="brand" href="/app" aria-label="Mi camino">
               <img src={logoUrl} alt="" />
-              <strong>Growkey</strong>
+              <strong>Agentic Sales</strong>
               <span>Mi camino</span>
             </a>
             <div className="topbar-actions">

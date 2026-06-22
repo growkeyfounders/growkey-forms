@@ -304,13 +304,12 @@ function Welcome({
         </span>
       </span>
       <div className="welcome-hero__content">
-        <span className="welcome-badge">
-          <svg className="welcome-badge__spark" viewBox="0 0 24 24" aria-hidden="true">
+        <h1 className="welcome-headline">
+          <svg className="welcome-headline__spark" viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 1.5 L14 10 L22.5 12 L14 14 L12 22.5 L10 14 L1.5 12 L10 10 Z" />
           </svg>
-          Tu programa de 16 semanas
-        </span>
-        <h1 className="welcome-headline">Bienvenido, {firstName(client.name)}</h1>
+          Bienvenido, {firstName(client.name)}
+        </h1>
         <p className="welcome-sub">
           Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un sistema
           de ventas predecible y escalable con tu conocimiento, que te trae clientes de forma

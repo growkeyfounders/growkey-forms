@@ -4642,13 +4642,24 @@ a.secondary-button {
 }
 .app-shell--onboarding .welcome-headline {
   margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
   font-weight: 800;
   font-size: clamp(30px, 4.2vw, 50px);
   line-height: 1.02;
   letter-spacing: -0.04em;
   color: #111310;
-  max-width: 18ch;
+  max-width: 20ch;
   text-wrap: balance;
+}
+.app-shell--onboarding .welcome-headline__spark {
+  width: 0.82em;
+  height: 0.82em;
+  flex: none;
+}
+.app-shell--onboarding .welcome-headline__spark path {
+  fill: #84cc16;
 }
 .app-shell--onboarding .welcome-sub {
   margin: 0;

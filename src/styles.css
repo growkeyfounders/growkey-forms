@@ -4709,3 +4709,94 @@ a.secondary-button {
     transition: none;
   }
 }
+
+/* ===== 11. Roadmap en glassmorphism: el calendario sobre la foto (atenuada),
+   tarjetas de mes + timeline + modal en vidrio esmerilado, sin perder legibilidad ===== */
+.app-shell--onboarding .welcome-roadmap {
+  position: relative;
+  background:
+    linear-gradient(180deg, #0a0b0a 0%, rgba(9, 12, 8, 0.52) 13%, rgba(9, 12, 8, 0.54) 100%),
+    url(/hero-valley.jpg) center / cover;
+}
+.app-shell--onboarding .welcome-roadmap .welcome-roadmap__title {
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.55);
+}
+
+/* Tarjeta de mes -> vidrio esmerilado claro */
+.app-shell--onboarding .welcome-roadmap .pcal-month {
+  background: rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(26px) saturate(1.3);
+  -webkit-backdrop-filter: blur(26px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 24px 56px rgba(0, 0, 0, 0.44);
+}
+.app-shell--onboarding .welcome-roadmap .pcal-month__tag {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+/* Celdas -> chip translúcido con su color de fase, texto blanco legible */
+.app-shell--onboarding .welcome-roadmap .pcal-cell {
+  background: color-mix(in srgb, var(--hue) 30%, rgba(16, 19, 13, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.13);
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell--rest {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell--today {
+  background: color-mix(in srgb, var(--hue) 60%, rgba(16, 19, 13, 0.5));
+  border-color: rgba(255, 255, 255, 0.6);
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell--hero {
+  background: color-mix(in srgb, #f5b81f 50%, rgba(16, 19, 13, 0.5));
+  border-color: color-mix(in srgb, #f5b81f 62%, transparent);
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell__date {
+  color: #ffffff;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell__mission {
+  color: #eef2e6;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-wd {
+  color: #e7eadf;
+}
+
+/* Botón "Añadir al calendario" + hint -> pill de vidrio */
+.app-shell--onboarding .welcome-roadmap .pcal__ics {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: #ffffff;
+}
+.app-shell--onboarding .welcome-roadmap .pcal__ics:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+.app-shell--onboarding .welcome-roadmap .pcal__hint {
+  color: #dde4d4;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+}
+
+/* Línea de tiempo: etiquetas legibles sobre la foto */
+.app-shell--onboarding .welcome-roadmap .jtl__l-nm {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+.app-shell--onboarding .welcome-roadmap .jtl__l-hr,
+.app-shell--onboarding .welcome-roadmap .jtl__l-ph {
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+.app-shell--onboarding .welcome-roadmap .jtl__goal {
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.25);
+}
+
+/* Modal de día -> vidrio esmerilado oscuro */
+.app-shell--onboarding .welcome-roadmap .pcal-modal__card {
+  background: rgba(26, 30, 22, 0.6);
+  backdrop-filter: blur(32px) saturate(1.3);
+  -webkit-backdrop-filter: blur(32px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}

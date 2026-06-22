@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabase } from "../supabaseClient";
 import { useSession } from "../session";
-import { currentDoor } from "../door";
 import logoUrl from "../assets/growkey-mascot.png";
 
 const activationTokenHash = () =>
@@ -101,12 +100,14 @@ export function LoginPage() {
     if (loading || !session || mode === "set-password" || !me) return;
     const isAdmin = me.profile?.role === "admin";
     const hasCamino = Boolean(me.client);
-    const door = currentDoor();
-    // La puerta decide dónde aterrizas primero; el botón "cambiar vista" hace el resto.
+    // La PUERTA (URL) decide el panel; el MISMO correo sirve en ambas.
+    // Puerta de admin → panel admin. Puerta de usuario → panel de usuario
+    // (aunque el correo sea admin: NO lo bota ni le pide cerrar sesión).
+    const host = window.location.hostname;
+    const adminDoor = host.startsWith("admin") || host.startsWith("equipo");
     let dest: string;
-    if (door === "admin") dest = isAdmin ? "/admin" : hasCamino ? "/app" : "/admin";
-    else if (door === "client") dest = hasCamino ? "/app" : isAdmin ? "/admin" : "/app";
-    else dest = isAdmin ? "/admin" : "/app";
+    if (adminDoor) dest = isAdmin ? "/admin" : "/app";
+    else dest = hasCamino ? "/app" : isAdmin ? "/admin" : "/app";
     window.location.replace(dest);
   }, [loading, session, me, mode]);
 

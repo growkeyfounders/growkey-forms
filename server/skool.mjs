@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { db, sendEmail, supabaseRequest } from "./db.mjs";
 import { authenticate } from "./auth.mjs";
 import { evaluateAdvance } from "./engine.mjs";
@@ -13,16 +14,20 @@ async function logEvent(clientId, type, payload, actorId) {
   await db.insert("skool_events", { client_id: clientId, type, payload, actor_id: actorId ?? null }, "return=minimal");
 }
 
-// Arma el enlace de activación apuntando a NUESTRO dominio. Detrás de caddy el
-// host real llega en x-forwarded-*. El front canjea el token con verifyOtp y
-// muestra "Crea tu contraseña" — sin depender de email ni del redirect de Supabase.
-async function buildActivationLink(request, email) {
-  const link = await db.authGenerateLink(email, "recovery");
-  if (!link.ok || !link.data?.hashed_token) return null;
+// Arma el enlace de activación con un token PROPIO (no el de Supabase): se guarda
+// en user_metadata.setup_token, NO caduca por tiempo, y se borra al crear la
+// contraseña (POST /set-password) → el enlace deja de funcionar tras un solo uso.
+async function buildActivationLink(request, userId) {
+  const token = (randomUUID() + randomUUID()).replace(/-/g, "");
+  const current = await db.authGetUser(userId);
+  if (!current) return null;
+  const meta = { ...(current.user_metadata || {}), setup_token: token };
+  const ok = await db.authUpdateUser(userId, { user_metadata: meta });
+  if (!ok) return null;
   const proto = request.headers["x-forwarded-proto"] || "https";
   const host = request.headers["x-forwarded-host"] || request.headers["host"];
   if (!host) return null;
-  return `${proto}://${host}/activar?token_hash=${encodeURIComponent(link.data.hashed_token)}&type=recovery`;
+  return `${proto}://${host}/activar?uid=${userId}&setup=${token}`;
 }
 
 async function getClient(clientId) {
@@ -173,6 +178,26 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     return;
   }
 
+  // ===== PÚBLICO: crear contraseña con el token de activación (sin sesión) =====
+  // El token vive en user_metadata.setup_token (no caduca). Al usarlo se borra,
+  // así que el enlace deja de funcionar después de crear la contraseña.
+  if (path === "/set-password" && method === "POST") {
+    const uid = String(body.uid || "");
+    const setup = String(body.setup || "");
+    const password = String(body.password || "");
+    if (!/^[0-9a-fA-F-]{36}$/.test(uid) || !setup) { sendJson(response, 400, { error: "invalid_request" }); return; }
+    if (password.length < 8) { sendJson(response, 400, { error: "weak_password" }); return; }
+    const user = await db.authGetUser(uid);
+    if (!user) { sendJson(response, 404, { error: "not_found" }); return; }
+    const stored = user.user_metadata?.setup_token;
+    if (!stored || stored !== setup) { sendJson(response, 410, { error: "link_used" }); return; }
+    const meta = { ...(user.user_metadata || {}), setup_token: null };
+    const ok = await db.authUpdateUser(uid, { password, user_metadata: meta });
+    if (!ok) { sendJson(response, 502, { error: "save_failed" }); return; }
+    sendJson(response, 200, { ok: true, email: user.email });
+    return;
+  }
+
   const auth = await authenticate(request);
   if (!auth) { sendJson(response, 401, { error: "unauthorized" }); return; }
   const isAdmin = auth.role === "admin";
@@ -281,7 +306,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     await db.upsert("skool_thread_members", { client_id: userId, user_id: auth.userId });
     await logEvent(userId, "status_change", { to: "invited" }, auth.userId);
 
-    const activationLink = await buildActivationLink(request, email);
+    const activationLink = await buildActivationLink(request, userId);
     sendJson(response, 200, { ...(await getClient(userId)), activationLink });
     return;
   }
@@ -292,7 +317,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
     if (!isAdmin) { sendJson(response, 403, { error: "forbidden" }); return; }
     const client = await getClient(activationMatch[1]);
     if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
-    const activationLink = await buildActivationLink(request, client.email);
+    const activationLink = await buildActivationLink(request, client.id);
     if (!activationLink) { sendJson(response, 502, { error: "link_failed" }); return; }
     sendJson(response, 200, { activationLink });
     return;
@@ -427,7 +452,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       userId = existing.id;
     }
     await db.upsert("profiles", { user_id: userId, role: "admin", name });
-    const activationLink = await buildActivationLink(request, email);
+    const activationLink = await buildActivationLink(request, userId);
     sendJson(response, 200, { ok: true, activationLink });
     return;
   }

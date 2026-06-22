@@ -108,6 +108,22 @@ export const db = {
     const data = await response.json();
     return (data.users || []).find((user) => user.email === email) || null;
   },
+  // Lee un usuario de Auth por id (incluye user_metadata).
+  authGetUser: async (id) => {
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users/${id}`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    });
+    return response.ok ? await response.json() : null;
+  },
+  // Actualiza un usuario de Auth (password y/o user_metadata).
+  authUpdateUser: async (id, patch) => {
+    const response = await fetch(`${supabaseUrl}/auth/v1/admin/users/${id}`, {
+      method: "PUT",
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    return response.ok;
+  },
   // Lista usuarios de Auth (para mostrar emails del equipo). Base chica: per_page=200.
   authListUsers: async () => {
     const response = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=200`, {

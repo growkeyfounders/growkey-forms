@@ -887,6 +887,33 @@ textarea:focus {
   background: var(--border);
 }
 
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 72px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+
+.password-toggle:hover {
+  color: var(--ink, #111);
+}
+
 .link-button {
   background: none;
   border: none;

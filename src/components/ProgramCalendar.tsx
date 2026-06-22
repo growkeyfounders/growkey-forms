@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import { addDays } from "../../shared/program.mjs";
 import type { BaseTask, Milestone, PhaseConfig } from "../../shared/program.mjs";
 
@@ -91,16 +91,20 @@ function PhoneIcon() {
   );
 }
 
+type Selected = { task: BaseTask; date: string; phaseId: number; ms?: Milestone };
+
 function PhaseMonth({
   phase,
   hue,
   schedule,
   todayIso,
+  onSelect,
 }: {
   phase: PhaseConfig;
   hue: string;
   schedule: Schedule;
   todayIso: string;
+  onSelect: (sel: Selected) => void;
 }) {
   const days = phase.baseTasks.map((t) => t.suggestedDay).filter((d): d is number => d != null);
   const firstDate = schedule.dayToDate.get(days[0])!;
@@ -152,8 +156,26 @@ function PhaseMonth({
             ]
               .filter(Boolean)
               .join(" ");
+            const task = c.task;
             return (
-              <div className={cls} key={`${wi}-${c.date}`} title={c.task?.mission ?? undefined}>
+              <div
+                className={cls}
+                key={`${wi}-${c.date}`}
+                title={task?.mission ?? undefined}
+                role={task ? "button" : undefined}
+                tabIndex={task ? 0 : undefined}
+                onClick={task ? () => onSelect({ task, date: c.date, phaseId: phase.id, ms: c.ms }) : undefined}
+                onKeyDown={
+                  task
+                    ? (e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelect({ task, date: c.date, phaseId: phase.id, ms: c.ms });
+                        }
+                      }
+                    : undefined
+                }
+              >
                 <span className="pcal-cell__top">
                   <span className="pcal-cell__date">{domOf(c.date)}</span>
                   {c.isToday ? (
@@ -168,7 +190,7 @@ function PhaseMonth({
                     </span>
                   ) : null}
                 </span>
-                {c.task ? <span className="pcal-cell__mission">{c.task.mission}</span> : null}
+                {task ? <span className="pcal-cell__mission">{task.mission}</span> : null}
               </div>
             );
           }),
@@ -291,6 +313,7 @@ export function ProgramCalendar({
   todayIso: string;
 }) {
   const schedule = buildSchedule(phases, startDate);
+  const [selected, setSelected] = useState<Selected | null>(null);
 
   function downloadIcs() {
     const blob = new Blob([buildIcs(phases, schedule)], { type: "text/calendar;charset=utf-8" });
@@ -304,11 +327,17 @@ export function ProgramCalendar({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  const parts = selected ? selected.task.title.split(" → ") : [];
+  const deliverable = parts.length > 1 ? parts[parts.length - 1] : null;
+  const action = parts.length > 1 ? parts.slice(0, -1).join(" → ") : selected?.task.title;
+
   return (
     <div className="pcal">
       <JourneyTimeline phases={phases} schedule={schedule} todayIso={todayIso} />
       <div className="pcal__head">
-        <span className="pcal__hint">Tu camino completo · hoy es tu día 1 · misiones de lunes a viernes</span>
+        <span className="pcal__hint">
+          Tu camino completo · hoy es tu día 1 · misiones de lunes a viernes · toca un día para verlo completo
+        </span>
         <button type="button" className="pcal__ics" onClick={downloadIcs}>
           <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
             <path
@@ -321,9 +350,50 @@ export function ProgramCalendar({
       </div>
       <div className="pcal__row" role="group" aria-label="Las 4 fases del programa">
         {phases.map((phase, i) => (
-          <PhaseMonth key={phase.id} phase={phase} hue={HUES[i]} schedule={schedule} todayIso={todayIso} />
+          <PhaseMonth
+            key={phase.id}
+            phase={phase}
+            hue={HUES[i]}
+            schedule={schedule}
+            todayIso={todayIso}
+            onSelect={setSelected}
+          />
         ))}
       </div>
+
+      {selected ? (
+        <div className="pcal-modal" role="dialog" aria-modal="true" onClick={() => setSelected(null)}>
+          <div
+            className="pcal-modal__card"
+            style={{ "--hue": HUES[selected.phaseId - 1] } as CSSProperties}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="pcal-modal__close" type="button" aria-label="Cerrar" onClick={() => setSelected(null)}>
+              ×
+            </button>
+            <span className="pcal-modal__eyebrow">
+              Día {selected.task.suggestedDay} ·{" "}
+              {new Date(`${selected.date}T12:00:00Z`).toLocaleDateString("es-CO", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}{" "}
+              · Fase {selected.phaseId}
+            </span>
+            <strong className="pcal-modal__mission">
+              {selected.ms?.type === "hero" ? <TrophyIcon /> : selected.ms?.type === "call" ? <PhoneIcon /> : null}{" "}
+              {selected.task.mission}
+            </strong>
+            {action ? <p className="pcal-modal__action">{action}</p> : null}
+            {deliverable ? (
+              <div className="pcal-modal__deliver">
+                <span className="pcal-modal__deliver-tag">Entregable</span>
+                {deliverable}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

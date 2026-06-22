@@ -287,33 +287,35 @@ function Welcome({
   return (
     <main className="portal portal--welcome">
       <section className="welcome-card">
-        <p className="eyebrow">Agentic Sales · {program.goal}</p>
-        <h1>Hola, {firstName(client.name)}.</h1>
-        <p className="welcome-copy">
-          Vas a construir un sistema de ventas predecible con tu conocimiento, que te trae clientes de
-          forma constante. Lo armas en 4 pasos: oferta, primeras ventas, validación y escala. Elige tu
-          fecha y empezamos hoy.
-        </p>
+        <div className="welcome-top">
+          <div className="welcome-intro">
+            <p className="eyebrow">Agentic Sales · {program.goal}</p>
+            <h1>Hola, {firstName(client.name)}.</h1>
+            <p className="welcome-copy">
+              Vas a construir un sistema de ventas predecible con tu conocimiento, que te trae clientes
+              de forma constante. Lo armas en 4 pasos: oferta, primeras ventas, validación y escala.
+            </p>
+          </div>
+          <form className="welcome-form" onSubmit={onSubmit}>
+            <label className="field">
+              <span className="field__label">¿Qué día arrancas?</span>
+              <span className="field__hint">
+                Tu día 1 es hoy y se actualiza solo. Las misiones corren de lunes a viernes.
+              </span>
+              <input
+                min={addDays(localTodayIso(), -30)}
+                onChange={(event) => onChangeStartDate(event.currentTarget.value)}
+                required
+                type="date"
+                value={startDate}
+              />
+            </label>
+            <button className="primary-button" disabled={starting || !startDate} type="submit">
+              {starting ? "Guardando…" : "Empezar mi camino"}
+            </button>
+          </form>
+        </div>
         <ProgramCalendar phases={program.phases} startDate={startDate} todayIso={localTodayIso()} />
-        <form className="welcome-form" onSubmit={onSubmit}>
-          <label className="field">
-            <span className="field__label">¿Qué día arrancas?</span>
-            <span className="field__hint">
-              Tu día 1 es hoy: el calendario se ancla a tu fecha actual y se actualiza solo. Las
-              misiones corren de lunes a viernes. Cámbiala si quieres arrancar otro día.
-            </span>
-            <input
-              min={addDays(localTodayIso(), -30)}
-              onChange={(event) => onChangeStartDate(event.currentTarget.value)}
-              required
-              type="date"
-              value={startDate}
-            />
-          </label>
-          <button className="primary-button" disabled={starting || !startDate} type="submit">
-            {starting ? "Guardando…" : "Empezar mi camino"}
-          </button>
-        </form>
       </section>
     </main>
   );

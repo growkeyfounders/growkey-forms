@@ -4389,6 +4389,8 @@ a.secondary-button {
 }
 .app-shell--client .jtl__l-nm {
   color: #fff;
+  font-size: 16.5px;
+  -webkit-text-stroke: 0.25px #fff;
 }
 .app-shell--client .jtl__l-hr {
   color: #9aa094;
@@ -4443,23 +4445,24 @@ a.secondary-button {
   --dim: #8f968a;   /* terciario  ~6.0:1  AA  (era #6f746c ~3.9:1) */
 }
 
-/* Hero centrado: intro + formulario protagonista, todo al centro */
+/* Hero a dos columnas: texto a la izquierda + formulario al lado (todo en una pantalla) */
 .app-shell--client .welcome-top {
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 26px;
-  max-width: 760px;
-  margin: 0 auto;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(28px, 4vw, 64px);
+  max-width: 100%;
+  margin: 0;
 }
 .app-shell--client .welcome-intro {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 14px;
-  flex: none;
-  max-width: 680px;
+  align-items: flex-start;
+  text-align: left;
+  gap: 16px;
+  flex: 1 1 540px;
+  min-width: 0;
+  max-width: 780px;
 }
 .app-shell--client .welcome-intro > * {
   margin: 0;
@@ -4467,11 +4470,12 @@ a.secondary-button {
 
 /* H1 — display ExtraBold, más grande y contrastante, tracking del referente */
 .app-shell--client .welcome-card h1 {
-  font-size: clamp(36px, 5.6vw, 58px);
+  font-size: clamp(42px, 6.4vw, 72px);
   font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1.02;
+  letter-spacing: -0.045em;
+  line-height: 1;
   color: #ffffff;
+  -webkit-text-stroke: 0.6px #ffffff;
   text-wrap: balance;
 }
 
@@ -4512,12 +4516,14 @@ a.secondary-button {
 /* Línea de cierre motivacional — alto contraste + energía neón anclada (no caja) */
 .app-shell--client .welcome-kicker {
   font-size: clamp(16px, 1.4vw, 19px);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.015em;
   line-height: 1.42;
   color: #eef3e4;
-  max-width: 52ch;
-  text-align: center;
+  max-width: 56ch;
+  text-align: left;
+  padding-left: 16px;
+  border-left: 3px solid #b6f24a;
   text-shadow: 0 0 22px rgba(182, 242, 74, 0.16);
   text-wrap: balance;
 }
@@ -4530,19 +4536,19 @@ a.secondary-button {
 
 /* Tarjeta del formulario — protagonista: centrada, amplia, con glow neón */
 .app-shell--client .welcome-form {
-  flex: none;
-  align-self: center;
-  width: min(460px, 100%);
-  margin: 2px auto 0;
-  gap: 14px;
+  flex: 0 0 360px;
+  align-self: flex-start;
+  width: auto;
+  margin: 0;
+  gap: 13px;
   padding: 24px 26px 26px;
   background: #141612;
   border: 1px solid #38431f;
   border-radius: 18px;
   box-shadow:
     0 0 0 1px rgba(182, 242, 74, 0.05),
-    0 22px 60px rgba(0, 0, 0, 0.5),
-    0 0 48px rgba(182, 242, 74, 0.07);
+    0 18px 50px rgba(0, 0, 0, 0.45),
+    0 0 42px rgba(182, 242, 74, 0.07);
   text-align: center;
 }
 .app-shell--client .welcome-form:focus-within {
@@ -4553,10 +4559,11 @@ a.secondary-button {
     0 0 48px rgba(182, 242, 74, 0.1);
 }
 .app-shell--client .welcome-form .field__label {
-  font-size: 19px;
+  font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #fff;
+  -webkit-text-stroke: 0.3px #fff;
   margin-bottom: 2px;
 }
 .app-shell--client .welcome-form .field__hint {
@@ -4580,17 +4587,24 @@ a.secondary-button {
 
 /* Responsive móvil */
 @media (max-width: 720px) {
+  .app-shell--client .welcome-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 22px;
+  }
   .app-shell--client .welcome-card h1 {
-    font-size: clamp(32px, 9vw, 44px);
-    letter-spacing: -0.035em;
+    font-size: clamp(38px, 11vw, 52px);
+    letter-spacing: -0.04em;
   }
   .app-shell--client .welcome-kicker {
     font-size: clamp(15px, 4.4vw, 18px);
   }
-  .app-shell--client .welcome-top {
-    gap: 20px;
+  .app-shell--client .welcome-intro {
+    flex: 1 1 auto;
+    max-width: 100%;
   }
   .app-shell--client .welcome-form {
+    flex: 1 1 auto;
     width: 100%;
     padding: 22px 18px 22px;
   }

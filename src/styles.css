@@ -4451,9 +4451,14 @@ a.secondary-button {
   color: #aab1a2;
 }
 
-/* 1. Romper el padding del shell SOLO en onboarding (full-bleed) */
+/* 1. Onboarding en tema claro (gris + verde lima). Rompe el padding del shell. */
 .app-shell--client.app-shell--onboarding {
   padding: 0;
+  background: #ebebe9;
+  --text: #1a1c18;
+  --muted: #6b7066;
+  --dim: #9a9a94;
+  --border: #e2e2de;
 }
 .app-shell--onboarding .portal--welcome {
   position: relative;
@@ -4461,12 +4466,12 @@ a.secondary-button {
   max-width: none;
   width: 100%;
   min-height: 100svh;
-  padding: clamp(34px, 4vh, 48px) clamp(16px, 3.5vw, 40px) clamp(12px, 1.8vh, 24px);
+  padding: clamp(26px, 3.2vh, 38px) clamp(16px, 3.5vw, 40px) clamp(10px, 1.4vh, 20px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(9px, 1.4vh, 16px);
-  background: #cdb89a url(/hero-valley.jpg) center / cover no-repeat;
+  gap: clamp(8px, 1.2vh, 13px);
+  background: #ebebe9;
   isolation: isolate;
   overflow: hidden;
 }
@@ -4476,8 +4481,8 @@ a.secondary-button {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(120% 44% at 50% 7%, rgba(255, 253, 247, 0.5), transparent 42%),
-    linear-gradient(180deg, transparent 30%, rgba(8, 11, 7, 0.3) 56%, rgba(8, 11, 7, 0.5) 100%);
+    radial-gradient(110% 70% at 50% -12%, #f5f5f3, transparent 58%),
+    radial-gradient(80% 50% at 50% 0%, rgba(163, 230, 53, 0.07), transparent 60%);
 }
 
 /* 2. Nav minimal: solo un botón pequeño "Cerrar sesión" arriba a la derecha */
@@ -4506,18 +4511,17 @@ a.secondary-button {
 }
 .app-shell--onboarding .ghost-button {
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(14px) saturate(1.3);
-  -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  color: #1a1f17;
-  padding: 7px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e2de;
+  color: #1a1c18;
+  padding: 8px 16px;
   font-size: 13px;
   font-weight: 700;
+  box-shadow: 0 2px 8px rgba(20, 22, 18, 0.05);
 }
 .app-shell--onboarding .ghost-button:hover {
-  background: rgba(255, 255, 255, 0.72);
-  color: #1a1f17;
+  background: #f4f4f1;
+  color: #1a1c18;
 }
 
 /* 3. Hero full-bleed con la foto + capas de legibilidad */
@@ -4563,17 +4567,70 @@ a.secondary-button {
 .app-shell--onboarding .welcome-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 16px;
+  gap: 7px;
+  padding: 6px 15px 6px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.58);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: #ffffff;
+  border: 1px solid #e4e4e0;
   font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #1a1f17;
+  letter-spacing: 0.01em;
+  color: #2c302a;
+  box-shadow: 0 2px 8px rgba(20, 22, 18, 0.05);
+}
+.app-shell--onboarding .welcome-badge__spark {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.app-shell--onboarding .welcome-badge__spark path {
+  fill: #84cc16;
+}
+
+/* Logo Agentic Sales (recreado, nítido) — arriba a la izquierda */
+.app-shell--onboarding .as-logo {
+  position: absolute;
+  top: clamp(14px, 2.4vh, 22px);
+  left: clamp(16px, 3vw, 30px);
+  z-index: 40;
+  display: inline-flex;
+  align-items: stretch;
+  height: 34px;
+  border-radius: 999px;
+  background: #16190f;
+  box-shadow:
+    0 0 16px rgba(163, 230, 53, 0.5),
+    0 0 0 1px rgba(163, 230, 53, 0.32),
+    0 5px 16px rgba(20, 22, 18, 0.14);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.app-shell--onboarding .as-logo__a {
+  display: flex;
+  align-items: center;
+  padding: 0 10px 0 15px;
+  color: #ffffff;
+  font-size: 14.5px;
+}
+.app-shell--onboarding .as-logo__s {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 3px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #14180f;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+}
+.app-shell--onboarding .as-logo__spark {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+.app-shell--onboarding .as-logo__spark path {
+  fill: #84cc16;
 }
 .app-shell--onboarding .welcome-headline {
   margin: 0;
@@ -4581,32 +4638,29 @@ a.secondary-button {
   font-size: clamp(30px, 4.2vw, 50px);
   line-height: 1.02;
   letter-spacing: -0.04em;
-  color: #14180f;
+  color: #111310;
   max-width: 18ch;
   text-wrap: balance;
-  text-shadow: 0 1px 30px rgba(255, 252, 244, 0.75), 0 1px 2px rgba(255, 250, 240, 0.9);
 }
 .app-shell--onboarding .welcome-sub {
   margin: 0;
   font-size: clamp(13.5px, 1.05vw, 15.5px);
   font-weight: 500;
   line-height: 1.5;
-  color: #232a1c;
+  color: #5e635a;
   max-width: 60ch;
-  text-shadow: 0 1px 16px rgba(255, 252, 244, 0.85);
 }
 .app-shell--onboarding .welcome-sub b {
   font-weight: 800;
-  color: #14180f;
+  color: #4d7c0f;
 }
 .app-shell--onboarding .welcome-kicker {
   margin: 0;
   font-size: clamp(13px, 1vw, 15px);
   font-weight: 700;
   line-height: 1.4;
-  color: #1a1f17;
+  color: #2c302a;
   max-width: 56ch;
-  text-shadow: 0 1px 14px rgba(255, 252, 244, 0.8);
 }
 
 /* 5. Form como action-bar glass clara (mismo form, restyle) */
@@ -4619,11 +4673,9 @@ a.secondary-button {
   margin: 0;
   padding: 14px 16px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.64);
-  backdrop-filter: blur(18px) saturate(1.3);
-  -webkit-backdrop-filter: blur(18px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  box-shadow: 0 14px 44px rgba(40, 40, 30, 0.18);
+  background: #ffffff;
+  border: 1px solid #e6e6e2;
+  box-shadow: 0 12px 34px rgba(20, 22, 18, 0.08);
   text-align: left;
 }
 .app-shell--onboarding .welcome-form .field {
@@ -4647,10 +4699,10 @@ a.secondary-button {
 }
 .app-shell--onboarding .welcome-form input[type="date"] {
   color-scheme: light;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(40, 40, 30, 0.18);
+  background: #f6f6f4;
+  border: 1px solid #e3e3df;
   border-radius: 12px;
-  color: #1a1f17;
+  color: #1a1c18;
   height: 46px;
   padding: 0 12px;
   font-size: 15px;
@@ -4745,8 +4797,7 @@ a.secondary-button {
   }
 }
 
-/* ===== 11. Roadmap en glassmorphism: el calendario sobre la foto (atenuada),
-   tarjetas de mes + timeline + modal en vidrio esmerilado, sin perder legibilidad ===== */
+/* ===== 11. Roadmap en tema CLARO (gris + acentos verde lima) ===== */
 .app-shell--onboarding .welcome-roadmap {
   position: relative;
   width: 100%;
@@ -4756,95 +4807,141 @@ a.secondary-button {
   padding: 0;
 }
 
-/* Tarjeta de mes -> vidrio esmerilado claro */
+/* Tarjeta de mes -> blanca, suave, redondeada */
 .app-shell--onboarding .welcome-roadmap .pcal-month {
-  background: rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(26px) saturate(1.3);
-  -webkit-backdrop-filter: blur(26px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 22px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    0 24px 56px rgba(0, 0, 0, 0.44);
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #e7e7e3;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(20, 22, 18, 0.06);
 }
 .app-shell--onboarding .welcome-roadmap .pcal-month__tag {
-  background: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: var(--hue);
+  border: none;
+  color: #ffffff;
 }
 
-/* Celdas -> chip translúcido con su color de fase, texto blanco legible */
+/* Celdas -> tinte claro del color de fase, texto oscuro legible */
 .app-shell--onboarding .welcome-roadmap .pcal-cell {
-  background: color-mix(in srgb, var(--hue) 30%, rgba(16, 19, 13, 0.6));
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: color-mix(in srgb, var(--hue) 9%, #ffffff);
+  border: 1px solid color-mix(in srgb, var(--hue) 16%, #ffffff);
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell--rest {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.07);
+  background: #f5f5f3;
+  border-color: #ededeb;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell--rest .pcal-cell__date {
+  color: #b6b6b0;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell--today {
-  background: color-mix(in srgb, var(--hue) 60%, rgba(16, 19, 13, 0.5));
-  border-color: rgba(255, 255, 255, 0.6);
+  background: color-mix(in srgb, #a3e635 26%, #ffffff);
+  border: 1.5px solid #84cc16;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell--hero {
-  background: color-mix(in srgb, #f5b81f 50%, rgba(16, 19, 13, 0.5));
-  border-color: color-mix(in srgb, #f5b81f 62%, transparent);
+  background: color-mix(in srgb, #f5b81f 20%, #ffffff);
+  border-color: color-mix(in srgb, #f5b81f 46%, #ffffff);
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell__date {
-  color: #ffffff;
+  color: #1a1c18;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell__mission {
-  color: #eef2e6;
+  color: #5a5f56;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell__hoy {
+  background: #84cc16;
+  color: #14180f;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-wd {
-  color: #e7eadf;
+  color: #a3a39d;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-cell[role="button"]:hover {
+  box-shadow: 0 6px 16px rgba(20, 22, 18, 0.12);
 }
 
-/* Botón "Añadir al calendario" + hint -> pill de vidrio */
+/* Botón "Añadir al calendario" + hint -> claro */
 .app-shell--onboarding .welcome-roadmap .pcal__ics {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(16px) saturate(1.3);
-  -webkit-backdrop-filter: blur(16px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  color: #ffffff;
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #e2e2de;
+  color: #1a1c18;
 }
 .app-shell--onboarding .welcome-roadmap .pcal__ics:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: #f4f4f1;
 }
 .app-shell--onboarding .welcome-roadmap .pcal__hint {
-  color: #dde4d4;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45);
+  color: #8c8c86;
+  text-shadow: none;
 }
 
-/* Línea de tiempo: etiquetas legibles sobre la foto */
+/* Línea de tiempo en claro, con punto "Hoy" verde lima */
 .app-shell--onboarding .welcome-roadmap .jtl__l-nm {
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+  color: #16180f;
+  text-shadow: none;
 }
-.app-shell--onboarding .welcome-roadmap .jtl__l-hr,
+.app-shell--onboarding .welcome-roadmap .jtl__l-hr {
+  color: #8c8c86;
+  text-shadow: none;
+}
 .app-shell--onboarding .welcome-roadmap .jtl__l-ph {
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+  text-shadow: none;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__seg + .jtl__seg {
+  box-shadow: inset 2px 0 0 #ececea;
 }
 .app-shell--onboarding .welcome-roadmap .jtl__goal {
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.25);
+  background: #ffffff;
+  border: 2px solid #1a1c18;
+  box-shadow: 0 0 0 4px #ececea;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__goal-lbl {
+  color: #1a1c18;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot::before {
+  background: #a3e635;
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(163, 230, 53, 0.35), 0 0 12px rgba(163, 230, 53, 0.6);
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot-lbl {
+  background: #1a1c18;
+  color: #c8f573;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot-lbl::after {
+  border-top-color: #1a1c18;
 }
 
-/* Modal de día -> vidrio esmerilado oscuro */
+/* Modal de día -> claro */
 .app-shell--onboarding .welcome-roadmap .pcal-modal__card {
-  background: rgba(26, 30, 22, 0.6);
-  backdrop-filter: blur(32px) saturate(1.3);
-  -webkit-backdrop-filter: blur(32px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #ffffff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid #e7e7e3;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-modal__action {
+  color: #5a5f56;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-modal__close {
+  color: #8c8c86;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-modal__deliver {
+  background: color-mix(in srgb, var(--hue) 10%, #ffffff);
+  color: #1a1c18;
+}
+.app-shell--onboarding .welcome-roadmap .pcal-modal__eyebrow {
+  color: var(--hue);
 }
 
 /* ===== 12. Onboarding compacto: todo en una pantalla (calendario justo bajo el form) ===== */
 .app-shell--onboarding .welcome-roadmap .jtl {
-  margin: 6px 0 10px;
-  padding-top: 26px;
+  margin: 4px 0 7px;
+  padding-top: 24px;
 }
 .app-shell--onboarding .welcome-roadmap .jtl__labels {
-  margin-top: 9px;
+  margin-top: 8px;
 }
 .app-shell--onboarding .welcome-roadmap .pcal__head {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-month__head {
   padding: 7px 12px;
@@ -4856,10 +4953,10 @@ a.secondary-button {
   gap: 5px;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell {
-  min-height: 46px;
-  padding: 4px 6px 5px;
+  min-height: 40px;
+  padding: 3px 6px 4px;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell__mission {
-  font-size: 9.5px;
-  line-height: 1.18;
+  font-size: 9px;
+  line-height: 1.12;
 }

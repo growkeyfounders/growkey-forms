@@ -10,7 +10,7 @@ export const PROGRAM = {
   "phases": [
     {
       "id": 1,
-      "name": "Oferta y Sistema de contenido",
+      "name": "Oferta y Contenido",
       "headline": "Defines tu nicho, tu oferta espejo y montas tu sistema de contenido",
       "startDay": 0,
       "endDay": 28,

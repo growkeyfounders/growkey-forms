@@ -287,12 +287,12 @@ function keyCalls(phase: PhaseConfig): Array<{ label: string; day: number }> {
 }
 
 // Línea de tiempo del programa: de "hoy" a las 4 fases y al objetivo.
-function RoadmapTimeline({ phases, totalDays }: { phases: PhaseConfig[]; totalDays: number }) {
+function RoadmapTimeline({ phases }: { phases: PhaseConfig[] }) {
   return (
     <div className="roadmap">
       <div className="roadmap__ends">
         <span>Empiezas hoy</span>
-        <span>Día {totalDays} · objetivo</span>
+        <span>Tu objetivo</span>
       </div>
       <div className="roadmap__bar">
         {phases.map((phase, index) => (
@@ -319,8 +319,8 @@ function RoadmapTimeline({ phases, totalDays }: { phases: PhaseConfig[]; totalDa
         ))}
       </div>
       <div className="roadmap__goal">
-        <strong>Objetivo a los {totalDays} días</strong>
-        <span>Oferta validada, primeras ventas y tu sistema corriendo para escalar.</span>
+        <strong>Tu objetivo</strong>
+        <span>Un sistema de ventas probado y predecible que te trae clientes de forma constante.</span>
       </div>
     </div>
   );
@@ -347,10 +347,11 @@ function Welcome({
         <p className="eyebrow">Agentic Sales · {program.goal}</p>
         <h1>Hola, {firstName(client.name)}.</h1>
         <p className="welcome-copy">
-          Este es tu camino: {program.totalDays} días en {program.phases.length} fases, de tu oferta a
-          tus primeras ventas y a escalar. Mira el mapa, elige tu fecha de inicio y arrancamos.
+          Este es tu camino para construir un sistema de ventas probado y predecible. En {program.phases.length} fases
+          pasas de tu oferta a tus primeras ventas, las validas con clientes reales y escalas. Elige tu
+          fecha de inicio y arrancamos hoy.
         </p>
-        <RoadmapTimeline phases={program.phases} totalDays={program.totalDays} />
+        <RoadmapTimeline phases={program.phases} />
         <form className="welcome-form" onSubmit={onSubmit}>
           <label className="field">
             <span className="field__label">¿Cuándo empieza tu camino?</span>

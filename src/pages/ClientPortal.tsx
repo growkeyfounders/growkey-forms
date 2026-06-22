@@ -286,36 +286,54 @@ function keyCalls(phase: PhaseConfig): Array<{ label: string; day: number }> {
     });
 }
 
-// Línea de tiempo del programa: de "hoy" a las 4 fases y al objetivo.
+function PhoneIcon() {
+  return (
+    <svg className="rdmap-call__ic" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.3 1l-2.2 2.2z"
+      />
+    </svg>
+  );
+}
+
+// Línea de tiempo premium: barra con degradado + nodos por fase, y tarjetas
+// con el logro de cada fase, sus días y las llamadas clave.
 function RoadmapTimeline({ phases }: { phases: PhaseConfig[] }) {
   return (
-    <div className="roadmap">
-      <div className="roadmap__ends">
-        <span>Empiezas hoy</span>
-        <span>Tu objetivo</span>
+    <div className="rdmap">
+      <div className="rdmap__head">
+        <span className="rdmap__cap">
+          <span className="rdmap__cap-dot rdmap__cap-dot--start" aria-hidden="true" /> Hoy
+        </span>
+        <span className="rdmap__cap">
+          Objetivo <span className="rdmap__cap-dot rdmap__cap-dot--goal" aria-hidden="true" />
+        </span>
       </div>
-      <div className="roadmap__bar">
+      <div className="rdmap__track">
         {phases.map((phase, index) => (
-          <div className={`roadmap__seg roadmap__seg--${index + 1}`} key={phase.id} />
+          <span className={`rdmap__node rdmap__node--${index + 1}`} key={phase.id} aria-hidden="true" />
         ))}
       </div>
-      <div className="roadmap__cards">
+      <div className="rdmap__cards">
         {phases.map((phase, index) => (
-          <div className={`roadmap-card roadmap-card--${index + 1}`} key={phase.id}>
-            <div className="roadmap-card__head">
-              <span className="roadmap-card__num">{phase.id}</span>
-              <strong>{phase.name}</strong>
+          <article className={`rdmap-card rdmap-card--${index + 1}`} key={phase.id}>
+            <div className="rdmap-card__top">
+              <span className="rdmap-card__num">{phase.id}</span>
+              <span className="rdmap-card__days">Días {phase.startDay}–{phase.endDay}</span>
             </div>
-            <p className="roadmap-card__desc">{phase.headline}</p>
-            <div className="roadmap-card__days">Días {phase.startDay}–{phase.endDay}</div>
-            <div className="roadmap-card__calls">
-              {keyCalls(phase).map((call) => (
-                <span className="roadmap-call" key={call.day}>
-                  <span className="roadmap-call__dot" aria-hidden="true" /> {call.label} · día {call.day}
-                </span>
-              ))}
-            </div>
-          </div>
+            <strong className="rdmap-card__title">{phase.name}</strong>
+            <p className="rdmap-card__desc">{phase.headline}</p>
+            {keyCalls(phase).length ? (
+              <ul className="rdmap-card__calls">
+                {keyCalls(phase).map((call) => (
+                  <li key={call.day}>
+                    <PhoneIcon /> {call.label} · día {call.day}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
         ))}
       </div>
     </div>

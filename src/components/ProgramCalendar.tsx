@@ -8,7 +8,9 @@ import type { BaseTask, Milestone, PhaseConfig } from "../../shared/program.mjs"
 // actual del cliente.
 
 const HUES = ["#2f6df6", "#10b981", "#f59e0b", "#ef4444"];
-const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
+// Solo días hábiles (el programa corre lunes a viernes); sin fines de semana
+// las celdas quedan más anchas y el texto se lee mejor.
+const WEEKDAYS = ["lun", "mar", "mié", "jue", "vie"];
 const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
 function dow(iso: string) {
@@ -162,8 +164,8 @@ function PhaseMonth({
   const weeks: Array<Array<{ date: string; task?: BaseTask; ms?: Milestone; isToday: boolean }>> = [];
   for (let wk = sundayOnOrBefore(firstDate); wk <= lastDate; wk = addDays(wk, 7)) {
     weeks.push(
-      Array.from({ length: 7 }, (_, off) => {
-        const date = addDays(wk, off);
+      Array.from({ length: 5 }, (_, k) => {
+        const date = addDays(wk, k + 1); // k+1 = lunes a viernes (saltamos domingo)
         const entry = schedule.dateToTask.get(date);
         const mine = entry && entry.phaseId === phase.id ? entry.task : undefined;
         return {

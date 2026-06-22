@@ -4483,14 +4483,6 @@ a.secondary-button {
   -webkit-backdrop-filter: blur(12px) saturate(1.2);
   border-bottom: 1px solid #e2e2de;
 }
-.app-shell--daily .brand,
-.app-shell--daily .brand strong {
-  color: #1a1c18;
-}
-.app-shell--daily .brand span {
-  color: #6b7066;
-  border-color: #d6d6d0;
-}
 .app-shell--daily .ghost-button {
   color: #5e635a;
 }
@@ -5252,4 +5244,20 @@ a.secondary-button {
   color: #16190f;
   border: 1.5px solid #ebebe9;
   box-shadow: 0 1px 3px rgba(20, 22, 18, 0.18);
+}
+
+/* Logo en el topbar de la diaria: glow más sutil que el flotante del onboarding */
+.app-shell--daily .as-logo {
+  box-shadow:
+    0 0 10px rgba(163, 230, 53, 0.32),
+    0 0 0 1px rgba(163, 230, 53, 0.26),
+    0 3px 10px rgba(20, 22, 18, 0.12);
+}
+
+/* El logo (spans) no debe heredar el gris del topbar oscuro: forzar sus colores */
+.app-shell--daily .brand .as-logo__a {
+  color: #ffffff;
+}
+.app-shell--daily .brand .as-logo__s {
+  color: #14180f;
 }

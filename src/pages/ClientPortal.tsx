@@ -18,14 +18,6 @@ function localTodayIso() {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
 }
 
-// El programa corre de lunes a viernes, así que el "día 0" ideal es un domingo
-// (día 1 = lunes = primera misión). Por defecto sugerimos el próximo domingo.
-function nextSundayIso() {
-  const base = localTodayIso();
-  const dow = new Date(`${base}T12:00:00Z`).getUTCDay();
-  return addDays(base, dow === 0 ? 0 : 7 - dow);
-}
-
 function firstName(name: string) {
   return name.trim().split(/\s+/)[0] || name;
 }
@@ -47,7 +39,7 @@ export function ClientPortal() {
   const toastTimer = useRef<number | null>(null);
   const celebrationButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const [startDate, setStartDate] = useState(nextSundayIso);
+  const [startDate, setStartDate] = useState(localTodayIso);
   const [starting, setStarting] = useState(false);
 
   const load = useCallback(async () => {
@@ -307,8 +299,8 @@ function Welcome({
           <label className="field">
             <span className="field__label">¿Qué día arrancas?</span>
             <span className="field__hint">
-              Tu calendario corre de lunes a viernes. Por defecto es el próximo domingo (tu día 0);
-              el lunes arranca tu primera misión. Cámbiala si ya empezaste con el equipo.
+              Tu día 1 es hoy: el calendario se ancla a tu fecha actual y se actualiza solo. Las
+              misiones corren de lunes a viernes. Cámbiala si quieres arrancar otro día.
             </span>
             <input
               min={addDays(localTodayIso(), -30)}

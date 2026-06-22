@@ -26,7 +26,7 @@ export const PROGRAM = {
           "type": "hero"
         },
         {
-          "day": 20,
+          "day": 18,
           "title": "Llamada 2 — Weekly 1",
           "type": "call"
         }

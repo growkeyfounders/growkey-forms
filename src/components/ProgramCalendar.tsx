@@ -1,21 +1,72 @@
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { addDays } from "../../shared/program.mjs";
 import type { BaseTask, Milestone, PhaseConfig } from "../../shared/program.mjs";
 
 // Calendario literal del programa: cada fase es un "mes" con su encabezado
-// grande, y los 4 van uno tras otro de izquierda a derecha. Cada día muestra
-// su misión y su fecha real (calculada desde la fecha de inicio del cliente).
+// grande. Se ancla a HOY como día 1 y agenda las misiones en días hábiles
+// (lunes a viernes), así que siempre refleja la fecha actual del cliente.
 
 const HUES = ["#2f6df6", "#10b981", "#f59e0b", "#ef4444"];
 const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
-const MONTHS = [
-  "ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic",
-];
+const MONTHS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
 
-function dom(iso: string) {
+function dow(iso: string) {
+  return new Date(`${iso}T12:00:00Z`).getUTCDay();
+}
+function isWeekend(iso: string) {
+  const d = dow(iso);
+  return d === 0 || d === 6;
+}
+function weekdayOnOrAfter(iso: string) {
+  let d = iso;
+  while (isWeekend(d)) d = addDays(d, 1);
+  return d;
+}
+function nextWeekday(iso: string) {
+  let d = addDays(iso, 1);
+  while (isWeekend(d)) d = addDays(d, 1);
+  return d;
+}
+function sundayOnOrBefore(iso: string) {
+  let d = iso;
+  while (dow(d) !== 0) d = addDays(d, -1);
+  return d;
+}
+function domOf(iso: string) {
   return Number(iso.slice(8, 10));
 }
 function monthOf(iso: string) {
   return MONTHS[Number(iso.slice(5, 7)) - 1];
+}
+
+type Schedule = {
+  dayToDate: Map<number, string>;
+  dateToTask: Map<string, { task: BaseTask; phaseId: number }>;
+  dateToMs: Map<string, Milestone>;
+};
+
+function buildSchedule(phases: PhaseConfig[], anchorIso: string): Schedule {
+  const dayToDate = new Map<number, string>();
+  const dateToTask = new Map<string, { task: BaseTask; phaseId: number }>();
+  const dateToMs = new Map<string, Milestone>();
+  let cur = weekdayOnOrAfter(anchorIso);
+  let first = true;
+  for (const phase of phases) {
+    for (const t of phase.baseTasks) {
+      if (t.suggestedDay == null) continue;
+      if (!first) cur = nextWeekday(cur);
+      first = false;
+      dayToDate.set(t.suggestedDay, cur);
+      dateToTask.set(cur, { task: t, phaseId: phase.id });
+    }
+  }
+  for (const phase of phases) {
+    for (const m of phase.milestones) {
+      const d = dayToDate.get(m.day);
+      if (d) dateToMs.set(d, m);
+    }
+  }
+  return { dayToDate, dateToTask, dateToMs };
 }
 
 function TrophyIcon() {
@@ -42,34 +93,35 @@ function PhoneIcon() {
 function PhaseMonth({
   phase,
   hue,
-  startDate,
+  schedule,
   todayIso,
 }: {
   phase: PhaseConfig;
   hue: string;
-  startDate: string;
-  todayIso?: string;
+  schedule: Schedule;
+  todayIso: string;
 }) {
-  const weeks = Math.round((phase.endDay - phase.startDay) / 7);
-  const taskByDay = new Map<number, BaseTask>();
-  for (const t of phase.baseTasks) if (t.suggestedDay != null) taskByDay.set(t.suggestedDay, t);
-  const msByDay = new Map<number, Milestone>();
-  for (const m of phase.milestones ?? []) msByDay.set(m.day, m);
+  const days = phase.baseTasks.map((t) => t.suggestedDay).filter((d): d is number => d != null);
+  const firstDate = schedule.dayToDate.get(days[0])!;
+  const lastDate = schedule.dayToDate.get(days[days.length - 1])!;
+  const span = monthOf(firstDate) === monthOf(lastDate) ? monthOf(firstDate) : `${monthOf(firstDate)}–${monthOf(lastDate)}`;
 
-  const firstIso = addDays(startDate, phase.startDay);
-  const lastIso = addDays(startDate, phase.endDay - 1);
-  const span =
-    monthOf(firstIso) === monthOf(lastIso)
-      ? monthOf(firstIso)
-      : `${monthOf(firstIso)}–${monthOf(lastIso)}`;
-
-  const rows = Array.from({ length: weeks }, (_, w) =>
-    Array.from({ length: 7 }, (_, off) => {
-      const day = phase.startDay + w * 7 + off;
-      const iso = addDays(startDate, day);
-      return { day, iso, task: taskByDay.get(day), ms: msByDay.get(day), isToday: iso === todayIso };
-    }),
-  );
+  const weeks: Array<Array<{ date: string; task?: BaseTask; ms?: Milestone; isToday: boolean }>> = [];
+  for (let wk = sundayOnOrBefore(firstDate); wk <= lastDate; wk = addDays(wk, 7)) {
+    weeks.push(
+      Array.from({ length: 7 }, (_, off) => {
+        const date = addDays(wk, off);
+        const entry = schedule.dateToTask.get(date);
+        const mine = entry && entry.phaseId === phase.id ? entry.task : undefined;
+        return {
+          date,
+          task: mine,
+          ms: mine ? schedule.dateToMs.get(date) : undefined,
+          isToday: date === todayIso,
+        };
+      }),
+    );
+  }
 
   return (
     <div className="pcal-month" style={{ "--hue": hue } as React.CSSProperties}>
@@ -80,7 +132,7 @@ function PhaseMonth({
         </div>
         <strong className="pcal-month__name">{phase.name}</strong>
         <span className="pcal-month__sub">
-          {weeks} semanas · {phase.baseTasks.length} misiones
+          {Math.round((phase.endDay - phase.startDay) / 7)} semanas · {phase.baseTasks.length} misiones
         </span>
       </header>
       <div className="pcal-wdrow">
@@ -91,23 +143,25 @@ function PhaseMonth({
         ))}
       </div>
       <div className="pcal-grid">
-        {rows.map((row, wi) =>
+        {weeks.map((row, wi) =>
           row.map((c) => {
             const hero = c.ms?.type === "hero";
             const call = c.ms?.type === "call";
             const cls = [
               "pcal-cell",
-              !c.task && !c.ms ? "pcal-cell--rest" : "",
+              !c.task ? "pcal-cell--rest" : "",
               c.isToday ? "pcal-cell--today" : "",
               hero ? "pcal-cell--hero" : "",
             ]
               .filter(Boolean)
               .join(" ");
             return (
-              <div className={cls} key={`${wi}-${c.day}`}>
+              <div className={cls} key={`${wi}-${c.date}`}>
                 <span className="pcal-cell__top">
-                  <span className="pcal-cell__date">{dom(c.iso)}</span>
-                  {hero ? (
+                  <span className="pcal-cell__date">{domOf(c.date)}</span>
+                  {c.isToday ? (
+                    <span className="pcal-cell__hoy">hoy</span>
+                  ) : hero ? (
                     <span className="pcal-cell__mk pcal-cell__mk--hero">
                       <TrophyIcon />
                     </span>
@@ -118,8 +172,6 @@ function PhaseMonth({
                   ) : null}
                 </span>
                 {c.task ? <span className="pcal-cell__mission">{c.task.mission}</span> : null}
-                {!c.task && call ? <span className="pcal-cell__mission">{shortCall(c.ms!.title)}</span> : null}
-                {c.isToday ? <span className="pcal-cell__today">hoy</span> : null}
               </div>
             );
           }),
@@ -129,20 +181,13 @@ function PhaseMonth({
   );
 }
 
-function shortCall(title: string) {
-  if (/onboarding/i.test(title)) return "Llamada · Onboarding";
-  if (/weekly/i.test(title)) return "Llamada · Weekly";
-  if (/monthly|mensual/i.test(title)) return "Llamada · Mensual";
-  if (/cierre/i.test(title)) return "Llamada · Cierre";
-  return "Llamada";
-}
-
 function icsEscape(text: string) {
   return text.replace(/[\\;,]/g, (m) => `\\${m}`).replace(/\n/g, "\\n");
 }
 
-function buildIcs(phases: PhaseConfig[], startDate: string) {
+function buildIcs(phases: PhaseConfig[], schedule: Schedule) {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+  const ds = (iso: string) => iso.replace(/-/g, "");
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -151,32 +196,19 @@ function buildIcs(phases: PhaseConfig[], startDate: string) {
     "METHOD:PUBLISH",
     "X-WR-CALNAME:Agentic Sales — Mi camino",
   ];
-  const dateStamp = (iso: string) => iso.replace(/-/g, "");
   for (const phase of phases) {
     for (const t of phase.baseTasks) {
       if (t.suggestedDay == null) continue;
-      const iso = addDays(startDate, t.suggestedDay);
+      const iso = schedule.dayToDate.get(t.suggestedDay);
+      if (!iso) continue;
       lines.push(
         "BEGIN:VEVENT",
         `UID:gk-${t.id}@growkey.ai`,
         `DTSTAMP:${stamp}`,
-        `DTSTART;VALUE=DATE:${dateStamp(iso)}`,
-        `DTEND;VALUE=DATE:${dateStamp(addDays(iso, 1))}`,
+        `DTSTART;VALUE=DATE:${ds(iso)}`,
+        `DTEND;VALUE=DATE:${ds(addDays(iso, 1))}`,
         `SUMMARY:${icsEscape(`${t.mission ?? "Misión"} · Fase ${phase.id}`)}`,
         `DESCRIPTION:${icsEscape(t.title)}`,
-        "END:VEVENT",
-      );
-    }
-    for (const m of phase.milestones ?? []) {
-      const iso = addDays(startDate, m.day);
-      const prefix = m.type === "hero" ? "🏆 " : "📞 ";
-      lines.push(
-        "BEGIN:VEVENT",
-        `UID:gk-ms-${phase.id}-${m.day}@growkey.ai`,
-        `DTSTAMP:${stamp}`,
-        `DTSTART;VALUE=DATE:${dateStamp(iso)}`,
-        `DTEND;VALUE=DATE:${dateStamp(addDays(iso, 1))}`,
-        `SUMMARY:${icsEscape(prefix + m.title)}`,
         "END:VEVENT",
       );
     }
@@ -192,10 +224,43 @@ export function ProgramCalendar({
 }: {
   phases: PhaseConfig[];
   startDate: string;
-  todayIso?: string;
+  todayIso: string;
 }) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+  const schedule = buildSchedule(phases, startDate);
+
+  // El carrusel toma la altura de la fase ACTIVA (no de la más larga), para no
+  // dejar espacio vacío debajo de las fases cortas.
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    const child = el?.children[active] as HTMLElement | undefined;
+    if (el && child) el.style.height = `${child.offsetHeight}px`;
+  }, [active]);
+  useEffect(() => {
+    function onResize() {
+      const el = scroller.current;
+      const child = el?.children[active] as HTMLElement | undefined;
+      if (el && child) el.style.height = `${child.offsetHeight}px`;
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [active]);
+
+  function go(i: number) {
+    const el = scroller.current;
+    if (!el) return;
+    const child = el.children[i] as HTMLElement | undefined;
+    if (child) el.style.height = `${child.offsetHeight}px`;
+    el.scrollLeft = i * el.clientWidth;
+    setActive(i);
+  }
+  function onScroll() {
+    const el = scroller.current;
+    if (el) setActive(Math.round(el.scrollLeft / el.clientWidth));
+  }
   function downloadIcs() {
-    const blob = new Blob([buildIcs(phases, startDate)], { type: "text/calendar;charset=utf-8" });
+    const blob = new Blob([buildIcs(phases, schedule)], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -208,19 +273,22 @@ export function ProgramCalendar({
 
   return (
     <div className="pcal">
-      <div className="pcal__scroll" role="group" aria-label="Calendario del programa por fases">
-        {phases.map((phase, i) => (
-          <PhaseMonth
-            key={phase.id}
-            phase={phase}
-            hue={HUES[i]}
-            startDate={startDate}
-            todayIso={todayIso}
-          />
-        ))}
-      </div>
-      <div className="pcal__foot">
-        <span className="pcal__hint">Desliza → para ver las 4 fases · cada misión es un día</span>
+      <div className="pcal__nav">
+        <div className="pcal__tabs" role="tablist" aria-label="Fases del programa">
+          {phases.map((p, i) => (
+            <button
+              key={p.id}
+              type="button"
+              className={`pcal__tab${active === i ? " is-active" : ""}`}
+              style={{ "--hue": HUES[i] } as React.CSSProperties}
+              onClick={() => go(i)}
+              aria-selected={active === i}
+              role="tab"
+            >
+              Fase {p.id}
+            </button>
+          ))}
+        </div>
         <button type="button" className="pcal__ics" onClick={downloadIcs}>
           <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
             <path
@@ -230,6 +298,11 @@ export function ProgramCalendar({
           </svg>
           Añadir a mi calendario
         </button>
+      </div>
+      <div className="pcal__scroll" ref={scroller} onScroll={onScroll}>
+        {phases.map((phase, i) => (
+          <PhaseMonth key={phase.id} phase={phase} hue={HUES[i]} schedule={schedule} todayIso={todayIso} />
+        ))}
       </div>
     </div>
   );

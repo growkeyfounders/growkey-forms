@@ -218,6 +218,37 @@ function buildIcs(phases: PhaseConfig[], schedule: Schedule) {
   return lines.join("\r\n");
 }
 
+// Línea de tiempo de un vistazo: el recorrido completo (Hoy → Objetivo) con las
+// 4 fases proporcionales a su duración y el logro héroe de cada una.
+function JourneyStrip({ phases }: { phases: PhaseConfig[] }) {
+  return (
+    <div className="jstrip">
+      <span className="jstrip__cap">Hoy</span>
+      <div className="jstrip__bar">
+        {phases.map((p, i) => {
+          const hero = p.milestones.find((m) => m.type === "hero");
+          return (
+            <div
+              className="jstrip__seg"
+              key={p.id}
+              style={{ flexGrow: p.endDay - p.startDay, "--hue": HUES[i] } as CSSProperties}
+            >
+              <span className="jstrip__ph">Fase {p.id}</span>
+              <span className="jstrip__nm">{p.name}</span>
+              {hero ? (
+                <span className="jstrip__hr">
+                  <TrophyIcon /> {hero.title}
+                </span>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
+      <span className="jstrip__cap jstrip__cap--goal">Objetivo</span>
+    </div>
+  );
+}
+
 export function ProgramCalendar({
   phases,
   startDate,
@@ -243,6 +274,7 @@ export function ProgramCalendar({
 
   return (
     <div className="pcal">
+      <JourneyStrip phases={phases} />
       <div className="pcal__head">
         <span className="pcal__hint">Tu camino completo · hoy es tu día 1 · misiones de lunes a viernes</span>
         <button type="button" className="pcal__ics" onClick={downloadIcs}>

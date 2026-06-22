@@ -1688,13 +1688,15 @@ a.secondary-button {
 .portal--welcome {
   align-content: center;
   min-height: calc(100vh - 68px);
-  width: min(1820px, 96vw);
+  width: 100%;
+  max-width: 2080px;
+  padding-inline: clamp(16px, 1.6vw, 30px);
 }
 
 .welcome-card {
   display: grid;
   gap: 16px;
-  width: min(1760px, 96vw);
+  width: 100%;
   margin: 0 auto;
   padding: clamp(26px, 4vw, 40px);
   border: 1px solid var(--border);
@@ -1972,6 +1974,75 @@ a.secondary-button {
   color: var(--muted);
 }
 .rdmap2__legend strong { color: var(--text); }
+
+/* === Línea de tiempo del recorrido (arriba del calendario) === */
+.jstrip {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin: 6px 0 18px;
+}
+.jstrip__cap {
+  align-self: center;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted, #746b68);
+  white-space: nowrap;
+}
+.jstrip__cap--goal {
+  color: var(--text, #141714);
+}
+.jstrip__bar {
+  flex: 1 1 auto;
+  display: flex;
+  gap: 3px;
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 0;
+}
+.jstrip__seg {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--hue);
+  color: #fff;
+  padding: 11px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+.jstrip__ph {
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.82;
+}
+.jstrip__nm {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.12;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jstrip__hr {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  opacity: 0.95;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jstrip__hr svg {
+  flex: 0 0 auto;
+}
 
 /* === Calendario del programa: las 4 fases a la vez, anclado a HOY === */
 .pcal {

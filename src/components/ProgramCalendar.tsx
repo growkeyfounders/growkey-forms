@@ -360,12 +360,17 @@ function JourneyTimeline({
                 ) : state === "active" ? (
                   <span className="jtl__step-pulse" />
                 ) : isGoal ? (
-                  <svg viewBox="0 0 24 24" width="12" height="12">
-                    <path
-                      fill="currentColor"
-                      d="M6 3a1 1 0 0 1 1 1v1.4l9.3-1.9a1 1 0 0 1 1.2 1.2l-1.1 4.3 1.1 4.3a1 1 0 0 1-1.2 1.2L7 12.6V21a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1z"
-                    />
-                  </svg>
+                  <>
+                    <span className="jtl__step-num">{p.id}</span>
+                    <span className="jtl__step-flag" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="9" height="9">
+                        <path
+                          fill="currentColor"
+                          d="M6 3a1 1 0 0 1 1 1v1.4l9.3-1.9a1 1 0 0 1 1.2 1.2l-1.1 4.3 1.1 4.3a1 1 0 0 1-1.2 1.2L7 12.6V21a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1z"
+                        />
+                      </svg>
+                    </span>
+                  </>
                 ) : (
                   <span className="jtl__step-num">{p.id}</span>
                 )}

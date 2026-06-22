@@ -5197,3 +5197,24 @@ a.secondary-button {
     linear-gradient(90deg, transparent calc(50% - 2px), #f59e0b calc(50% - 2px), #f59e0b calc(50% + 2px), transparent calc(50% + 2px)),
     linear-gradient(90deg, transparent calc(75% - 2px), #ef4444 calc(75% - 2px), #ef4444 calc(75% + 2px), transparent calc(75% + 2px));
 }
+
+/* Híbrido en el paso meta (Fase 4): número "4" + badge de bandera en la esquina */
+.app-shell--onboarding .welcome-roadmap .jtl__step--goal .jtl__step-mark {
+  position: relative;
+  overflow: visible;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-flag {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #a3e635;
+  color: #16190f;
+  border: 1.5px solid #ebebe9;
+  box-shadow: 0 1px 3px rgba(20, 22, 18, 0.18);
+}

@@ -354,9 +354,10 @@ function Welcome({
         <RoadmapTimeline phases={program.phases} />
         <form className="welcome-form" onSubmit={onSubmit}>
           <label className="field">
-            <span className="field__label">¿Cuándo empieza tu camino?</span>
+            <span className="field__label">¿Qué día arrancas?</span>
             <span className="field__hint">
-              Si ya arrancaste con el equipo, puedes elegir una fecha de hasta 30 días atrás.
+              Esa fecha marca tu Día 1 y activa tu calendario de tareas. Por defecto es hoy; si ya
+              empezaste con el equipo, elige el día real.
             </span>
             <input
               min={addDays(localTodayIso(), -30)}

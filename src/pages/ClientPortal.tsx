@@ -347,9 +347,9 @@ function Welcome({
         <p className="eyebrow">Agentic Sales · {program.goal}</p>
         <h1>Hola, {firstName(client.name)}.</h1>
         <p className="welcome-copy">
-          Aquí construyes lo que casi ningún experto logra: un sistema de ventas predecible con tu
-          conocimiento, que te trae clientes de forma constante. Lo armas paso a paso —oferta, primeras
-          ventas, validación y escala—. Elige tu fecha y empezamos hoy.
+          Vas a construir un sistema de ventas predecible con tu conocimiento, que te trae clientes de
+          forma constante. Lo armas en 4 pasos: oferta, primeras ventas, validación y escala. Elige tu
+          fecha y empezamos hoy.
         </p>
         <RoadmapTimeline phases={program.phases} />
         <form className="welcome-form" onSubmit={onSubmit}>

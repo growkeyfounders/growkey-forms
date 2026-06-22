@@ -4472,7 +4472,7 @@ a.secondary-button {
   max-width: none;
   width: 100%;
   min-height: 100svh;
-  padding: clamp(26px, 3.2vh, 38px) clamp(16px, 3.5vw, 40px) clamp(10px, 1.4vh, 20px);
+  padding: clamp(40px, 5vh, 64px) clamp(16px, 3.5vw, 40px) clamp(10px, 1.4vh, 20px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4566,7 +4566,7 @@ a.secondary-button {
 .app-shell--onboarding .welcome-hero__content {
   display: grid;
   justify-items: center;
-  gap: clamp(14px, 2vh, 20px);
+  gap: clamp(18px, 2.6vh, 28px);
   width: 100%;
   max-width: 720px;
 }

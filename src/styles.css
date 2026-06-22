@@ -2143,8 +2143,13 @@ a.secondary-button {
 .pcal__ics:active {
   transform: scale(0.98);
 }
-.pcal__ics svg {
-  color: #2f6df6;
+.pcal__ics-logos {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.pcal__ics-logos svg {
+  display: block;
 }
 .pcal__row {
   display: flex;

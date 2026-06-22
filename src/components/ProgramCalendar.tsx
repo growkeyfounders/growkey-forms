@@ -90,6 +90,54 @@ function PhoneIcon() {
     </svg>
   );
 }
+function GoogleCalIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-label="Google Calendar">
+      <rect x="4" y="4" width="16" height="16" rx="3" fill="#4285f4" />
+      <rect x="4.6" y="8" width="14.8" height="11.4" fill="#fff" />
+      <text
+        x="12"
+        y="17"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="8"
+        fontWeight="700"
+        fill="#4285f4"
+        textAnchor="middle"
+      >
+        31
+      </text>
+    </svg>
+  );
+}
+function AppleCalIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-label="Apple Calendar">
+      <rect x="4" y="4" width="16" height="16" rx="3.5" fill="#fff" stroke="#e0e0e0" strokeWidth="1" />
+      <text
+        x="12"
+        y="10"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="3.8"
+        fontWeight="800"
+        fill="#ff3b30"
+        textAnchor="middle"
+      >
+        JUE
+      </text>
+      <text
+        x="12"
+        y="18"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontSize="8"
+        fontWeight="800"
+        fill="#1d1d1f"
+        textAnchor="middle"
+      >
+        17
+      </text>
+    </svg>
+  );
+}
 
 type Selected = { task: BaseTask; date: string; phaseId: number; ms?: Milestone };
 
@@ -339,13 +387,11 @@ export function ProgramCalendar({
           Tu camino completo · hoy es tu día 1 · misiones de lunes a viernes · toca un día para verlo completo
         </span>
         <button type="button" className="pcal__ics" onClick={downloadIcs}>
-          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
-            <path
-              fill="currentColor"
-              d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 7v10H5V9h14zM12 11l-3 3h2v3h2v-3h2l-3-3z"
-            />
-          </svg>
-          Añadir a mi calendario
+          <span className="pcal__ics-logos" aria-hidden="true">
+            <GoogleCalIcon />
+            <AppleCalIcon />
+          </span>
+          Añadir programa a mi calendario
         </button>
       </div>
       <div className="pcal__row" role="group" aria-label="Las 4 fases del programa">

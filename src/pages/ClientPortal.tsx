@@ -322,7 +322,7 @@ function Welcome({
         </p>
         <form id="reservar" className="welcome-form" onSubmit={onSubmit}>
           <label className="field">
-            <span className="field__label">¿Qué día arrancas?</span>
+            <span className="field__label">Elige cuando empiezas</span>
             <span className="field__hint">
               Tu día 1 es hoy y se actualiza solo. Las misiones corren de lunes a viernes.
             </span>

@@ -1,10 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { addDays } from "../../shared/program.mjs";
 import type { BaseTask, Milestone, PhaseConfig } from "../../shared/program.mjs";
 
-// Calendario literal del programa: cada fase es un "mes" con su encabezado
-// grande. Se ancla a HOY como día 1 y agenda las misiones en días hábiles
-// (lunes a viernes), así que siempre refleja la fecha actual del cliente.
+// Calendario literal del programa: las 4 fases se ven a la vez, una al lado de
+// la otra (cada una es un "mes"). Se ancla a HOY como día 1 y agenda las
+// misiones en días hábiles (lunes a viernes), así que siempre refleja la fecha
+// actual del cliente.
 
 const HUES = ["#2f6df6", "#10b981", "#f59e0b", "#ef4444"];
 const WEEKDAYS = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
@@ -71,7 +72,7 @@ function buildSchedule(phases: PhaseConfig[], anchorIso: string): Schedule {
 
 function TrophyIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
       <path
         fill="currentColor"
         d="M18 2H6v2H3v3a4 4 0 0 0 4 4h.3A5 5 0 0 0 11 13.9V16H8v2h8v-2h-3v-2.1A5 5 0 0 0 16.7 11H17a4 4 0 0 0 4-4V4h-3V2zM5 7V6h1v3a2 2 0 0 1-1-2zm14 0a2 2 0 0 1-1 2V6h1v1z"
@@ -81,7 +82,7 @@ function TrophyIcon() {
 }
 function PhoneIcon() {
   return (
-    <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="10" height="10" aria-hidden="true">
       <path
         fill="currentColor"
         d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.3 1l-2.2 2.2z"
@@ -124,7 +125,7 @@ function PhaseMonth({
   }
 
   return (
-    <div className="pcal-month" style={{ "--hue": hue } as React.CSSProperties}>
+    <div className="pcal-month" style={{ "--hue": hue } as CSSProperties}>
       <header className="pcal-month__head">
         <div className="pcal-month__eyebrow">
           <span className="pcal-month__tag">Fase {phase.id}</span>
@@ -156,7 +157,7 @@ function PhaseMonth({
               .filter(Boolean)
               .join(" ");
             return (
-              <div className={cls} key={`${wi}-${c.date}`}>
+              <div className={cls} key={`${wi}-${c.date}`} title={c.task?.mission ?? undefined}>
                 <span className="pcal-cell__top">
                   <span className="pcal-cell__date">{domOf(c.date)}</span>
                   {c.isToday ? (
@@ -226,39 +227,8 @@ export function ProgramCalendar({
   startDate: string;
   todayIso: string;
 }) {
-  const scroller = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
   const schedule = buildSchedule(phases, startDate);
 
-  // El carrusel toma la altura de la fase ACTIVA (no de la más larga), para no
-  // dejar espacio vacío debajo de las fases cortas.
-  useLayoutEffect(() => {
-    const el = scroller.current;
-    const child = el?.children[active] as HTMLElement | undefined;
-    if (el && child) el.style.height = `${child.offsetHeight}px`;
-  }, [active]);
-  useEffect(() => {
-    function onResize() {
-      const el = scroller.current;
-      const child = el?.children[active] as HTMLElement | undefined;
-      if (el && child) el.style.height = `${child.offsetHeight}px`;
-    }
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [active]);
-
-  function go(i: number) {
-    const el = scroller.current;
-    if (!el) return;
-    const child = el.children[i] as HTMLElement | undefined;
-    if (child) el.style.height = `${child.offsetHeight}px`;
-    el.scrollLeft = i * el.clientWidth;
-    setActive(i);
-  }
-  function onScroll() {
-    const el = scroller.current;
-    if (el) setActive(Math.round(el.scrollLeft / el.clientWidth));
-  }
   function downloadIcs() {
     const blob = new Blob([buildIcs(phases, schedule)], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -273,22 +243,8 @@ export function ProgramCalendar({
 
   return (
     <div className="pcal">
-      <div className="pcal__nav">
-        <div className="pcal__tabs" role="tablist" aria-label="Fases del programa">
-          {phases.map((p, i) => (
-            <button
-              key={p.id}
-              type="button"
-              className={`pcal__tab${active === i ? " is-active" : ""}`}
-              style={{ "--hue": HUES[i] } as React.CSSProperties}
-              onClick={() => go(i)}
-              aria-selected={active === i}
-              role="tab"
-            >
-              Fase {p.id}
-            </button>
-          ))}
-        </div>
+      <div className="pcal__head">
+        <span className="pcal__hint">Tu camino completo · hoy es tu día 1 · misiones de lunes a viernes</span>
         <button type="button" className="pcal__ics" onClick={downloadIcs}>
           <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
             <path
@@ -299,7 +255,7 @@ export function ProgramCalendar({
           Añadir a mi calendario
         </button>
       </div>
-      <div className="pcal__scroll" ref={scroller} onScroll={onScroll}>
+      <div className="pcal__row" role="group" aria-label="Las 4 fases del programa">
         {phases.map((phase, i) => (
           <PhaseMonth key={phase.id} phase={phase} hue={HUES[i]} schedule={schedule} todayIso={todayIso} />
         ))}

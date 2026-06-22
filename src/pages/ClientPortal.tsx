@@ -318,10 +318,6 @@ function RoadmapTimeline({ phases }: { phases: PhaseConfig[] }) {
           </div>
         ))}
       </div>
-      <div className="roadmap__goal">
-        <strong>Tu objetivo</strong>
-        <span>Un sistema de ventas predecible con tu conocimiento, que te trae clientes de forma constante.</span>
-      </div>
     </div>
   );
 }

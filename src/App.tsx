@@ -8,6 +8,8 @@ import {
   type FormConfig,
 } from "./formSchema";
 import { useSession } from "./session";
+import { currentDoor } from "./door";
+import { WrongDoor } from "./WrongDoor";
 import { AdminClientDetail } from "./pages/AdminClientDetail";
 import { AdminPanel } from "./pages/AdminPanel";
 import { ClientPortal } from "./pages/ClientPortal";
@@ -115,6 +117,11 @@ function SignOutButton() {
 function RequireRole({ role, children }: { role: "admin" | "client"; children: React.ReactNode }) {
   const { session, me, loading, signOut } = useSession();
   const profile = me?.profile ?? null;
+  const door = currentDoor();
+  // En la puerta equivocada: la cuenta pertenece a otra puerta (admin vs cliente).
+  const wrongDoor = Boolean(profile && door !== null && door !== profile.role);
+  // Ruta equivocada pero puerta correcta (ej. admin abrió /app): lo mandamos a su panel.
+  const wrongPath = Boolean(profile && !wrongDoor && profile.role !== role);
 
   useEffect(() => {
     if (loading) return;
@@ -122,12 +129,24 @@ function RequireRole({ role, children }: { role: "admin" | "client"; children: R
       window.location.replace("/login");
       return;
     }
-    if (profile && profile.role !== role) {
+    if (wrongPath && profile) {
       window.location.replace(profile.role === "admin" ? "/admin" : "/app");
     }
-  }, [loading, session, profile, role]);
+  }, [loading, session, wrongPath, profile]);
 
-  if (loading || !session || (profile && profile.role !== role)) {
+  if (loading || !session) {
+    return (
+      <div className="login-shell">
+        <p className="route-status">Cargando…</p>
+      </div>
+    );
+  }
+
+  if (profile && wrongDoor) {
+    return <WrongDoor neededDoor={profile.role} />;
+  }
+
+  if (profile && wrongPath) {
     return (
       <div className="login-shell">
         <p className="route-status">Cargando…</p>

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { supabase } from "../supabaseClient";
 import { useSession } from "../session";
+import { currentDoor } from "../door";
+import { WrongDoor } from "../WrongDoor";
 import logoUrl from "../assets/growkey-mascot.png";
 
 const activationTokenHash = () =>
@@ -98,8 +100,11 @@ export function LoginPage() {
 
   useEffect(() => {
     if (loading || !session || mode === "set-password") return;
-    if (me?.profile?.role === "admin") window.location.replace("/admin");
-    else if (me?.profile?.role === "client") window.location.replace("/app");
+    const role = me?.profile?.role;
+    if (!role) return;
+    const door = currentDoor();
+    if (door !== null && door !== role) return; // puerta equivocada → se muestra WrongDoor
+    window.location.replace(role === "admin" ? "/admin" : "/app");
   }, [loading, session, me, mode]);
 
   async function loginPassword(e: React.FormEvent) {
@@ -196,6 +201,14 @@ export function LoginPage() {
       setError("No pudimos enviar tu solicitud. Intenta de nuevo.");
     }
     setBusy(false);
+  }
+
+  // Si ya hay sesión pero entraste por la puerta equivocada (admin por la de
+  // clientes o viceversa), mostramos la pantalla que apunta a la puerta correcta.
+  const sessionRole = me?.profile?.role;
+  const door = currentDoor();
+  if (!loading && session && sessionRole && door !== null && door !== sessionRole && mode !== "set-password") {
+    return <WrongDoor neededDoor={sessionRole} />;
   }
 
   return (

@@ -237,6 +237,7 @@ export const PROGRAM = {
         {
           "id": "t1-d1",
           "title": "Responder Por Qué (propósito) / Cómo (vehículo) / Qué (resultado) en 1 página + Asistir a la llamada de Onboarding y recopilar todos los accesos → Documento de fundaciones (Por qué/Cómo/Qué) + accesos confirmados",
+          "mission": "Define tu propósito y vehículo",
           "week": 1,
           "suggestedDay": 1,
           "classId": "c1-compendio-fundacional-1"
@@ -244,6 +245,7 @@ export const PROGRAM = {
         {
           "id": "t1-d2",
           "title": "Ejercicio del Bote: describir tu bote actual, fallas de fábrica, bote ideal + Elegir 1 nicho específico candidato (rol + reto, no 'coaching general') → Análisis del Bote (1 pág) + nicho candidato escrito",
+          "mission": "Elige tu nicho",
           "week": 1,
           "suggestedDay": 2,
           "classId": "c1-nicho-en-profundidad-p-3"
@@ -251,6 +253,7 @@ export const PROGRAM = {
         {
           "id": "t1-d3",
           "title": "Completar el Checklist de Selección de Nicho (Google Sheets) y mapear el ciclo de precio → veredicto GO/NO-GO + diagnóstico de ciclo + Calcular ICO base (<1.5) e IEN con la calculadora e identificar 1 multiplicador a reducir → Checklist con GO/NO-GO + ICO/IEN calculados con diagnóstico y reducción propuesta",
+          "mission": "Valida tu nicho: GO/NO-GO",
           "week": 1,
           "suggestedDay": 3,
           "classId": "c1-checklist-de-selecci-n-5"
@@ -258,6 +261,7 @@ export const PROGRAM = {
         {
           "id": "t1-d4",
           "title": "Agendar y arrancar 10 entrevistas (15-20 min) con personas del nicho; pregunta gatillo: '¿Cuál es tu problema más doloroso en [área]?' + Llenar tabla de respuestas (problema, gasto actual, soluciones probadas, por qué fallan) → Mínimo 3-5 entrevistas hechas el primer día + tabla de respuestas iniciada",
+          "mission": "Arranca 10 entrevistas",
           "week": 1,
           "suggestedDay": 4,
           "classId": "c1-investigaci-n-del-nich-9"
@@ -265,6 +269,7 @@ export const PROGRAM = {
         {
           "id": "t1-d5",
           "title": "Acelerar entrevistas con llamadas al nicho, grupos/foros y escucha de objeciones + Listar 5-10 condiciones latentes con citas textuales del nicho → Avance hacia las 10 entrevistas + lista preliminar de 5-10 condiciones latentes con citas",
+          "mission": "Escucha dolores y objeciones",
           "week": 1,
           "suggestedDay": 5,
           "classId": "c1-condiciones-latentes-e-12"
@@ -272,6 +277,7 @@ export const PROGRAM = {
         {
           "id": "t1-d8",
           "title": "Completar las 10 entrevistas y documentar el Avatar (nombre, edad, ingresos, problema #1/#2/#3, lenguaje, dónde encontrarlo) + Consolidar las condiciones latentes con sus citas → Avatar de Cliente Ideal (1 pág) + lista de 5-10 condiciones latentes cerrada",
+          "mission": "Construye tu Avatar",
           "week": 2,
           "suggestedDay": 8,
           "classId": "c1-cierre-del-avatar-comp-11"
@@ -279,6 +285,7 @@ export const PROGRAM = {
         {
           "id": "t1-d9",
           "title": "Agrupar las condiciones latentes por tema y priorizar las 3 principales + Extraer 10-15 palabras/frases exactas del nicho (keywords resonantes) → Matriz de condiciones latentes (Condición→Emoción→Síntoma→Palabra resonante)",
+          "mission": "Mapea condiciones latentes",
           "week": 2,
           "suggestedDay": 9,
           "classId": "c1-estaciones-de-radio-ps-13"
@@ -286,6 +293,7 @@ export const PROGRAM = {
         {
           "id": "t1-d10",
           "title": "Definir tus 3 pilares editoriales con 2 ejemplos cada uno y construir banco de 15-20 ideas derivadas de condiciones latentes/palabras-pozo + Analizar 5-10 bios reales del nicho línea por línea (¿condición latente? ¿prueba social? ¿CTA?) → Documento de pilares + banco de 15-20 ideas etiquetadas + análisis de bios",
+          "mission": "Define tus 3 pilares",
           "week": 2,
           "suggestedDay": 10,
           "classId": "c1-arquitectura-de-conten-15"
@@ -293,6 +301,7 @@ export const PROGRAM = {
         {
           "id": "t1-d11",
           "title": "Redactar 3 borradores de pieza corta (1 por pilar) usando palabras-pozo + Publicar las 2 primeras piezas reales, armar el calendario editorial de 4 semanas y configurar sistema de medición de leads/agendas por pieza (etiqueta en sheet) → 3 borradores + 2 piezas publicadas + calendario editorial + sheet de medición",
+          "mission": "Publica tus 2 piezas",
           "week": 2,
           "suggestedDay": 11,
           "classId": "c1-c-mo-grabar-editar-con-19"
@@ -300,6 +309,7 @@ export const PROGRAM = {
         {
           "id": "t1-d12",
           "title": "Mapear los 6 pilares en tu oferta (cuantificar confianza: oferta% / fe% / casos%) + Publicar pieza de Valor del día → 6 pilares mapeados (1 pág) + 1 pieza Valor publicada",
+          "mission": "Mapea tu oferta",
           "week": 2,
           "suggestedDay": 12,
           "classId": "c1-la-oferta-como-motor-c-21"
@@ -307,6 +317,7 @@ export const PROGRAM = {
         {
           "id": "t1-d15",
           "title": "Escribir 5 preguntas retóricas que amplifiquen el dolor sin decir 'sufres' + Redactar los 7 elementos de tu oferta en mensaje corto / largo / pitch + Publicar pieza de Nicho del día (usar 1 pregunta de dolor como hook) → Script de 5 preguntas de dolor + Oferta de 7 elementos en 3 formatos + 1 pieza Nicho publicada",
+          "mission": "Escribe tu oferta",
           "week": 3,
           "suggestedDay": 15,
           "classId": "c1-composici-n-de-la-ofer-25"
@@ -314,6 +325,7 @@ export const PROGRAM = {
         {
           "id": "t1-d16",
           "title": "Calcular valor generado y definir precio con ratio 3-10x + Diseñar tu oferta en los 3 formatos (escalera/cebolla/única) y elegir el de tu etapa + Publicar pieza de Autoridad del día → Análisis valor-precio + decisión de estructura de oferta justificada + 1 pieza Autoridad publicada",
+          "mission": "Pon precio a tu oferta",
           "week": 3,
           "suggestedDay": 16,
           "classId": "c1-desajuste-valor-precio-27"
@@ -321,6 +333,7 @@ export const PROGRAM = {
         {
           "id": "t1-d17",
           "title": "Redactar bio resonante (máx 3 líneas: público+descriptor+condición latente+diferencial+prueba social+CTA) + Publicar primera pieza LARGA de la semana y desplegar la bio en todos los perfiles → Bio resonante desplegada en todos los canales + 1 pieza larga publicada",
+          "mission": "Lanza tu bio resonante",
           "week": 3,
           "suggestedDay": 17,
           "classId": "c1-resonancia-redactar-la-29"
@@ -328,6 +341,7 @@ export const PROGRAM = {
         {
           "id": "t1-d18",
           "title": "Carta de compromiso de cambio de lentes (paradigma viejo→nuevo + 3 acciones incómodas) + Diseñar el Canvas de Oferta Espejo (qué logra el cliente / tu riesgo / precio / bolsa de presión / diferenciador) + Publicar pieza del día → Carta de compromiso firmada + Canvas de Oferta Espejo (1 pág) + 1 pieza publicada",
+          "mission": "Diseña tu Oferta Espejo",
           "week": 3,
           "suggestedDay": 18,
           "classId": "c1-oferta-espejo-alinear-33"
@@ -335,6 +349,7 @@ export const PROGRAM = {
         {
           "id": "t1-d19",
           "title": "Mostrar bio + oferta a 3-5 personas del nicho (no amigos); registrar reacción buscando '¡esto es para mí!' + Completar el Checklist Pre-Launch, cerrar gaps y mapear la tubería ideal con 3 cuellos de botella + Publicar pieza larga y preparar checklist de salida para la Weekly 1:1 → Fase 1 cerrada: oferta validada (3-5 reacciones) + Checklist Pre-Launch completo + tubería con 3 cuellos; avatar+bio+contenido listos para la Weekly 1:1",
+          "mission": "Oferta validada",
           "week": 3,
           "suggestedDay": 19,
           "classId": "c1-validaci-n-de-resonanc-35"
@@ -571,6 +586,7 @@ export const PROGRAM = {
         {
           "id": "t2-d22",
           "title": "Estudiar el Flow y dibujar tu propio diagrama de 4 estados para tu plataforma + Elegir plataforma(s) y optimizar el perfil (foto, feed, destacados) → Diagrama de 4 estados propio + perfil optimizado",
+          "mission": "Monta tu sistema de DM",
           "week": 4,
           "suggestedDay": 22,
           "classId": "c2-el-sistema-de-dm-en-fr-1"
@@ -578,6 +594,7 @@ export const PROGRAM = {
         {
           "id": "t2-d23",
           "title": "Copiar y personalizar el Tracker por plataforma (columnas A/B/C/D + fórmulas MSR/PRR/CSR/ABR) + Configurar Calendly con enlace único y disponibilidad → Tracker funcional + Calendly configurado",
+          "mission": "Arma tu tracker y Calendly",
           "week": 4,
           "suggestedDay": 23,
           "classId": "c2-setup-del-tracker-goog-3"
@@ -585,6 +602,7 @@ export const PROGRAM = {
         {
           "id": "t2-d24",
           "title": "Scrapear 30 leads del nicho y cargarlos en el Tracker como 'Iniciado (A)' + Deduplicar con ChatGPT → 30 leads cargados en estado A + evidencia de deduplicación",
+          "mission": "Consigue tus primeros 30 leads",
           "week": 4,
           "suggestedDay": 24,
           "classId": "c2-scraping-de-leads-b-sq-5"
@@ -592,6 +610,7 @@ export const PROGRAM = {
         {
           "id": "t2-d25",
           "title": "Mapear 3 competidores y crear 3 variantes de Caballo de Troya que rompan el patrón + Grabar tu Caballo de Troya → Análisis de competencia + 3 scripts + 1 Caballo de Troya grabado",
+          "mission": "Graba tu Caballo de Troya",
           "week": 4,
           "suggestedDay": 25,
           "classId": "c2-caballo-de-troya-video-7"
@@ -599,6 +618,7 @@ export const PROGRAM = {
         {
           "id": "t2-d26",
           "title": "Enviar los primeros 10-30 Caballos de Troya y registrarlos en el Tracker + Publicar pieza larga de la semana → Primeros 10-30 Caballos enviados y trackeados + 1 pieza larga",
+          "mission": "Lanza tus primeros mensajes",
           "week": 4,
           "suggestedDay": 26,
           "classId": "c2-daily-workflow-am-pm-1-9"
@@ -606,6 +626,7 @@ export const PROGRAM = {
         {
           "id": "t2-d29",
           "title": "Grabar el VSL evergreen de 90s nativo de plataforma + Enviar VSL a los leads que dieron permiso (mover a estado B) → VSL evergreen grabado + primeros leads movidos a B",
+          "mission": "Graba tu VSL de 90s",
           "week": 5,
           "suggestedDay": 29,
           "classId": "c2-vsl-evergreen-nativo-9-11"
@@ -613,6 +634,7 @@ export const PROGRAM = {
         {
           "id": "t2-d30",
           "title": "Crear 1 Loom personalizado para un lead de alto potencial (con visuals en Miro/Canva) + Documentar las 2-3 ineficiencias encontradas y cómo las presentaste → 1 Loom personalizado + guion desglosado por sección",
+          "mission": "Crea tu primer Loom",
           "week": 5,
           "suggestedDay": 30,
           "classId": "c2-loom-personalizado-4-s-13"
@@ -620,6 +642,7 @@ export const PROGRAM = {
         {
           "id": "t2-d31",
           "title": "Escribir las 14 piezas de follow-up (7B + 7C) con objetivo de cada una + Aplicar FUPs a los leads pendientes según su estado → 14 mensajes de follow-up listos + FUPs aplicados en el Tracker",
+          "mission": "Escribe tus 14 follow-ups",
           "week": 5,
           "suggestedDay": 31,
           "classId": "c2-cadenas-de-follow-up-7-15"
@@ -627,6 +650,7 @@ export const PROGRAM = {
         {
           "id": "t2-d32",
           "title": "Enviar Calendly a los leads interesados (mover a estado C) + Correr Daily Workflow AM/PM a volumen (objetivo acumulado 100+ Caballos) → Leads en estado C + acumulado de envíos hacia 100 Caballos",
+          "mission": "Empuja a 100 mensajes",
           "week": 5,
           "suggestedDay": 32,
           "classId": "c2-calendly-y-raz-n-para-17"
@@ -634,6 +658,7 @@ export const PROGRAM = {
         {
           "id": "t2-d33",
           "title": "Generar reporte de métricas del Tracker (MSR/PRR/CSR/ABR) para la Weekly + Publicar pieza larga + marcar 2-3 piezas ganadoras de contenido → Reporte de métricas + primeras agendas registradas + 2-3 piezas ganadoras marcadas",
+          "mission": "Lee tus primeras métricas",
           "week": 5,
           "suggestedDay": 33,
           "classId": "c2-lectura-de-m-tricas-y-19"
@@ -641,6 +666,7 @@ export const PROGRAM = {
         {
           "id": "t2-d36",
           "title": "Armar tu Script de 5 etapas con tiempos (Diag 30-40min, Pitch 5-10, etc.) + Continuar Daily Workflow + publicar pieza del día → Script de llamada de 5 etapas personalizado",
+          "mission": "Arma tu script de venta",
           "week": 6,
           "suggestedDay": 36,
           "classId": "c2-arquitectura-de-ventas-21"
@@ -648,6 +674,7 @@ export const PROGRAM = {
         {
           "id": "t2-d37",
           "title": "Grabar 3 pitches SIN mencionar características (solo A→B→puente) + Enviar Calendly/FUPs del día → 3 pitches de transformación grabados (2 min c/u)",
+          "mission": "Graba tus 3 pitches",
           "week": 6,
           "suggestedDay": 37,
           "classId": "c2-5-principios-de-persua-23"
@@ -655,6 +682,7 @@ export const PROGRAM = {
         {
           "id": "t2-d38",
           "title": "Documentar 10 objeciones reales con redireccionamiento + pregunta socrática + Role-play de objeciones con un par (grabado) → Arsenal de 10 objeciones + video de role-play",
+          "mission": "Domina las objeciones",
           "week": 6,
           "suggestedDay": 38,
           "classId": "c2-las-10-armas-de-cierre-25"
@@ -662,6 +690,7 @@ export const PROGRAM = {
         {
           "id": "t2-d39",
           "title": "Tomar la primera llamada de venta agendada y grabarla + Aplicar diagnóstico profundo (lead habla 80%) → 1 llamada de venta real ejecutada y grabada",
+          "mission": "Toma tu primera llamada",
           "week": 6,
           "suggestedDay": 39,
           "classId": "c2-pre-call-confirmaci-n-27"
@@ -669,6 +698,7 @@ export const PROGRAM = {
         {
           "id": "t2-d40",
           "title": "Escuchar tu llamada grabada y anotar 3 ajustes + Publicar pieza larga + seguir DM a volumen → Auto-análisis de llamada (3 ajustes) + pieza larga publicada",
+          "mission": "Analiza tu llamada grabada",
           "week": 6,
           "suggestedDay": 40,
           "classId": "c2-auto-revisi-n-de-llama-29"
@@ -676,6 +706,7 @@ export const PROGRAM = {
         {
           "id": "t2-d43",
           "title": "Medir tu tubería de la semana (conversaciones, calendarios, agendadas, presentadas, cerradas) + Identificar tu cuello de botella principal → Spreadsheet de tubería de 7 días + cuello identificado",
+          "mission": "Mide tu tubería de ventas",
           "week": 7,
           "suggestedDay": 43,
           "classId": "c2-la-tuber-a-de-ventas-c-31"
@@ -683,6 +714,7 @@ export const PROGRAM = {
         {
           "id": "t2-d44",
           "title": "Correr Doctor DM sobre tus métricas y documentar causa+ajuste + Si aplica, montar A/B test de Caballo de Troya en cuenta nueva → Diagnóstico Doctor DM documentado + plan de ajuste",
+          "mission": "Diagnostica con Doctor DM",
           "week": 7,
           "suggestedDay": 44,
           "classId": "c2-doctor-dm-aplicado-dia-33"
@@ -690,6 +722,7 @@ export const PROGRAM = {
         {
           "id": "t2-d45",
           "title": "Tomar 2da/3ra llamada de venta y aplicar el arsenal + Role-play socrático+reencuadre con 'no tengo plata' (grabado) → Llamadas adicionales ejecutadas + video role-play de cierre",
+          "mission": "Cierra más llamadas",
           "week": 7,
           "suggestedDay": 45,
           "classId": "c2-manejo-de-objeciones-e-35"
@@ -697,6 +730,7 @@ export const PROGRAM = {
         {
           "id": "t2-d46",
           "title": "Cerrar/avanzar las agendas activas + Elegir 2-3 piezas ganadoras y documentar por qué (leads/agendas generadas) → Estado de cierres + lista de 2-3 piezas ganadoras justificadas",
+          "mission": "Tu primera venta",
           "week": 7,
           "suggestedDay": 46,
           "classId": "c2-cierre-y-primeros-cobr-37"
@@ -704,6 +738,7 @@ export const PROGRAM = {
         {
           "id": "t2-d47",
           "title": "Consolidar reporte mensual (agendas, llamadas, cierres, métricas DM) + Publicar pieza larga + preparar criterio de salida Fase 2 → Reporte mensual consolidado; Fase 2 validada en el Monthly",
+          "mission": "Cierra tu primer mes",
           "week": 7,
           "suggestedDay": 47,
           "classId": "c2-cierre-de-fase-2-qu-de-39"
@@ -935,6 +970,7 @@ export const PROGRAM = {
         {
           "id": "t3-d50",
           "title": "Seguir tubería DM→llamada→cierre con foco en llegar a 5 clientes (scrapear nuevos leads, FUPs, agendar) + Medir cuántos clientes cerrados/onboardeados llevas vs la meta de 5 → Pipeline de cierre actualizado + conteo de clientes hacia la meta de 5",
+          "mission": "Avanza hacia 5 clientes",
           "week": 8,
           "suggestedDay": 50,
           "classId": "c3-cierre-de-m-s-ventas-s-25"
@@ -942,6 +978,7 @@ export const PROGRAM = {
         {
           "id": "t3-d51",
           "title": "Leer la campaña Follow-Me Ads tras el ciclo de aprendizaje de 3-5 días sin tocar nada antes de tiempo (CPM↓/CTR↑) + Anotar qué conjunto/creativo respira mejor → Lectura disciplinada de la campaña (3-5 días) + diagnóstico inicial CPM/CTR",
+          "mission": "Lee tu campaña con calma",
           "week": 8,
           "suggestedDay": 51,
           "classId": "c3-disciplina-cpm-ctr-lee-14"
@@ -949,6 +986,7 @@ export const PROGRAM = {
         {
           "id": "t3-d52",
           "title": "Dar seguimiento 1:1 a los clientes activos en Uso Activo (check-in semanal, revisar accionables del roadmap, desbloquear) + Confirmar que cada cliente avanza hacia su primer resultado → Seguimiento 1:1 de clientes activos (notas por cliente) + estado de avance hacia primer resultado",
+          "mission": "Acompaña a tus clientes 1:1",
           "week": 8,
           "suggestedDay": 52,
           "classId": "c3-uso-activo-sem-2-10-de-15"
@@ -956,6 +994,7 @@ export const PROGRAM = {
         {
           "id": "t3-d53",
           "title": "Documentar los primeros resultados que van apareciendo en clientes (métrica antes→después, cita textual) + Capturar evidencia (capturas, mensajes) para futuros casos → Bitácora de resultados emergentes por cliente + evidencia capturada",
+          "mission": "Documenta primeros resultados",
           "week": 8,
           "suggestedDay": 53,
           "classId": "c3-documentar-primeros-re-28"
@@ -963,6 +1002,7 @@ export const PROGRAM = {
         {
           "id": "t3-d54",
           "title": "Ajustar la entrega según lo aprendido en el seguimiento (afinar entregables/accionables por etapa del Journey) + Continuar tubería de cierre hacia los 5 clientes + publicar pieza larga → Entrega ajustada (entregables/accionables refinados) + pipeline de cierre al día",
+          "mission": "Afina tu entrega",
           "week": 8,
           "suggestedDay": 54,
           "classId": "c3-entregables-y-accionab-2"
@@ -970,6 +1010,7 @@ export const PROGRAM = {
         {
           "id": "t3-d57",
           "title": "Mapear tu Customer Journey con entregables + accionables + deadlines por etapa + Continuar DM + contenido → Customer Journey documentado (tabla por etapa)",
+          "mission": "Mapea el viaje del cliente",
           "week": 9,
           "suggestedDay": 57,
           "classId": "c3-customer-journey-de-6-1"
@@ -977,6 +1018,7 @@ export const PROGRAM = {
         {
           "id": "t3-d58",
           "title": "Crear documento de onboarding (flujo 48h) + template de email de bienvenida + Armar roadmap visual del cliente (Miro) → Flujo de onboarding 48h + roadmap visual del cliente",
+          "mission": "Diseña tu onboarding 48h",
           "week": 9,
           "suggestedDay": 58,
           "classId": "c3-onboarding-del-cliente-3"
@@ -984,6 +1026,7 @@ export const PROGRAM = {
         {
           "id": "t3-d59",
           "title": "Configurar Business Manager (página, IG, píxel) + Instalar y validar píxel con Pixel Helper → Business Manager configurado + píxel validado (captura de eventos)",
+          "mission": "Configura tu píxel de Meta",
           "week": 9,
           "suggestedDay": 59,
           "classId": "c3-el-trafficker-y-meta-a-5"
@@ -991,6 +1034,7 @@ export const PROGRAM = {
         {
           "id": "t3-d60",
           "title": "Crear públicos: avatar (intereses), lookalike y retargeting (visualizadores/visitantes) + Preparar la 1ª pieza ganadora como creativo de Follow-Me Ad → Públicos creados + 1ª pieza ganadora lista para amplificar",
+          "mission": "Prepara tu pieza ganadora",
           "week": 9,
           "suggestedDay": 60,
           "classId": "c3-follow-me-ads-amplific-7"
@@ -998,6 +1042,7 @@ export const PROGRAM = {
         {
           "id": "t3-d61",
           "title": "Montar servidor Discord con canales + reglas + sección pesadilla + Crear estructura base de Skool (1 curso, 2-3 módulos) → Discord estructurado + Skool con curso base + pieza larga publicada",
+          "mission": "Monta Discord y Skool",
           "week": 9,
           "suggestedDay": 61,
           "classId": "c3-comunicaci-n-multicana-9"
@@ -1005,6 +1050,7 @@ export const PROGRAM = {
         {
           "id": "t3-d64",
           "title": "Montar el Zap Form→Airtable+PandaDoc y testearlo end-to-end + Continuar DM + contenido → Zaps de onboarding funcionando (test documentado)",
+          "mission": "Automatiza el onboarding",
           "week": 10,
           "suggestedDay": 64,
           "classId": "c3-automatizaci-n-de-onbo-11"
@@ -1012,6 +1058,7 @@ export const PROGRAM = {
         {
           "id": "t3-d65",
           "title": "Lanzar 1ª campaña Follow-Me Ads (creativo = pieza ganadora, público tibio+avatar) + Configurar tope de presupuesto → 1ª campaña Follow-Me Ads en vivo con tope de presupuesto",
+          "mission": "Lanza tu primer anuncio",
           "week": 10,
           "suggestedDay": 65,
           "classId": "c3-lanzamiento-de-follow-13"
@@ -1019,6 +1066,7 @@ export const PROGRAM = {
         {
           "id": "t3-d66",
           "title": "Ejecutar 1ª sesión 1:1/Gameplan con un cliente real (o test-client) usando el roadmap + Entregar tabla de accionables al cliente → Sesión 1:1 ejecutada (Loom resumen) + Gameplan entregado",
+          "mission": "Da tu primera sesión 1:1",
           "week": 10,
           "suggestedDay": 66,
           "classId": "c3-uso-activo-sem-2-10-de-15"
@@ -1026,6 +1074,7 @@ export const PROGRAM = {
         {
           "id": "t3-d67",
           "title": "Montar la matriz CPL/CPR/ROAS con fórmulas y umbral ROAS>3 + Revisar métricas de la campaña y decidir mantener/ajustar → Matriz de métricas de ads + primera lectura de la campaña",
+          "mission": "Mide tus métricas de ads",
           "week": 10,
           "suggestedDay": 67,
           "classId": "c3-m-tricas-de-follow-me-17"
@@ -1033,6 +1082,7 @@ export const PROGRAM = {
         {
           "id": "t3-d68",
           "title": "Grabar 1 Loom de feedback a un cliente + Publicar pieza larga + seguir DM → Loom de feedback enviado + pieza larga + estado de ads",
+          "mission": "Graba un Loom de feedback",
           "week": 10,
           "suggestedDay": 68,
           "classId": "c3-loom-de-feedback-perso-19"
@@ -1040,6 +1090,7 @@ export const PROGRAM = {
         {
           "id": "t3-d71",
           "title": "Definir protocolo de cliente pesadilla (CRM mark + Discord + 1:1 extra) + Aplicar a un caso real o ficticio → Protocolo de pesadilla + caso documentado",
+          "mission": "Maneja al cliente pesadilla",
           "week": 11,
           "suggestedDay": 71,
           "classId": "c3-triada-de-lo-delicado-21"
@@ -1047,6 +1098,7 @@ export const PROGRAM = {
         {
           "id": "t3-d72",
           "title": "Optimizar la campaña: apagar/escalar según métricas + Crear 1 conjunto de retargeting → Campaña optimizada + conjunto de retargeting activo",
+          "mission": "Optimiza tu campaña",
           "week": 11,
           "suggestedDay": 72,
           "classId": "c3-optimizaci-n-de-follow-23"
@@ -1054,6 +1106,7 @@ export const PROGRAM = {
         {
           "id": "t3-d73",
           "title": "Ejecutar llamadas de venta de la semana + Aplicar checklist pre-call y rescate de no-shows → Llamadas ejecutadas + estado de cierres hacia 5 clientes",
+          "mission": "Cierra llamadas de venta",
           "week": 11,
           "suggestedDay": 73,
           "classId": "c3-cierre-de-m-s-ventas-s-25"
@@ -1061,6 +1114,7 @@ export const PROGRAM = {
         {
           "id": "t3-d74",
           "title": "Montar dashboard de métricas de servicio con targets + Documentar primeros resultados de tus clientes (caso de éxito) → Dashboard de métricas de servicio + 1 caso de éxito documentado",
+          "mission": "Arma tu primer caso de éxito",
           "week": 11,
           "suggestedDay": 74,
           "classId": "c3-m-tricas-de-servicio-t-27"
@@ -1068,6 +1122,7 @@ export const PROGRAM = {
         {
           "id": "t3-d75",
           "title": "Escribir 1 SOP (atención de leads o seguimiento) + JD de Setter + Publicar pieza larga + seguir DM/ads → 1 SOP + JD de Setter + pieza larga",
+          "mission": "Escribe tu primer SOP",
           "week": 11,
           "suggestedDay": 75,
           "classId": "c3-contrataci-n-inicial-d-29"
@@ -1075,6 +1130,7 @@ export const PROGRAM = {
         {
           "id": "t3-d78",
           "title": "Pedir feedback estructurado a clientes + preparar 1 propuesta de renovación + Seguir tubería de cierre hacia 5 clientes → Feedback recogido + 1 propuesta de renovación",
+          "mission": "Pide feedback y renueva",
           "week": 12,
           "suggestedDay": 78,
           "classId": "c3-retenci-n-sem-10-12-de-31"
@@ -1082,6 +1138,7 @@ export const PROGRAM = {
         {
           "id": "t3-d79",
           "title": "Correr 1 ciclo PDCA sobre una métrica de servicio + Convertir 2 casos de éxito en piezas de contenido → 1 ciclo PDCA documentado + 2 piezas de caso de éxito publicadas",
+          "mission": "Convierte casos en contenido",
           "week": 12,
           "suggestedDay": 79,
           "classId": "c3-mejora-continua-pdca-k-33"
@@ -1089,6 +1146,7 @@ export const PROGRAM = {
         {
           "id": "t3-d80",
           "title": "Documentar el creativo/público ganador y su ROAS/CPL + Analizar 3 competidores que usan follow-me ads → Reporte de ads ganadores + análisis competitivo",
+          "mission": "Documenta tu anuncio ganador",
           "week": 12,
           "suggestedDay": 80,
           "classId": "c3-consolidaci-n-de-follo-35"
@@ -1096,6 +1154,7 @@ export const PROGRAM = {
         {
           "id": "t3-d81",
           "title": "Verificar el estado de los ~5 clientes y documentar primeros resultados + Consolidar batería de casos de éxito para el Webinar → Estado de ~5 clientes validados + batería de casos de éxito",
+          "mission": "5 clientes validados",
           "week": 12,
           "suggestedDay": 81,
           "classId": "c3-validaci-n-de-oferta-c-37"
@@ -1103,6 +1162,7 @@ export const PROGRAM = {
         {
           "id": "t3-d82",
           "title": "Consolidar reporte mensual (clientes, entrega, ads) + Publicar pieza larga + preparar criterio de salida Fase 3 → Reporte mensual + Fase 3 validada en Monthly = luz verde Webinar",
+          "mission": "Cierra la Fase 3",
           "week": 12,
           "suggestedDay": 82,
           "classId": "c3-cierre-de-fase-3-tuber-39"
@@ -1334,6 +1394,7 @@ export const PROGRAM = {
         {
           "id": "t4-d85",
           "title": "Diseñar el flujo completo de tu webinar (cada etapa con su objetivo) + Definir la promesa/tema de la clase → Flujo de webinar documentado + promesa de la clase",
+          "mission": "Diseña tu webinar",
           "week": 13,
           "suggestedDay": 85,
           "classId": "c4-modelo-de-webinar-del-1"
@@ -1341,6 +1402,7 @@ export const PROGRAM = {
         {
           "id": "t4-d86",
           "title": "Crear el grupo de WhatsApp + reglas + mensaje de bienvenida + Diseñar 3 hooks de contenido que lleven al grupo → Grupo de WhatsApp creado + 3 hooks de captación",
+          "mission": "Crea tu grupo de WhatsApp",
           "week": 13,
           "suggestedDay": 86,
           "classId": "c4-cta-a-grupo-de-whatsap-3"
@@ -1348,6 +1410,7 @@ export const PROGRAM = {
         {
           "id": "t4-d87",
           "title": "Publicar contenido de captación al grupo en todos los canales + Cargar 2-3 piezas de valor en el grupo → Campaña de captación al grupo activa + valor inicial en el grupo",
+          "mission": "Llena tu grupo de valor",
           "week": 13,
           "suggestedDay": 87,
           "classId": "c4-contenido-de-precalent-5"
@@ -1355,6 +1418,7 @@ export const PROGRAM = {
         {
           "id": "t4-d88",
           "title": "Armar el guion/slides de la clase (método paso a paso) + Definir la oferta y la urgencia (pocas plazas/día en Calendly) → Guion/slides de la clase + oferta con urgencia definida",
+          "mission": "Arma tu clase",
           "week": 13,
           "suggestedDay": 88,
           "classId": "c4-estructurar-la-clase-m-7"
@@ -1362,6 +1426,7 @@ export const PROGRAM = {
         {
           "id": "t4-d89",
           "title": "Configurar Calendly de webinar (plazas limitadas/día, 20min) + Publicar pieza larga + seguir poblando el grupo → Calendly de webinar configurado + grupo creciendo",
+          "mission": "Configura tu Calendly",
           "week": 13,
           "suggestedDay": 89,
           "classId": "c4-calendly-para-webinar-9"
@@ -1369,6 +1434,7 @@ export const PROGRAM = {
         {
           "id": "t4-d92",
           "title": "Enviar recordatorios e invitaciones a la clase a todo el grupo + Ensayar la clase (1 pasada cronometrada) → Clase agendada + grupo recordado + ensayo hecho",
+          "mission": "Ensaya tu clase",
           "week": 14,
           "suggestedDay": 92,
           "classId": "c4-log-stica-de-la-clase-11"
@@ -1376,6 +1442,7 @@ export const PROGRAM = {
         {
           "id": "t4-d93",
           "title": "Dictar la clase en vivo (o grabada evergreen) y abrir agendas de 20min + Registrar asistentes y agendas generadas → Clase dictada + agendas de 20min generadas",
+          "mission": "Tu primer webinar en vivo",
           "week": 14,
           "suggestedDay": 93,
           "classId": "c4-dictado-de-la-clase-m-13"
@@ -1383,6 +1450,7 @@ export const PROGRAM = {
         {
           "id": "t4-d94",
           "title": "Tomar las primeras llamadas de 20min y cerrar + Aplicar arsenal de objeciones comprimido → Primeras llamadas de 20min ejecutadas + cierres",
+          "mission": "Cierra tus llamadas de 20min",
           "week": 14,
           "suggestedDay": 94,
           "classId": "c4-llamada-de-cierre-de-2-15"
@@ -1390,6 +1458,7 @@ export const PROGRAM = {
         {
           "id": "t4-d95",
           "title": "Actualizar el Tracker/tubería con la fuente de cada agenda + Comparar CPR/calidad de lead por fuente → Tubería integrada con fuente por agenda + comparativa de fuentes",
+          "mission": "Integra tus 3 fuentes",
           "week": 14,
           "suggestedDay": 95,
           "classId": "c4-integraci-n-de-las-3-f-17"
@@ -1397,6 +1466,7 @@ export const PROGRAM = {
         {
           "id": "t4-d96",
           "title": "Onboardear a los clientes cerrados por webinar + Publicar pieza larga + sacar aprendizajes del 1er webinar → Clientes de webinar onboardeados + aprendizajes documentados",
+          "mission": "Onboardea tus clientes nuevos",
           "week": 14,
           "suggestedDay": 96,
           "classId": "c4-onboarding-de-los-clie-19"
@@ -1404,6 +1474,7 @@ export const PROGRAM = {
         {
           "id": "t4-d99",
           "title": "Auditar el embudo del webinar tramo por tramo e identificar el cuello + Diseñar 2 mejoras a testear en el próximo ciclo → Auditoría del embudo de webinar + 2 mejoras",
+          "mission": "Audita tu embudo",
           "week": 15,
           "suggestedDay": 99,
           "classId": "c4-optimizaci-n-del-webin-21"
@@ -1411,6 +1482,7 @@ export const PROGRAM = {
         {
           "id": "t4-d100",
           "title": "Definir plan de escalado por fuente (DM, Ads, Webinar) + Escribir 2 SOPs adicionales (webinar + entrega) → Plan de escalado + 2 SOPs nuevos",
+          "mission": "Define tu plan de escala",
           "week": 15,
           "suggestedDay": 100,
           "classId": "c4-escalado-del-sistema-c-23"
@@ -1418,6 +1490,7 @@ export const PROGRAM = {
         {
           "id": "t4-d101",
           "title": "Montar tu calendario operativo (Onboarding/1:1/Weekly/Monthly/Cierre) + Grabar 3 videos de coaching pregrabado para Skool (dudas repetidas) → Calendario operativo + 3 videos pregrabados en Skool",
+          "mission": "Monta tu calendario operativo",
           "week": 15,
           "suggestedDay": 101,
           "classId": "c4-calendario-operativo-c-25"
@@ -1425,6 +1498,7 @@ export const PROGRAM = {
         {
           "id": "t4-d102",
           "title": "Instalar el sistema de revisión semanal de métricas (las 8 de servicio + tubería) + Iniciar log Kaizen diario (1-3 mejoras/día) → Sistema de revisión semanal + log Kaizen iniciado",
+          "mission": "Instala tu revisión semanal",
           "week": 15,
           "suggestedDay": 102,
           "classId": "c4-mejora-continua-revisi-27"
@@ -1432,6 +1506,7 @@ export const PROGRAM = {
         {
           "id": "t4-d103",
           "title": "Diseñar 1 propuesta de upsell + programa de referidos + Publicar pieza larga + correr 2do ciclo de captación al grupo → Propuesta de upsell + programa de referidos + 2do grupo poblándose",
+          "mission": "Lanza tu programa de referidos",
           "week": 15,
           "suggestedDay": 103,
           "classId": "c4-expansi-n-y-fidelizaci-29"
@@ -1439,6 +1514,7 @@ export const PROGRAM = {
         {
           "id": "t4-d106",
           "title": "Auditar la tubería end-to-end e identificar los 3 cuellos prioritarios + Priorizar qué optimizar primero en los próximos 90 días → Auditoría final de tubería + top 3 cuellos priorizados",
+          "mission": "Audita toda tu tubería",
           "week": 16,
           "suggestedDay": 106,
           "classId": "c4-auditor-a-final-de-la-31"
@@ -1446,6 +1522,7 @@ export const PROGRAM = {
         {
           "id": "t4-d107",
           "title": "Correr o dejar programado el 2do ciclo de webinar con mejoras + Dejar el grupo y la clase listos para evergreen → 2do webinar corrido/programado + assets evergreen listos",
+          "mission": "Corre tu segundo webinar",
           "week": 16,
           "suggestedDay": 107,
           "classId": "c4-2do-webinar-iteraci-n-33"
@@ -1453,6 +1530,7 @@ export const PROGRAM = {
         {
           "id": "t4-d108",
           "title": "Calcular métricas finales y comparar contra inicio + Recalcular ICO/IEN del negocio → Reporte de métricas finales + ICO/IEN actualizado",
+          "mission": "Mide tus resultados finales",
           "week": 16,
           "suggestedDay": 108,
           "classId": "c4-m-tricas-finales-ltv-c-35"
@@ -1460,6 +1538,7 @@ export const PROGRAM = {
         {
           "id": "t4-d109",
           "title": "Redactar el plan de los próximos 90 días (qué optimizar, qué escalar, qué delegar) + Definir las métricas que vas a vigilar autónomamente → Plan de mejora continua de 90 días",
+          "mission": "Escribe tu plan de 90 días",
           "week": 16,
           "suggestedDay": 109,
           "classId": "c4-plan-de-mejora-continu-37"
@@ -1467,6 +1546,7 @@ export const PROGRAM = {
         {
           "id": "t4-d110",
           "title": "Consolidar el reporte final de los 4 meses + Asistir a la llamada de Cierre y definir el camino (renovar/escalar o transición) → Reporte final de 4 meses + camino definido; sistema completo corriendo y medido",
+          "mission": "Cierra tu programa",
           "week": 16,
           "suggestedDay": 110,
           "classId": "c4-cierre-del-programa-re-39"

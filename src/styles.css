@@ -1966,6 +1966,197 @@ a.secondary-button {
 }
 .rdmap2__legend strong { color: var(--text); }
 
+/* === Calendario del programa: cada fase es un "mes", de lunes a viernes === */
+.pcal {
+  margin: 14px 0 4px;
+  min-width: 0;
+  max-width: 100%;
+}
+.pcal__scroll {
+  display: flex;
+  gap: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  max-width: 100%;
+  padding: 2px 2px 12px;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+}
+.pcal-month {
+  flex: 0 0 auto;
+  width: 560px;
+  scroll-snap-align: start;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid var(--border, #eadfd9);
+  box-shadow: 0 8px 26px rgba(20, 23, 20, 0.07);
+  overflow: hidden;
+}
+.pcal-month__head {
+  background: var(--hue);
+  color: #fff;
+  padding: 16px 18px 14px;
+}
+.pcal-month__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.pcal-month__tag {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.22);
+  padding: 2px 9px;
+  border-radius: 999px;
+}
+.pcal-month__span {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+.pcal-month__name {
+  display: block;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+.pcal-month__sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.92;
+}
+.pcal-wdrow,
+.pcal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+.pcal-wdrow {
+  padding: 9px 9px 2px;
+  gap: 5px;
+}
+.pcal-wd {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dim, #9a908c);
+}
+.pcal-grid {
+  padding: 0 9px 12px;
+  gap: 5px;
+}
+.pcal-cell {
+  min-height: 66px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #eadfd9);
+  background: color-mix(in srgb, var(--hue) 6%, #fff);
+  padding: 5px 6px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+.pcal-cell--rest {
+  background: transparent;
+  border-color: transparent;
+}
+.pcal-cell__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pcal-cell__date {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text, #141714);
+}
+.pcal-cell--rest .pcal-cell__date {
+  color: var(--dim, #9a908c);
+  font-weight: 700;
+}
+.pcal-cell__mk {
+  display: inline-flex;
+  color: var(--dim, #9a908c);
+}
+.pcal-cell__mk--hero {
+  color: #e0a106;
+}
+.pcal-cell__mission {
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text, #141714);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pcal-cell--today {
+  border: 2px solid var(--hue);
+  background: color-mix(in srgb, var(--hue) 15%, #fff);
+}
+.pcal-cell--hero {
+  background: color-mix(in srgb, #f59e0b 16%, #fff);
+  border-color: color-mix(in srgb, #f59e0b 45%, #fff);
+}
+.pcal-cell__today {
+  align-self: flex-start;
+  margin-top: auto;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: var(--hue);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+.pcal__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.pcal__hint {
+  font-size: 11.5px;
+  color: var(--muted, #746b68);
+}
+.pcal__ics {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text, #141714);
+  background: #fff;
+  border: 1px solid var(--border-strong, #dccbc3);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.pcal__ics:hover {
+  background: #faf8f6;
+}
+.pcal__ics:active {
+  transform: scale(0.98);
+}
+.pcal__ics svg {
+  color: #2f6df6;
+}
+
 .welcome-form {
   display: grid;
   gap: 14px;

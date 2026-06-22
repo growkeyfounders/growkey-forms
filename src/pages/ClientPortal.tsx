@@ -6,6 +6,7 @@ import { ApiError, apiGet, apiPost } from "../api";
 import { ChatThread, threadMemberToChatMember } from "../components/ChatThread";
 import { Checklist } from "../components/Checklist";
 import { PhaseTimeline } from "../components/PhaseTimeline";
+import { ProgramCalendar } from "../components/ProgramCalendar";
 import { WeekView } from "../components/WeekView";
 import type { ClientRow, MessageRow, PortalData, TaskRow, ThreadMemberRow, ToggleResponse } from "../skoolTypes";
 import { supabase } from "../supabaseClient";
@@ -15,6 +16,14 @@ import { supabase } from "../supabaseClient";
 function localTodayIso() {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+}
+
+// El programa corre de lunes a viernes, así que el "día 0" ideal es un domingo
+// (día 1 = lunes = primera misión). Por defecto sugerimos el próximo domingo.
+function nextSundayIso() {
+  const base = localTodayIso();
+  const dow = new Date(`${base}T12:00:00Z`).getUTCDay();
+  return addDays(base, dow === 0 ? 0 : 7 - dow);
 }
 
 function firstName(name: string) {
@@ -38,7 +47,7 @@ export function ClientPortal() {
   const toastTimer = useRef<number | null>(null);
   const celebrationButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const [startDate, setStartDate] = useState(localTodayIso);
+  const [startDate, setStartDate] = useState(nextSundayIso);
   const [starting, setStarting] = useState(false);
 
   const load = useCallback(async () => {
@@ -268,132 +277,6 @@ export function ClientPortal() {
   );
 }
 
-const CALL_MAP: Array<[RegExp, string]> = [
-  [/onboarding/i, "Onboarding"],
-  [/weekly/i, "Weekly"],
-  [/monthly|mensual/i, "Mensual"],
-  [/cierre/i, "Cierre"],
-];
-
-function shortCallLabel(title: string): string {
-  const hit = CALL_MAP.find(([re]) => re.test(title));
-  return hit ? hit[1] : "Llamada";
-}
-
-type Milestone = { day: number; title: string; type?: string };
-
-function PhoneIcon() {
-  return (
-    <svg className="rdmap2-ic" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.3 1l-2.2 2.2z"
-      />
-    </svg>
-  );
-}
-
-function TrophyIcon() {
-  return (
-    <svg className="rdmap2-ic" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
-      <path
-        fill="currentColor"
-        d="M18 2H6v2H3v3a4 4 0 0 0 4 4h.3A5 5 0 0 0 11 13.9V16H8v2h8v-2h-3v-2.1A5 5 0 0 0 16.7 11H17a4 4 0 0 0 4-4V4h-3V2zM5 7V6h1v3a2 2 0 0 1-1-2zm14 0a2 2 0 0 1-1 2V6h1v1z"
-      />
-    </svg>
-  );
-}
-
-const RDMAP_HUES = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"];
-
-// Línea de tiempo premium: UN solo eje horizontal de duración REAL. Las fases
-// tienen ancho proporcional a su duración (3/4/5/4 sem), los hitos héroe van
-// sobre el eje en su día y las llamadas con el coach debajo.
-function RoadmapTimeline({ phases }: { phases: PhaseConfig[] }) {
-  const total = phases[phases.length - 1].endDay;
-  const pos = (day: number) => `${Math.min(96, Math.max(4, (day / total) * 100))}%`;
-  const pick = (type: string) =>
-    phases.flatMap((phase, i) =>
-      (((phase as { milestones?: Milestone[] }).milestones) ?? [])
-        .filter((m) => m.type === type)
-        .map((m) => ({ ...m, hue: RDMAP_HUES[i] }))
-    );
-  const heroes = pick("hero");
-  const calls = pick("call");
-  return (
-    <div className="rdmap2">
-      <div className="rdmap2__scroll">
-        <div className="rdmap2__inner">
-          <span className="rdmap2__cap rdmap2__cap--start">
-            <span className="rdmap2__cdot" aria-hidden="true" />
-            <span className="rdmap2__cap-lbl">Hoy</span>
-          </span>
-          <span className="rdmap2__cap rdmap2__cap--end">
-            <span className="rdmap2__cdot rdmap2__cdot--goal" aria-hidden="true" />
-            <span className="rdmap2__cap-lbl">Objetivo</span>
-          </span>
-
-          <div className="rdmap2__field">
-            <div className="rdmap2__bands">
-              {phases.map((phase, i) => (
-                <div
-                  className="rdmap2-band"
-                  key={phase.id}
-                  style={{ flexGrow: phase.endDay - phase.startDay, "--hue": RDMAP_HUES[i] } as React.CSSProperties}
-                >
-                  <span className="rdmap2-band__tag">Fase {phase.id}</span>
-                  <span className="rdmap2-band__name">{phase.name}</span>
-                  <span className="rdmap2-band__weeks">{Math.round((phase.endDay - phase.startDay) / 7)} semanas</span>
-                </div>
-              ))}
-            </div>
-
-            {heroes.map((h, i) => (
-              <div
-                className={`rdmap2-hero${i % 2 === 0 ? " rdmap2-hero--up" : ""}`}
-                key={`h-${h.day}`}
-                style={{ left: pos(h.day), "--hue": h.hue } as React.CSSProperties}
-              >
-                <span className="rdmap2-hero__label">
-                  <TrophyIcon /> {h.title}
-                </span>
-                <span className="rdmap2-hero__day">día {h.day}</span>
-                <span className="rdmap2-hero__stem" aria-hidden="true" />
-              </div>
-            ))}
-
-            <div className="rdmap2__spine" aria-hidden="true">
-              {phases.map((phase, i) => (
-                <span
-                  className="rdmap2__seg"
-                  key={phase.id}
-                  style={{ flexGrow: phase.endDay - phase.startDay, background: RDMAP_HUES[i] }}
-                />
-              ))}
-            </div>
-
-            {calls.map((c, i) => (
-              <div
-                className={`rdmap2-call${i % 2 ? " rdmap2-call--low" : ""}`}
-                key={`c-${c.day}`}
-                style={{ left: pos(c.day) }}
-              >
-                <span className="rdmap2-call__stem" aria-hidden="true" />
-                <span className="rdmap2-call__pill">
-                  <PhoneIcon /> {shortCallLabel(c.title)} · día {c.day}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <p className="rdmap2__legend">
-        <strong>16 semanas</strong> · fases de duración real (3 · 4 · 5 · 4 sem) · 6 llamadas con tu coach
-      </p>
-    </div>
-  );
-}
-
 function Welcome({
   client,
   program,
@@ -419,13 +302,13 @@ function Welcome({
           forma constante. Lo armas en 4 pasos: oferta, primeras ventas, validación y escala. Elige tu
           fecha y empezamos hoy.
         </p>
-        <RoadmapTimeline phases={program.phases} />
+        <ProgramCalendar phases={program.phases} startDate={startDate} todayIso={localTodayIso()} />
         <form className="welcome-form" onSubmit={onSubmit}>
           <label className="field">
             <span className="field__label">¿Qué día arrancas?</span>
             <span className="field__hint">
-              Esa fecha marca tu Día 1 y activa tu calendario de tareas. Por defecto es hoy; si ya
-              empezaste con el equipo, elige el día real.
+              Tu calendario corre de lunes a viernes. Por defecto es el próximo domingo (tu día 0);
+              el lunes arranca tu primera misión. Cámbiala si ya empezaste con el equipo.
             </span>
             <input
               min={addDays(localTodayIso(), -30)}

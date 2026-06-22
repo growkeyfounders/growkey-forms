@@ -1,6 +1,6 @@
-export type Milestone = { day: number; title: string; type: "call" | "launch" | "goal" };
+export type Milestone = { day: number; title: string; type: "call" | "hero" | "launch" | "goal" };
 export type SkoolClass = { id: string; title: string; url: string };
-export type BaseTask = { id: string; title: string; week: number; suggestedDay?: number; classId?: string };
+export type BaseTask = { id: string; title: string; mission?: string; week: number; suggestedDay?: number; classId?: string };
 export type PhaseConfig = {
   id: number; name: string; headline: string;
   startDay: number; endDay: number;

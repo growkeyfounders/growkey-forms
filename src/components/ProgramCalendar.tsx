@@ -127,13 +127,9 @@ function PhaseMonth({
   return (
     <div className="pcal-month" style={{ "--hue": hue } as CSSProperties}>
       <header className="pcal-month__head">
-        <div className="pcal-month__eyebrow">
-          <span className="pcal-month__tag">Fase {phase.id}</span>
-          <span className="pcal-month__span">{span}</span>
-        </div>
-        <strong className="pcal-month__name">{phase.name}</strong>
-        <span className="pcal-month__sub">
-          {Math.round((phase.endDay - phase.startDay) / 7)} semanas · {phase.baseTasks.length} misiones
+        <span className="pcal-month__tag">Fase {phase.id}</span>
+        <span className="pcal-month__meta">
+          {span} · {phase.baseTasks.length} misiones
         </span>
       </header>
       <div className="pcal-wdrow">
@@ -218,25 +214,56 @@ function buildIcs(phases: PhaseConfig[], schedule: Schedule) {
   return lines.join("\r\n");
 }
 
-// Línea de tiempo de un vistazo: el recorrido completo (Hoy → Objetivo) con las
-// 4 fases proporcionales a su duración y el logro héroe de cada una.
-function JourneyStrip({ phases }: { phases: PhaseConfig[] }) {
+function daysBetween(a: string, b: string) {
+  return Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 86_400_000);
+}
+
+// Posición (%) del punto "Hoy" sobre la línea de tiempo: cada fase ocupa un
+// cuarto (alineado con las 4 tarjetas), y dentro de su fase el punto avanza
+// proporcional al día actual. Entre más avanza el cliente, más a la derecha.
+function markerPct(phases: PhaseConfig[], schedule: Schedule, todayIso: string) {
+  const n = phases.length;
+  for (let i = 0; i < n; i++) {
+    const days = phases[i].baseTasks.map((t) => t.suggestedDay).filter((d): d is number => d != null);
+    const first = schedule.dayToDate.get(days[0])!;
+    const last = schedule.dayToDate.get(days[days.length - 1])!;
+    if (todayIso < first) return Math.max(3, (i / n) * 100);
+    if (todayIso <= last) {
+      const frac = Math.min(1, Math.max(0, daysBetween(first, todayIso) / Math.max(1, daysBetween(first, last))));
+      return Math.min(97, Math.max(3, ((i + frac) / n) * 100));
+    }
+  }
+  return 97;
+}
+
+// La línea de tiempo ES el título del calendario: las 4 fases (un cuarto cada
+// una, alineadas con las tarjetas de abajo) y un punto "Hoy" que avanza día a día.
+function JourneyTimeline({
+  phases,
+  schedule,
+  todayIso,
+}: {
+  phases: PhaseConfig[];
+  schedule: Schedule;
+  todayIso: string;
+}) {
+  const pct = markerPct(phases, schedule, todayIso);
+  const todayDay = schedule.dateToTask.get(todayIso)?.task.suggestedDay;
   return (
-    <div className="jstrip">
-      <span className="jstrip__cap">Hoy</span>
-      <div className="jstrip__bar">
+    <div className="jtl">
+      <div className="jtl__marker" style={{ left: `${pct}%` }}>
+        <span className="jtl__bubble">Hoy{todayDay ? ` · día ${todayDay}` : ""}</span>
+        <span className="jtl__pin" aria-hidden="true" />
+      </div>
+      <div className="jtl__track">
         {phases.map((p, i) => {
           const hero = p.milestones.find((m) => m.type === "hero");
           return (
-            <div
-              className="jstrip__seg"
-              key={p.id}
-              style={{ flexGrow: p.endDay - p.startDay, "--hue": HUES[i] } as CSSProperties}
-            >
-              <span className="jstrip__ph">Fase {p.id}</span>
-              <span className="jstrip__nm">{p.name}</span>
+            <div className="jtl__seg" key={p.id} style={{ "--hue": HUES[i] } as CSSProperties}>
+              <span className="jtl__ph">Fase {p.id}</span>
+              <span className="jtl__nm">{p.name}</span>
               {hero ? (
-                <span className="jstrip__hr">
+                <span className="jtl__hr">
                   <TrophyIcon /> {hero.title}
                 </span>
               ) : null}
@@ -244,7 +271,6 @@ function JourneyStrip({ phases }: { phases: PhaseConfig[] }) {
           );
         })}
       </div>
-      <span className="jstrip__cap jstrip__cap--goal">Objetivo</span>
     </div>
   );
 }
@@ -274,7 +300,7 @@ export function ProgramCalendar({
 
   return (
     <div className="pcal">
-      <JourneyStrip phases={phases} />
+      <JourneyTimeline phases={phases} schedule={schedule} todayIso={todayIso} />
       <div className="pcal__head">
         <span className="pcal__hint">Tu camino completo · hoy es tu día 1 · misiones de lunes a viernes</span>
         <button type="button" className="pcal__ics" onClick={downloadIcs}>

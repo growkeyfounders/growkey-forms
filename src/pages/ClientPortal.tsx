@@ -429,6 +429,13 @@ function DailyHome({
   busyTaskId: string | null;
   onToggle: (task: TaskRow) => void;
 }) {
+  useEffect(() => {
+    // La vista diaria usa el mismo tema claro (gris + verde) que el onboarding.
+    const shell = document.querySelector(".app-shell--client");
+    shell?.classList.add("app-shell--daily");
+    return () => shell?.classList.remove("app-shell--daily");
+  }, []);
+
   const { program, client } = data;
   const prog = client.day ?? 0;
   const phase = program.phases.find((p) => p.id === client.current_phase) ?? program.phases[0];

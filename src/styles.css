@@ -1764,154 +1764,207 @@ a.secondary-button {
   line-height: 1.4;
 }
 
-.rdmap {
-  margin: 6px 0 2px;
+/* === Línea de tiempo premium: eje horizontal de duración REAL === */
+.rdmap2 { margin: 12px 0 4px; }
+.rdmap2__scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
 }
-
-.rdmap__head {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.rdmap__cap {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.rdmap__cap-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
-}
-.rdmap__cap-dot--start { background: #9a908c; }
-.rdmap__cap-dot--goal { background: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15); }
-
-.rdmap__track {
+.rdmap2__inner {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  align-items: center;
-  height: 20px;
-  margin: 8px 0 16px;
+  height: 300px;
+  min-width: 620px;
 }
-.rdmap__track::before {
-  content: "";
+.rdmap2__field {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 6px;
-  transform: translateY(-50%);
-  border-radius: 999px;
-  background: linear-gradient(90deg, #3b82f6 0%, #10b981 36%, #f59e0b 68%, #ef4444 100%);
-}
-.rdmap__node {
-  position: relative;
-  justify-self: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 3px solid var(--bg);
-  box-shadow: 0 2px 6px rgba(20, 23, 20, 0.22);
-}
-.rdmap__node--1 { background: #3b82f6; }
-.rdmap__node--2 { background: #10b981; }
-.rdmap__node--3 { background: #f59e0b; }
-.rdmap__node--4 { background: #ef4444; }
-
-.rdmap__cards {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  left: 48px;
+  right: 48px;
+  top: 0;
+  bottom: 0;
 }
 
-.rdmap-card {
+/* Bandas de fase: ancho proporcional a la duración (3/4/5/4) */
+.rdmap2__bands {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 4px;
+}
+.rdmap2-band {
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border: 1px solid rgba(20, 23, 20, 0.07);
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(20, 23, 20, 0.06);
-  padding: 14px 14px 16px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-.rdmap-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(20, 23, 20, 0.12);
-}
-
-.rdmap-card__top {
-  display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
+  padding: 12px 6px 0;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--hue) 9%, transparent);
+  text-align: center;
 }
-
-.rdmap-card__num {
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  color: #fff;
+.rdmap2-band__tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--hue);
+}
+.rdmap2-band__name {
   font-size: 13px;
-  font-weight: 800;
-}
-.rdmap-card--1 .rdmap-card__num { background: #3b82f6; box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4); }
-.rdmap-card--2 .rdmap-card__num { background: #10b981; box-shadow: 0 3px 8px rgba(16, 185, 129, 0.4); }
-.rdmap-card--3 .rdmap-card__num { background: #f59e0b; box-shadow: 0 3px 8px rgba(245, 158, 11, 0.4); }
-.rdmap-card--4 .rdmap-card__num { background: #ef4444; box-shadow: 0 3px 8px rgba(239, 68, 68, 0.4); }
-
-.rdmap-card__days {
-  color: var(--dim);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.rdmap-card__title {
-  font-size: 15px;
   font-weight: 800;
   line-height: 1.2;
   color: var(--text);
+  margin-top: 1px;
+}
+.rdmap2-band__weeks {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-top: 2px;
 }
 
-.rdmap-card__desc {
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 12.5px;
-  line-height: 1.5;
+/* Eje: segmentos de ancho real */
+.rdmap2__spine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 178px;
+  height: 9px;
+  display: flex;
+  gap: 2px;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(20, 23, 20, 0.12);
 }
+.rdmap2__seg { height: 100%; }
 
-.rdmap-card__calls {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px solid rgba(20, 23, 20, 0.06);
+/* Extremos Hoy / Objetivo */
+.rdmap2__cap {
+  position: absolute;
+  top: 175px;
+  width: 48px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-.rdmap-card__calls li {
-  display: flex;
-  align-items: center;
-  gap: 7px;
+  gap: 5px;
+  font-size: 9.5px;
+  font-weight: 800;
   color: var(--text);
-  font-size: 11.5px;
-  font-weight: 700;
 }
-.rdmap-call__ic {
-  flex: 0 0 auto;
-  color: var(--dim);
+.rdmap2__cap--start { left: 0; align-items: flex-end; }
+.rdmap2__cap--end { right: 0; align-items: flex-start; }
+.rdmap2__cap-lbl { white-space: nowrap; }
+.rdmap2__cdot {
+  width: 13px;
+  height: 13px;
+  border-radius: 999px;
+  background: #9a908c;
+  border: 3px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(20, 23, 20, 0.2);
+}
+.rdmap2__cdot--goal {
+  background: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.16);
 }
 
-@media (max-width: 560px) {
-  .rdmap__cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Hitos héroe (sobre el eje) */
+.rdmap2-hero {
+  position: absolute;
+  bottom: 122px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 120px;
 }
+.rdmap2-hero__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--text);
+  text-align: center;
+}
+.rdmap2-hero__label .rdmap2-ic { flex: 0 0 auto; color: var(--hue); }
+.rdmap2-hero__day {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-top: 1px;
+}
+.rdmap2-hero__stem {
+  position: relative;
+  width: 1px;
+  height: 18px;
+  margin-top: 5px;
+  background: color-mix(in srgb, var(--hue) 50%, var(--border, #eadfd9));
+}
+.rdmap2-hero--up .rdmap2-hero__stem { height: 58px; }
+.rdmap2-hero__stem::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--hue);
+  border: 2px solid var(--bg);
+  transform: translateX(-50%);
+  box-shadow: 0 1px 5px rgba(20, 23, 20, 0.28);
+}
+
+/* Llamadas con el coach (bajo el eje) */
+.rdmap2-call {
+  position: absolute;
+  top: 187px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.rdmap2-call__stem {
+  position: relative;
+  width: 1px;
+  height: 16px;
+  background: var(--border-strong, #dccbc3);
+}
+.rdmap2-call__stem::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--dim);
+  border: 2px solid var(--bg);
+  transform: translateX(-50%);
+}
+.rdmap2-call--low .rdmap2-call__stem { height: 54px; }
+.rdmap2-call__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  margin-top: 3px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  background: #fff;
+  border: 1px solid var(--border, #eadfd9);
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(20, 23, 20, 0.07);
+}
+.rdmap2-call__pill .rdmap2-ic { flex: 0 0 auto; color: var(--dim); }
+
+.rdmap2__legend {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.rdmap2__legend strong { color: var(--text); }
 
 .welcome-form {
   display: grid;

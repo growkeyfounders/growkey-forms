@@ -13,26 +13,21 @@ export const PROGRAM = {
       "name": "Oferta y Contenido",
       "headline": "Defines tu nicho, tu oferta espejo y montas tu sistema de contenido",
       "startDay": 0,
-      "endDay": 28,
+      "endDay": 21,
       "milestones": [
         {
           "day": 1,
-          "title": "Llamada 1 — ONBOARDING (día 1-3)",
+          "title": "Llamada 1 — Onboarding",
           "type": "call"
         },
         {
-          "day": 8,
-          "title": "Cadencia interna",
-          "type": "call"
+          "day": 19,
+          "title": "Oferta lista y validada",
+          "type": "hero"
         },
         {
-          "day": 15,
-          "title": "Cadencia interna",
-          "type": "call"
-        },
-        {
-          "day": 22,
-          "title": "Llamada 2 — WEEKLY 1",
+          "day": 20,
+          "title": "Llamada 2 — Weekly 1",
           "type": "call"
         }
       ],
@@ -255,28 +250,28 @@ export const PROGRAM = {
         },
         {
           "id": "t1-d3",
-          "title": "Completar el Checklist de Selección de Nicho (Google Sheets), marcar honestamente → GO/NO-GO + Mapear en cuál ciclo de precio está tu nicho y cómo saltar al virtuoso → Checklist completado con veredicto GO/NO-GO + diagnóstico de ciclo de pr",
+          "title": "Completar el Checklist de Selección de Nicho (Google Sheets) y mapear el ciclo de precio → veredicto GO/NO-GO + diagnóstico de ciclo + Calcular ICO base (<1.5) e IEN con la calculadora e identificar 1 multiplicador a reducir → Checklist con GO/NO-GO + ICO/IEN calculados con diagnóstico y reducción propuesta",
           "week": 1,
           "suggestedDay": 3,
           "classId": "c1-checklist-de-selecci-n-5"
         },
         {
           "id": "t1-d4",
-          "title": "Calcular ICO base (1 nicho, 1 producto, 1-2 fuentes) con la calculadora; objetivo <1.5 + Estimar facturación y calcular IEN; identificar 1 multiplicador a reducir → ICO/IEN calculados con diagnóstico (baja/moderada/alta) y reducción propues",
+          "title": "Agendar y arrancar 10 entrevistas (15-20 min) con personas del nicho; pregunta gatillo: '¿Cuál es tu problema más doloroso en [área]?' + Llenar tabla de respuestas (problema, gasto actual, soluciones probadas, por qué fallan) → Mínimo 3-5 entrevistas hechas el primer día + tabla de respuestas iniciada",
           "week": 1,
           "suggestedDay": 4,
-          "classId": "c1-ndice-de-complejidad-o-7"
-        },
-        {
-          "id": "t1-d5",
-          "title": "Agendar y arrancar 10 entrevistas (15-20 min) con personas del nicho; pregunta gatillo: '¿Cuál es tu problema más doloroso en [área]?' + Llenar tabla de respuestas (problema, gasto actual, soluciones probadas, por qué fallan) → Mínimo 3-5 e",
-          "week": 1,
-          "suggestedDay": 5,
           "classId": "c1-investigaci-n-del-nich-9"
         },
         {
+          "id": "t1-d5",
+          "title": "Acelerar entrevistas con llamadas al nicho, grupos/foros y escucha de objeciones + Listar 5-10 condiciones latentes con citas textuales del nicho → Avance hacia las 10 entrevistas + lista preliminar de 5-10 condiciones latentes con citas",
+          "week": 1,
+          "suggestedDay": 5,
+          "classId": "c1-condiciones-latentes-e-12"
+        },
+        {
           "id": "t1-d8",
-          "title": "Completar las 10 entrevistas y documentar el Avatar (nombre, edad, ingresos, problema #1/#2/#3, lenguaje, dónde encontrarlo) + Listar 5-10 condiciones latentes con citas textuales del nicho → Avatar de Cliente Ideal (1 pág) + lista de 5-10 ",
+          "title": "Completar las 10 entrevistas y documentar el Avatar (nombre, edad, ingresos, problema #1/#2/#3, lenguaje, dónde encontrarlo) + Consolidar las condiciones latentes con sus citas → Avatar de Cliente Ideal (1 pág) + lista de 5-10 condiciones latentes cerrada",
           "week": 2,
           "suggestedDay": 8,
           "classId": "c1-cierre-del-avatar-comp-11"
@@ -290,94 +285,59 @@ export const PROGRAM = {
         },
         {
           "id": "t1-d10",
-          "title": "Definir tus 3 pilares editoriales con 2 ejemplos de tema cada uno + Construir banco de 15-20 ideas de contenido derivadas de las condiciones latentes/palabras-pozo → Documento de pilares de contenido + banco de 15-20 ideas etiquetadas por p",
+          "title": "Definir tus 3 pilares editoriales con 2 ejemplos cada uno y construir banco de 15-20 ideas derivadas de condiciones latentes/palabras-pozo + Analizar 5-10 bios reales del nicho línea por línea (¿condición latente? ¿prueba social? ¿CTA?) → Documento de pilares + banco de 15-20 ideas etiquetadas + análisis de bios",
           "week": 2,
           "suggestedDay": 10,
           "classId": "c1-arquitectura-de-conten-15"
         },
         {
           "id": "t1-d11",
-          "title": "Analizar 5-10 bios reales del nicho línea por línea (¿nombran condición latente? ¿prueba social? ¿CTA?) + Redactar 3 borradores de pieza corta (1 por pilar) usando palabras-pozo → Análisis de bios + 3 borradores de contenido corto",
+          "title": "Redactar 3 borradores de pieza corta (1 por pilar) usando palabras-pozo + Publicar las 2 primeras piezas reales, armar el calendario editorial de 4 semanas y configurar sistema de medición de leads/agendas por pieza (etiqueta en sheet) → 3 borradores + 2 piezas publicadas + calendario editorial + sheet de medición",
           "week": 2,
           "suggestedDay": 11,
-          "classId": "c1-estructura-de-comunica-17"
-        },
-        {
-          "id": "t1-d12",
-          "title": "Publicar las 2 primeras piezas reales + armar el calendario editorial de las próximas 4 semanas + Configurar sistema de medición de leads/agendas por pieza (etiqueta en sheet) → 2 piezas publicadas + calendario editorial + sheet de medición",
-          "week": 2,
-          "suggestedDay": 12,
           "classId": "c1-c-mo-grabar-editar-con-19"
         },
         {
-          "id": "t1-d15",
+          "id": "t1-d12",
           "title": "Mapear los 6 pilares en tu oferta (cuantificar confianza: oferta% / fe% / casos%) + Publicar pieza de Valor del día → 6 pilares mapeados (1 pág) + 1 pieza Valor publicada",
-          "week": 3,
-          "suggestedDay": 15,
+          "week": 2,
+          "suggestedDay": 12,
           "classId": "c1-la-oferta-como-motor-c-21"
         },
         {
-          "id": "t1-d16",
-          "title": "Escribir 5 preguntas retóricas que amplifiquen el dolor sin decir 'sufres' + Publicar pieza de Nicho del día (usar 1 pregunta de dolor como hook) → Script de 5 preguntas de dolor + 1 pieza Nicho publicada",
+          "id": "t1-d15",
+          "title": "Escribir 5 preguntas retóricas que amplifiquen el dolor sin decir 'sufres' + Redactar los 7 elementos de tu oferta en mensaje corto / largo / pitch + Publicar pieza de Nicho del día (usar 1 pregunta de dolor como hook) → Script de 5 preguntas de dolor + Oferta de 7 elementos en 3 formatos + 1 pieza Nicho publicada",
           "week": 3,
-          "suggestedDay": 16,
-          "classId": "c1-5-fuentes-de-dolor-y-a-23"
-        },
-        {
-          "id": "t1-d17",
-          "title": "Redactar los 7 elementos de tu oferta + mensaje corto / largo / pitch + Publicar pieza de Autoridad del día → Oferta de 7 elementos completa en 3 formatos + 1 pieza Autoridad publicada",
-          "week": 3,
-          "suggestedDay": 17,
+          "suggestedDay": 15,
           "classId": "c1-composici-n-de-la-ofer-25"
         },
         {
-          "id": "t1-d18",
-          "title": "Calcular valor generado y definir precio con ratio 3-10x + Diseñar tu oferta en los 3 formatos (escalera/cebolla/única) y elegir el de tu etapa → Análisis valor-precio + decisión de estructura de oferta justificada",
+          "id": "t1-d16",
+          "title": "Calcular valor generado y definir precio con ratio 3-10x + Diseñar tu oferta en los 3 formatos (escalera/cebolla/única) y elegir el de tu etapa + Publicar pieza de Autoridad del día → Análisis valor-precio + decisión de estructura de oferta justificada + 1 pieza Autoridad publicada",
           "week": 3,
-          "suggestedDay": 18,
+          "suggestedDay": 16,
           "classId": "c1-desajuste-valor-precio-27"
         },
         {
-          "id": "t1-d19",
-          "title": "Redactar bio resonante (máx 3 líneas: público+descriptor+condición latente+diferencial+prueba social+CTA) + Publicar primera pieza LARGA de la semana + desplegar la bio en todos los perfiles → Bio resonante desplegada en todos los canales +",
+          "id": "t1-d17",
+          "title": "Redactar bio resonante (máx 3 líneas: público+descriptor+condición latente+diferencial+prueba social+CTA) + Publicar primera pieza LARGA de la semana y desplegar la bio en todos los perfiles → Bio resonante desplegada en todos los canales + 1 pieza larga publicada",
           "week": 3,
-          "suggestedDay": 19,
+          "suggestedDay": 17,
           "classId": "c1-resonancia-redactar-la-29"
         },
         {
-          "id": "t1-d22",
-          "title": "Carta de compromiso de cambio de lentes (paradigma viejo→nuevo + 3 acciones incómodas) + Publicar pieza de Valor del día → Carta de compromiso firmada + 1 pieza publicada",
-          "week": 4,
-          "suggestedDay": 22,
-          "classId": "c1-mindset-ciclo-paradigm-31"
-        },
-        {
-          "id": "t1-d23",
-          "title": "Diseñar el Canvas de Oferta Espejo (qué logra el cliente / tu riesgo / precio / bolsa de presión / diferenciador) + Publicar pieza de Nicho del día → Canvas de Oferta Espejo (1 pág) + 1 pieza publicada",
-          "week": 4,
-          "suggestedDay": 23,
+          "id": "t1-d18",
+          "title": "Carta de compromiso de cambio de lentes (paradigma viejo→nuevo + 3 acciones incómodas) + Diseñar el Canvas de Oferta Espejo (qué logra el cliente / tu riesgo / precio / bolsa de presión / diferenciador) + Publicar pieza del día → Carta de compromiso firmada + Canvas de Oferta Espejo (1 pág) + 1 pieza publicada",
+          "week": 3,
+          "suggestedDay": 18,
           "classId": "c1-oferta-espejo-alinear-33"
         },
         {
-          "id": "t1-d24",
-          "title": "Mostrar bio + oferta a 3-5 personas del nicho (no amigos); registrar reacción; buscar '¡esto es para mí!' + Publicar pieza de Autoridad del día → Registro de validación (3-5 reacciones) + ajustes si no resuena + 1 pieza publicada",
-          "week": 4,
-          "suggestedDay": 24,
+          "id": "t1-d19",
+          "title": "Mostrar bio + oferta a 3-5 personas del nicho (no amigos); registrar reacción buscando '¡esto es para mí!' + Completar el Checklist Pre-Launch, cerrar gaps y mapear la tubería ideal con 3 cuellos de botella + Publicar pieza larga y preparar checklist de salida para la Weekly 1:1 → Fase 1 cerrada: oferta validada (3-5 reacciones) + Checklist Pre-Launch completo + tubería con 3 cuellos; avatar+bio+contenido listos para la Weekly 1:1",
+          "week": 3,
+          "suggestedDay": 19,
           "classId": "c1-validaci-n-de-resonanc-35"
-        },
-        {
-          "id": "t1-d25",
-          "title": "Completar el Checklist Pre-Launch y cerrar gaps + Mapear tu tubería ideal e identificar 3 cuellos de botella a vigilar → Checklist Pre-Launch completo + diagrama de tubería con 3 cuellos",
-          "week": 4,
-          "suggestedDay": 25,
-          "classId": "c1-checklist-pre-launch-d-37"
-        },
-        {
-          "id": "t1-d26",
-          "title": "Publicar pieza larga de la semana (caso/análisis o método) + Preparar checklist de salida de Fase 1 para la Weekly 1:1 → Fase 1 cerrada: oferta+avatar+bio+contenido listos; validado en Weekly 1:1",
-          "week": 4,
-          "suggestedDay": 26,
-          "classId": "c1-repaso-de-fase-1-y-pre-39"
         }
       ],
       "requiredForms": []
@@ -386,27 +346,22 @@ export const PROGRAM = {
       "id": 2,
       "name": "Primeras Ventas",
       "headline": "Tu motor de DM en frío trae las primeras llamadas y tus primeras ventas",
-      "startDay": 28,
-      "endDay": 56,
+      "startDay": 21,
+      "endDay": 49,
       "milestones": [
         {
-          "day": 29,
-          "title": "Cadencia interna",
-          "type": "call"
-        },
-        {
           "day": 36,
-          "title": "Llamada 3 — WEEKLY/FEEDBACK DE SISTEMA (fin de",
+          "title": "Llamada 3 — Weekly / Feedback de sistema",
           "type": "call"
         },
         {
-          "day": 43,
-          "title": "Cadencia interna",
-          "type": "call"
+          "day": 46,
+          "title": "Tu primera venta",
+          "type": "hero"
         },
         {
-          "day": 50,
-          "title": "Llamada 4 — MONTHLY (mes 2, fin de Sem 8)",
+          "day": 47,
+          "title": "Llamada 4 — Mensual (balance)",
           "type": "call"
         }
       ],
@@ -614,143 +569,143 @@ export const PROGRAM = {
       ],
       "baseTasks": [
         {
-          "id": "t2-d29",
+          "id": "t2-d22",
           "title": "Estudiar el Flow y dibujar tu propio diagrama de 4 estados para tu plataforma + Elegir plataforma(s) y optimizar el perfil (foto, feed, destacados) → Diagrama de 4 estados propio + perfil optimizado",
-          "week": 5,
-          "suggestedDay": 29,
+          "week": 4,
+          "suggestedDay": 22,
           "classId": "c2-el-sistema-de-dm-en-fr-1"
         },
         {
-          "id": "t2-d30",
+          "id": "t2-d23",
           "title": "Copiar y personalizar el Tracker por plataforma (columnas A/B/C/D + fórmulas MSR/PRR/CSR/ABR) + Configurar Calendly con enlace único y disponibilidad → Tracker funcional + Calendly configurado",
-          "week": 5,
-          "suggestedDay": 30,
+          "week": 4,
+          "suggestedDay": 23,
           "classId": "c2-setup-del-tracker-goog-3"
         },
         {
-          "id": "t2-d31",
+          "id": "t2-d24",
           "title": "Scrapear 30 leads del nicho y cargarlos en el Tracker como 'Iniciado (A)' + Deduplicar con ChatGPT → 30 leads cargados en estado A + evidencia de deduplicación",
-          "week": 5,
-          "suggestedDay": 31,
+          "week": 4,
+          "suggestedDay": 24,
           "classId": "c2-scraping-de-leads-b-sq-5"
         },
         {
-          "id": "t2-d32",
+          "id": "t2-d25",
           "title": "Mapear 3 competidores y crear 3 variantes de Caballo de Troya que rompan el patrón + Grabar tu Caballo de Troya → Análisis de competencia + 3 scripts + 1 Caballo de Troya grabado",
-          "week": 5,
-          "suggestedDay": 32,
+          "week": 4,
+          "suggestedDay": 25,
           "classId": "c2-caballo-de-troya-video-7"
         },
         {
-          "id": "t2-d33",
+          "id": "t2-d26",
           "title": "Enviar los primeros 10-30 Caballos de Troya y registrarlos en el Tracker + Publicar pieza larga de la semana → Primeros 10-30 Caballos enviados y trackeados + 1 pieza larga",
-          "week": 5,
-          "suggestedDay": 33,
+          "week": 4,
+          "suggestedDay": 26,
           "classId": "c2-daily-workflow-am-pm-1-9"
         },
         {
-          "id": "t2-d36",
+          "id": "t2-d29",
           "title": "Grabar el VSL evergreen de 90s nativo de plataforma + Enviar VSL a los leads que dieron permiso (mover a estado B) → VSL evergreen grabado + primeros leads movidos a B",
-          "week": 6,
-          "suggestedDay": 36,
+          "week": 5,
+          "suggestedDay": 29,
           "classId": "c2-vsl-evergreen-nativo-9-11"
         },
         {
-          "id": "t2-d37",
+          "id": "t2-d30",
           "title": "Crear 1 Loom personalizado para un lead de alto potencial (con visuals en Miro/Canva) + Documentar las 2-3 ineficiencias encontradas y cómo las presentaste → 1 Loom personalizado + guion desglosado por sección",
-          "week": 6,
-          "suggestedDay": 37,
+          "week": 5,
+          "suggestedDay": 30,
           "classId": "c2-loom-personalizado-4-s-13"
         },
         {
-          "id": "t2-d38",
+          "id": "t2-d31",
           "title": "Escribir las 14 piezas de follow-up (7B + 7C) con objetivo de cada una + Aplicar FUPs a los leads pendientes según su estado → 14 mensajes de follow-up listos + FUPs aplicados en el Tracker",
-          "week": 6,
-          "suggestedDay": 38,
+          "week": 5,
+          "suggestedDay": 31,
           "classId": "c2-cadenas-de-follow-up-7-15"
         },
         {
-          "id": "t2-d39",
+          "id": "t2-d32",
           "title": "Enviar Calendly a los leads interesados (mover a estado C) + Correr Daily Workflow AM/PM a volumen (objetivo acumulado 100+ Caballos) → Leads en estado C + acumulado de envíos hacia 100 Caballos",
-          "week": 6,
-          "suggestedDay": 39,
+          "week": 5,
+          "suggestedDay": 32,
           "classId": "c2-calendly-y-raz-n-para-17"
         },
         {
-          "id": "t2-d40",
+          "id": "t2-d33",
           "title": "Generar reporte de métricas del Tracker (MSR/PRR/CSR/ABR) para la Weekly + Publicar pieza larga + marcar 2-3 piezas ganadoras de contenido → Reporte de métricas + primeras agendas registradas + 2-3 piezas ganadoras marcadas",
-          "week": 6,
-          "suggestedDay": 40,
+          "week": 5,
+          "suggestedDay": 33,
           "classId": "c2-lectura-de-m-tricas-y-19"
         },
         {
-          "id": "t2-d43",
+          "id": "t2-d36",
           "title": "Armar tu Script de 5 etapas con tiempos (Diag 30-40min, Pitch 5-10, etc.) + Continuar Daily Workflow + publicar pieza del día → Script de llamada de 5 etapas personalizado",
-          "week": 7,
-          "suggestedDay": 43,
+          "week": 6,
+          "suggestedDay": 36,
           "classId": "c2-arquitectura-de-ventas-21"
         },
         {
-          "id": "t2-d44",
+          "id": "t2-d37",
           "title": "Grabar 3 pitches SIN mencionar características (solo A→B→puente) + Enviar Calendly/FUPs del día → 3 pitches de transformación grabados (2 min c/u)",
-          "week": 7,
-          "suggestedDay": 44,
+          "week": 6,
+          "suggestedDay": 37,
           "classId": "c2-5-principios-de-persua-23"
         },
         {
-          "id": "t2-d45",
+          "id": "t2-d38",
           "title": "Documentar 10 objeciones reales con redireccionamiento + pregunta socrática + Role-play de objeciones con un par (grabado) → Arsenal de 10 objeciones + video de role-play",
-          "week": 7,
-          "suggestedDay": 45,
+          "week": 6,
+          "suggestedDay": 38,
           "classId": "c2-las-10-armas-de-cierre-25"
         },
         {
-          "id": "t2-d46",
+          "id": "t2-d39",
           "title": "Tomar la primera llamada de venta agendada y grabarla + Aplicar diagnóstico profundo (lead habla 80%) → 1 llamada de venta real ejecutada y grabada",
-          "week": 7,
-          "suggestedDay": 46,
+          "week": 6,
+          "suggestedDay": 39,
           "classId": "c2-pre-call-confirmaci-n-27"
         },
         {
-          "id": "t2-d47",
+          "id": "t2-d40",
           "title": "Escuchar tu llamada grabada y anotar 3 ajustes + Publicar pieza larga + seguir DM a volumen → Auto-análisis de llamada (3 ajustes) + pieza larga publicada",
-          "week": 7,
-          "suggestedDay": 47,
+          "week": 6,
+          "suggestedDay": 40,
           "classId": "c2-auto-revisi-n-de-llama-29"
         },
         {
-          "id": "t2-d50",
+          "id": "t2-d43",
           "title": "Medir tu tubería de la semana (conversaciones, calendarios, agendadas, presentadas, cerradas) + Identificar tu cuello de botella principal → Spreadsheet de tubería de 7 días + cuello identificado",
-          "week": 8,
-          "suggestedDay": 50,
+          "week": 7,
+          "suggestedDay": 43,
           "classId": "c2-la-tuber-a-de-ventas-c-31"
         },
         {
-          "id": "t2-d51",
+          "id": "t2-d44",
           "title": "Correr Doctor DM sobre tus métricas y documentar causa+ajuste + Si aplica, montar A/B test de Caballo de Troya en cuenta nueva → Diagnóstico Doctor DM documentado + plan de ajuste",
-          "week": 8,
-          "suggestedDay": 51,
+          "week": 7,
+          "suggestedDay": 44,
           "classId": "c2-doctor-dm-aplicado-dia-33"
         },
         {
-          "id": "t2-d52",
+          "id": "t2-d45",
           "title": "Tomar 2da/3ra llamada de venta y aplicar el arsenal + Role-play socrático+reencuadre con 'no tengo plata' (grabado) → Llamadas adicionales ejecutadas + video role-play de cierre",
-          "week": 8,
-          "suggestedDay": 52,
+          "week": 7,
+          "suggestedDay": 45,
           "classId": "c2-manejo-de-objeciones-e-35"
         },
         {
-          "id": "t2-d53",
+          "id": "t2-d46",
           "title": "Cerrar/avanzar las agendas activas + Elegir 2-3 piezas ganadoras y documentar por qué (leads/agendas generadas) → Estado de cierres + lista de 2-3 piezas ganadoras justificadas",
-          "week": 8,
-          "suggestedDay": 53,
+          "week": 7,
+          "suggestedDay": 46,
           "classId": "c2-cierre-y-primeros-cobr-37"
         },
         {
-          "id": "t2-d54",
+          "id": "t2-d47",
           "title": "Consolidar reporte mensual (agendas, llamadas, cierres, métricas DM) + Publicar pieza larga + preparar criterio de salida Fase 2 → Reporte mensual consolidado; Fase 2 validada en el Monthly",
-          "week": 8,
-          "suggestedDay": 54,
+          "week": 7,
+          "suggestedDay": 47,
           "classId": "c2-cierre-de-fase-2-qu-de-39"
         }
       ],
@@ -760,27 +715,17 @@ export const PROGRAM = {
       "id": 3,
       "name": "Validar",
       "headline": "Entregas a tus clientes, obtienen resultados (oferta probada) y amplificas con Follow-Me Ads",
-      "startDay": 56,
+      "startDay": 49,
       "endDay": 84,
       "milestones": [
         {
-          "day": 57,
-          "title": "Cadencia interna",
-          "type": "call"
+          "day": 81,
+          "title": "5 clientes validados",
+          "type": "hero"
         },
         {
-          "day": 64,
-          "title": "Cadencia interna",
-          "type": "call"
-        },
-        {
-          "day": 71,
-          "title": "Cadencia interna",
-          "type": "call"
-        },
-        {
-          "day": 78,
-          "title": "Llamada 5 — MONTHLY (mes 3, fin de Sem 12)",
+          "day": 82,
+          "title": "Llamada 5 — Mensual (balance)",
           "type": "call"
         }
       ],
@@ -988,6 +933,41 @@ export const PROGRAM = {
       ],
       "baseTasks": [
         {
+          "id": "t3-d50",
+          "title": "Seguir tubería DM→llamada→cierre con foco en llegar a 5 clientes (scrapear nuevos leads, FUPs, agendar) + Medir cuántos clientes cerrados/onboardeados llevas vs la meta de 5 → Pipeline de cierre actualizado + conteo de clientes hacia la meta de 5",
+          "week": 8,
+          "suggestedDay": 50,
+          "classId": "c3-cierre-de-m-s-ventas-s-25"
+        },
+        {
+          "id": "t3-d51",
+          "title": "Leer la campaña Follow-Me Ads tras el ciclo de aprendizaje de 3-5 días sin tocar nada antes de tiempo (CPM↓/CTR↑) + Anotar qué conjunto/creativo respira mejor → Lectura disciplinada de la campaña (3-5 días) + diagnóstico inicial CPM/CTR",
+          "week": 8,
+          "suggestedDay": 51,
+          "classId": "c3-disciplina-cpm-ctr-lee-14"
+        },
+        {
+          "id": "t3-d52",
+          "title": "Dar seguimiento 1:1 a los clientes activos en Uso Activo (check-in semanal, revisar accionables del roadmap, desbloquear) + Confirmar que cada cliente avanza hacia su primer resultado → Seguimiento 1:1 de clientes activos (notas por cliente) + estado de avance hacia primer resultado",
+          "week": 8,
+          "suggestedDay": 52,
+          "classId": "c3-uso-activo-sem-2-10-de-15"
+        },
+        {
+          "id": "t3-d53",
+          "title": "Documentar los primeros resultados que van apareciendo en clientes (métrica antes→después, cita textual) + Capturar evidencia (capturas, mensajes) para futuros casos → Bitácora de resultados emergentes por cliente + evidencia capturada",
+          "week": 8,
+          "suggestedDay": 53,
+          "classId": "c3-documentar-primeros-re-28"
+        },
+        {
+          "id": "t3-d54",
+          "title": "Ajustar la entrega según lo aprendido en el seguimiento (afinar entregables/accionables por etapa del Journey) + Continuar tubería de cierre hacia los 5 clientes + publicar pieza larga → Entrega ajustada (entregables/accionables refinados) + pipeline de cierre al día",
+          "week": 8,
+          "suggestedDay": 54,
+          "classId": "c3-entregables-y-accionab-2"
+        },
+        {
           "id": "t3-d57",
           "title": "Mapear tu Customer Journey con entregables + accionables + deadlines por etapa + Continuar DM + contenido → Customer Journey documentado (tabla por etapa)",
           "week": 9,
@@ -1138,23 +1118,13 @@ export const PROGRAM = {
       "endDay": 112,
       "milestones": [
         {
-          "day": 85,
-          "title": "Cadencia interna",
-          "type": "call"
+          "day": 93,
+          "title": "Tu primer webinar en vivo",
+          "type": "hero"
         },
         {
-          "day": 92,
-          "title": "Cadencia interna",
-          "type": "call"
-        },
-        {
-          "day": 99,
-          "title": "Cadencia interna",
-          "type": "call"
-        },
-        {
-          "day": 106,
-          "title": "Llamada 6 — CIERRE / MEJORA CONTINUA (fin de S",
+          "day": 110,
+          "title": "Llamada 6 — Cierre / Mejora continua",
           "type": "call"
         }
       ],

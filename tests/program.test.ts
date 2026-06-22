@@ -78,16 +78,19 @@ describe("isValidDateIso", () => {
 describe("fases", () => {
   it("expectedPhaseForDay", () => {
     expect(expectedPhaseForDay(0).id).toBe(1);
-    expect(expectedPhaseForDay(27).id).toBe(1);
-    expect(expectedPhaseForDay(28).id).toBe(2);
-    expect(expectedPhaseForDay(56).id).toBe(3);
+    expect(expectedPhaseForDay(20).id).toBe(1);
+    expect(expectedPhaseForDay(21).id).toBe(2);
+    expect(expectedPhaseForDay(48).id).toBe(2);
+    expect(expectedPhaseForDay(49).id).toBe(3);
+    expect(expectedPhaseForDay(83).id).toBe(3);
     expect(expectedPhaseForDay(84).id).toBe(4);
     expect(expectedPhaseForDay(500).id).toBe(4);
   });
   it("isLate compara contra endDay de la fase ACTUAL del cliente", () => {
     expect(isLate(1, 10)).toBe(false);
-    expect(isLate(1, 29)).toBe(true);
-    expect(isLate(2, 40)).toBe(false);
+    expect(isLate(1, 25)).toBe(true);
+    expect(isLate(2, 45)).toBe(false);
+    expect(isLate(3, 90)).toBe(true);
     expect(isLate(4, 200)).toBe(true);
   });
   it("phaseById", () => {

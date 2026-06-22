@@ -321,34 +321,77 @@ function JourneyTimeline({
 }) {
   const pct = markerPct(phases, schedule, todayIso);
   const todayDay = schedule.dateToTask.get(todayIso)?.task.suggestedDay;
+  // Día 1 => fase 1 "en curso", fases 2-4 pendientes. El índice de la fase activa lo da pct.
+  const activeIdx = Math.min(phases.length - 1, Math.floor((pct / 100) * phases.length));
   return (
     <div className="jtl">
-      <div className="jtl__line">
-        {phases.map((p, i) => (
-          <span className="jtl__seg" key={p.id} style={{ "--hue": HUES[i] } as CSSProperties} />
-        ))}
+      {/* Barra píldora monocroma: relleno verde lima hasta "Hoy", gris el resto, meta a la derecha */}
+      <div className="jtl__bar">
+        <span className="jtl__bar-fill" style={{ width: `${pct}%` }} />
         <span className="jtl__goal" aria-hidden="true" />
-        <span className="jtl__goal-lbl">Objetivo</span>
+        <span className="jtl__goal-lbl">Meta</span>
         <div className="jtl__dot" style={{ left: `${pct}%` }}>
           <span className="jtl__dot-lbl">Hoy{todayDay ? ` · día ${todayDay}` : ""}</span>
         </div>
       </div>
-      <div className="jtl__labels">
+      {/* 4 pasos alineados con las 4 tarjetas de mes: círculo de estado + fase + hito hero */}
+      <ol className="jtl__steps">
         {phases.map((p, i) => {
           const hero = p.milestones.find((m) => m.type === "hero");
+          const state = i < activeIdx ? "done" : i === activeIdx ? "active" : "pending";
+          const isGoal = i === phases.length - 1;
           return (
-            <div className="jtl__label" key={p.id} style={{ "--hue": HUES[i] } as CSSProperties}>
-              <span className="jtl__l-ph">Fase {p.id}</span>
-              <span className="jtl__l-nm">{p.name}</span>
-              {hero ? (
-                <span className="jtl__l-hr">
-                  <TrophyIcon /> {hero.title}
+            <li
+              className={`jtl__step jtl__step--${state}${isGoal ? " jtl__step--goal" : ""}`}
+              key={p.id}
+            >
+              <span className="jtl__step-mark" aria-hidden="true">
+                {state === "done" ? (
+                  <svg viewBox="0 0 24 24" width="13" height="13">
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 12.5l4.2 4.3L19 7"
+                    />
+                  </svg>
+                ) : state === "active" ? (
+                  <span className="jtl__step-pulse" />
+                ) : isGoal ? (
+                  <svg viewBox="0 0 24 24" width="12" height="12">
+                    <path
+                      fill="currentColor"
+                      d="M6 3a1 1 0 0 1 1 1v1.4l9.3-1.9a1 1 0 0 1 1.2 1.2l-1.1 4.3 1.1 4.3a1 1 0 0 1-1.2 1.2L7 12.6V21a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1z"
+                    />
+                  </svg>
+                ) : (
+                  <span className="jtl__step-num">{p.id}</span>
+                )}
+              </span>
+              <span className="jtl__step-body">
+                <span className="jtl__step-ph">
+                  Fase {p.id}
+                  {state === "active"
+                    ? " · en curso"
+                    : state === "done"
+                      ? " · hecho"
+                      : isGoal
+                        ? " · meta"
+                        : " · próximo"}
                 </span>
-              ) : null}
-            </div>
+                <span className="jtl__step-nm">{p.name}</span>
+                {hero ? (
+                  <span className="jtl__step-hr">
+                    <TrophyIcon /> {hero.title}
+                  </span>
+                ) : null}
+              </span>
+            </li>
           );
         })}
-      </div>
+      </ol>
     </div>
   );
 }

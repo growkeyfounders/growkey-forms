@@ -4459,6 +4459,12 @@ a.secondary-button {
   --muted: #6b7066;
   --dim: #9a9a94;
   --border: #e2e2de;
+  /* Sistema de sombras en capas (soft 3D, contacto nítido + flote difuso) */
+  --shadow-clay-sm: 0 1px 2px rgba(20, 22, 18, 0.04), 0 4px 10px rgba(20, 22, 18, 0.05);
+  --shadow-clay-md: 0 1px 2px rgba(20, 22, 18, 0.04), 0 10px 24px -10px rgba(20, 22, 18, 0.1);
+  --shadow-clay-lg: 0 2px 6px rgba(20, 22, 18, 0.06), 0 18px 40px -16px rgba(20, 22, 18, 0.16);
+  --shadow-lime-glow: 0 0 0 1px rgba(163, 230, 53, 0.3), 0 8px 20px -8px rgba(132, 204, 22, 0.26),
+    0 24px 48px -20px rgba(20, 22, 18, 0.12);
 }
 .app-shell--onboarding .portal--welcome {
   position: relative;
@@ -4677,10 +4683,7 @@ a.secondary-button {
   border-radius: 18px;
   background: #ffffff;
   border: 1px solid rgba(163, 230, 53, 0.5);
-  box-shadow:
-    0 0 0 1px rgba(163, 230, 53, 0.32),
-    0 0 28px rgba(163, 230, 53, 0.42),
-    0 12px 34px rgba(20, 22, 18, 0.1);
+  box-shadow: var(--shadow-lime-glow);
   text-align: left;
 }
 .app-shell--onboarding .welcome-form .field {
@@ -4819,7 +4822,7 @@ a.secondary-button {
   -webkit-backdrop-filter: none;
   border: 1px solid #e7e7e3;
   border-radius: 20px;
-  box-shadow: 0 10px 28px rgba(20, 22, 18, 0.06);
+  box-shadow: var(--shadow-clay-md);
 }
 .app-shell--onboarding .welcome-roadmap .pcal-month__tag {
   background: var(--hue);
@@ -4861,7 +4864,8 @@ a.secondary-button {
   color: #a3a39d;
 }
 .app-shell--onboarding .welcome-roadmap .pcal-cell[role="button"]:hover {
-  box-shadow: 0 6px 16px rgba(20, 22, 18, 0.12);
+  box-shadow: var(--shadow-clay-sm);
+  transform: translateY(-1px);
 }
 
 /* Botón "Añadir al calendario" + hint -> claro */
@@ -4922,6 +4926,7 @@ a.secondary-button {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid #e7e7e3;
+  box-shadow: var(--shadow-clay-lg);
 }
 .app-shell--onboarding .welcome-roadmap .pcal-modal__action {
   color: #5a5f56;
@@ -4964,4 +4969,205 @@ a.secondary-button {
 .app-shell--onboarding .welcome-roadmap .pcal-cell__mission {
   font-size: 9px;
   line-height: 1.12;
+}
+
+/* ===== 13. Stepper de progreso (onboarding) — barra píldora verde+gris + 4 pasos.
+   Va al final para ganar la cascada a las reglas .jtl* viejas (mismo specificity). ===== */
+.app-shell--onboarding .welcome-roadmap .jtl {
+  position: relative;
+  margin: 8px 0 10px;
+  padding-top: 26px;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__bar {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #e7e7e3;
+  box-shadow: inset 0 1px 2px rgba(20, 22, 18, 0.07);
+}
+.app-shell--onboarding .welcome-roadmap .jtl__bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #84cc16, #a3e635);
+  box-shadow: 0 1px 3px rgba(132, 204, 22, 0.4);
+  transition: width 0.45s ease;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__goal {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2.5px solid #c8c8c2;
+  box-shadow: 0 1px 3px rgba(20, 22, 18, 0.12);
+  z-index: 2;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__goal-lbl {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  right: 0;
+  transform: translateX(50%);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9a9a94;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  transition: left 0.45s ease;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot::before {
+  content: "";
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #a3e635;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px rgba(132, 204, 22, 0.5), 0 2px 8px rgba(132, 204, 22, 0.5);
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot-lbl {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #16190f;
+  color: #c8f573;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__dot-lbl::after {
+  display: none;
+}
+
+/* Fila de 4 pasos: un cuarto cada uno, alineado con .pcal__row */
+.app-shell--onboarding .welcome-roadmap .jtl__steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: start;
+  gap: 9px;
+  padding-right: 12px;
+  min-width: 0;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--pending .jtl__step-mark {
+  background: #f1f1ee;
+  border: 1.5px solid #dcdcd6;
+  color: #9a9a94;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--active .jtl__step-mark {
+  background: #fff;
+  border: 2.5px solid #84cc16;
+  color: #4d7c0f;
+  box-shadow: 0 0 0 4px rgba(163, 230, 53, 0.18);
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #84cc16;
+  box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.5);
+  animation: jtlPulse 1.8s ease-out infinite;
+}
+@keyframes jtlPulse {
+  0% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(132, 204, 22, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(132, 204, 22, 0); }
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--done .jtl__step-mark {
+  background: #84cc16;
+  border: 1.5px solid #84cc16;
+  color: #fff;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--goal.jtl__step--pending .jtl__step-mark {
+  background: #16190f;
+  border-color: #16190f;
+  color: #a3e635;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-body {
+  min-width: 0;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-ph {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9a9a94;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--active .jtl__step-ph {
+  color: #4d7c0f;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--done .jtl__step-ph {
+  color: #5a5f56;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-nm {
+  display: block;
+  margin-top: 1px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.12;
+  color: #5a5f56;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--active .jtl__step-nm {
+  color: #1a1c18;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-hr {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #9a9a94;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--active .jtl__step-hr {
+  color: #6b7066;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step-hr svg {
+  flex: 0 0 auto;
+  color: #c8c8c2;
+}
+.app-shell--onboarding .welcome-roadmap .jtl__step--active .jtl__step-hr svg,
+.app-shell--onboarding .welcome-roadmap .jtl__step--done .jtl__step-hr svg {
+  color: #84cc16;
+}
+@media (max-width: 720px) {
+  .app-shell--onboarding .welcome-roadmap .jtl__step-hr { display: none; }
+  .app-shell--onboarding .welcome-roadmap .jtl__step { padding-right: 6px; }
 }

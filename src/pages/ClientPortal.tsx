@@ -381,6 +381,21 @@ function initialsOf(name: string) {
 
 const WEEK_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie"];
 
+// Paleta vibrante por fase para el riel de progreso de la vista diaria.
+const PHASE_HUES = [
+  { from: "#f0997b", to: "#e24b4a", label: "#993c1d" }, // F1 Oferta — coral/rojo
+  { from: "#97c459", to: "#639922", label: "#3b6d11" }, // F2 Ventas — lima/verde (marca)
+  { from: "#5dcaa5", to: "#1d9e75", label: "#0f6e56" }, // F3 Validar — teal/cyan
+  { from: "#85b7eb", to: "#378add", label: "#185fa5" }, // F4 Escalar — azul
+] as const;
+
+const SHORT_PHASE: Record<number, string> = {
+  1: "Oferta",
+  2: "Ventas",
+  3: "Validar",
+  4: "Escalar",
+};
+
 function IconPlay() {
   return (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
@@ -489,6 +504,79 @@ function DailyHome({
 
   return (
     <div className="daily">
+      {(() => {
+        const phaseCount = program.phases.length;
+        const curIdx = phase.id - 1;
+        const fillPct = phaseCount > 1 ? (curIdx / (phaseCount - 1)) * 100 : 0;
+        const shortOf = (p: PhaseConfig) => SHORT_PHASE[p.id] ?? p.name.split(" ")[0];
+        const stateOf = (i: number) => (i < curIdx ? "done" : i === curIdx ? "current" : "soon");
+        const stateLbl = (i: number) =>
+          i < curIdx ? "Hecho" : i === curIdx ? "Aquí vas" : i === curIdx + 1 ? "Próxima" : "Meta";
+        return (
+          <section className="grail" aria-label={`Fase ${phase.id} de ${phaseCount}: ${phase.name}`}>
+            <div className="grail__head">
+              <div className="grail__id">
+                <span className="grail__eyebrow" style={{ color: PHASE_HUES[curIdx].label }}>
+                  Fase {phase.id} de {phaseCount}
+                </span>
+                <strong>{phase.name}</strong>
+              </div>
+              <span className="grail__pct">{progPct}%</span>
+            </div>
+
+            <div className="grail__rail">
+              <div className="grail__track" />
+              <div className="grail__fill" style={{ width: `${fillPct}%` }} />
+              {program.phases.map((p, i) => {
+                const state = stateOf(i);
+                const hue = PHASE_HUES[i] ?? PHASE_HUES[PHASE_HUES.length - 1];
+                const left = phaseCount > 1 ? (i / (phaseCount - 1)) * 100 : 0;
+                return (
+                  <span
+                    key={p.id}
+                    className={`grail__node grail__node--${state}`}
+                    style={
+                      state === "soon"
+                        ? { left: `${left}%` }
+                        : { left: `${left}%`, background: `linear-gradient(150deg, ${hue.from}, ${hue.to})` }
+                    }
+                    aria-current={state === "current" ? "step" : undefined}
+                  >
+                    {state === "done" ? <IconCheck size={14} /> : p.id}
+                  </span>
+                );
+              })}
+            </div>
+
+            <ol className="grail__labels">
+              {program.phases.map((p, i) => {
+                const state = stateOf(i);
+                return (
+                  <li key={p.id} className={`grail__lbl grail__lbl--${state}`}>
+                    <b style={state === "current" ? { color: "#4d7c0f" } : undefined}>{shortOf(p)}</b>
+                    <i>{stateLbl(i)}</i>
+                  </li>
+                );
+              })}
+            </ol>
+
+            {focusTask ? (
+              <div className="grail__mission">
+                <span className="grail__mission-ic">
+                  <IconCircleCheck />
+                </span>
+                <div className="grail__mission-txt">
+                  <span className="grail__mission-eyebrow">
+                    {todayTask ? "Tu misión de hoy" : "Tu próxima misión"}
+                  </span>
+                  <strong>{missionOf(focusTask)}</strong>
+                </div>
+              </div>
+            ) : null}
+          </section>
+        );
+      })()}
+
       <div className="daily__head">
         <div className="daily__avatar">{initialsOf(client.name)}</div>
         <div className="daily__hi">
@@ -498,30 +586,6 @@ function DailyHome({
         <div className="daily__streak">
           <span aria-hidden="true">🔥</span>
           {streak}
-        </div>
-      </div>
-
-      <div className="daily__stats">
-        <div className="daily-stat">
-          <b>
-            {phase.id}
-            <i>/{program.phases.length}</i>
-          </b>
-          <span>Fase</span>
-        </div>
-        <div className="daily-stat">
-          <b>
-            {progPct}
-            <i>%</i>
-          </b>
-          <span>Avance</span>
-        </div>
-        <div className="daily-stat">
-          <b>
-            {streak}
-            <i> 🔥</i>
-          </b>
-          <span>Racha</span>
         </div>
       </div>
 

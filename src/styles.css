@@ -5292,3 +5292,207 @@ a.secondary-button {
 .app-shell--daily .brand .as-logo__s {
   color: #14180f;
 }
+
+/* ===== Riel de progreso vibrante "grail" — tope de la vista diaria ===== */
+.grail {
+  margin-bottom: 18px;
+}
+.grail__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.grail__id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.grail__eyebrow {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.grail__id strong {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #111310;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.grail__pct {
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 800;
+  color: #4d7c0f;
+  background: color-mix(in srgb, #a3e635 20%, #fff);
+  border: 1px solid color-mix(in srgb, #84cc16 45%, #fff);
+  border-radius: 999px;
+  padding: 4px 11px;
+}
+.grail__rail {
+  position: relative;
+  height: 32px;
+  margin: 4px 6px 0;
+}
+.grail__track,
+.grail__fill {
+  position: absolute;
+  top: 50%;
+  height: 8px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+}
+.grail__track {
+  left: 0;
+  right: 0;
+  background: #ececea;
+}
+.grail__fill {
+  left: 0;
+  background: linear-gradient(90deg, #e24b4a, #d4537e 34%, #639922 60%, #1d9e75 80%, #378add);
+  box-shadow: 0 1px 4px rgba(99, 153, 34, 0.22);
+  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.grail__node {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 0 0 4px #fff, 0 3px 9px rgba(20, 22, 18, 0.18);
+}
+.grail__node:first-of-type {
+  transform: translate(-2px, -50%);
+}
+.grail__node:last-of-type {
+  transform: translate(calc(-100% + 2px), -50%);
+}
+.grail__node--done {
+  width: 25px;
+  height: 25px;
+  color: #fff;
+}
+.grail__node--current {
+  width: 30px;
+  height: 30px;
+  font-size: 13px;
+  color: #fff;
+  outline: 2px solid #84cc16;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px #fff, 0 4px 12px rgba(132, 204, 22, 0.4);
+}
+.grail__node--soon {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  color: #888780;
+  background: #f1efe8;
+  box-shadow: 0 0 0 4px #fff;
+  border: 2px solid #d3d1c7;
+}
+.grail__labels {
+  list-style: none;
+  margin: 9px 2px 0;
+  padding: 0;
+  display: flex;
+  justify-content: space-between;
+}
+.grail__lbl {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.grail__lbl:first-child {
+  text-align: left;
+  align-items: flex-start;
+}
+.grail__lbl:last-child {
+  text-align: right;
+  align-items: flex-end;
+}
+.grail__lbl:not(:first-child):not(:last-child) {
+  text-align: center;
+  align-items: center;
+}
+.grail__lbl b {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #b4b2a9;
+}
+.grail__lbl i {
+  font-size: 8.5px;
+  font-weight: 800;
+  font-style: normal;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #c2c0b7;
+}
+.grail__lbl--done b {
+  color: #6f6e67;
+}
+.grail__lbl--done i {
+  color: #9a9a94;
+}
+.grail__lbl--current i {
+  color: #4d7c0f;
+}
+.grail__mission {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+  padding: 13px 14px;
+  border-radius: 16px;
+  background: radial-gradient(120% 120% at 100% 0%, rgba(163, 230, 53, 0.16), rgba(255, 255, 255, 0) 60%), #fbfbfa;
+  border: 1px solid rgba(132, 204, 22, 0.45);
+}
+.grail__mission-ic {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, #a3e635 24%, #fff);
+  color: #4d7c0f;
+}
+.grail__mission-txt {
+  min-width: 0;
+}
+.grail__mission-eyebrow {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #4d7c0f;
+}
+.grail__mission-txt strong {
+  display: block;
+  margin-top: 2px;
+  font-size: clamp(15.5px, 4.2vw, 16.5px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #111310;
+}
+@media (max-width: 420px) {
+  .grail__id strong { font-size: 15.5px; }
+  .grail__rail { margin-left: 4px; margin-right: 4px; }
+  .grail__node--current { width: 28px; height: 28px; }
+  .grail__lbl b { font-size: 10px; }
+}

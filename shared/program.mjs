@@ -10,8 +10,8 @@ export const PROGRAM = {
   "phases": [
     {
       "id": 1,
-      "name": "Fundaciones + Montaje del Contenido (el sistema antes del fuego)",
-      "headline": "Fundaciones + perfil vendible",
+      "name": "Oferta y Sistema de contenido",
+      "headline": "Defines tu nicho, tu oferta espejo y montas tu sistema de contenido",
       "startDay": 0,
       "endDay": 28,
       "milestones": [
@@ -384,8 +384,8 @@ export const PROGRAM = {
     },
     {
       "id": 2,
-      "name": "Motor de Arranque: DM en Frío + Primeras Ventas",
-      "headline": "Motor de arranque: DM en frío + primeras ventas",
+      "name": "Primeras Ventas",
+      "headline": "Tu motor de DM en frío trae las primeras llamadas y tus primeras ventas",
       "startDay": 28,
       "endDay": 56,
       "milestones": [
@@ -758,8 +758,8 @@ export const PROGRAM = {
     },
     {
       "id": 3,
-      "name": "Conversión, Entrega y Validación con ~5 Clientes + Follow-Me Ads",
-      "headline": "Validar 5 clientes + amplificar con Follow-Me Ads",
+      "name": "Validar",
+      "headline": "Entregas a tus clientes, obtienen resultados (oferta probada) y amplificas con Follow-Me Ads",
       "startDay": 56,
       "endDay": 84,
       "milestones": [
@@ -1132,8 +1132,8 @@ export const PROGRAM = {
     },
     {
       "id": 4,
-      "name": "Escala con Webinar + Mejora Continua",
-      "headline": "Escalar con tu webinar + autonomía",
+      "name": "Escalar",
+      "headline": "Lanzas tu webinar y el sistema corre para crecer sin freno",
       "startDay": 84,
       "endDay": 112,
       "milestones": [

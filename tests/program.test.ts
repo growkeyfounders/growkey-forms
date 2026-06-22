@@ -91,6 +91,6 @@ describe("fases", () => {
     expect(isLate(4, 200)).toBe(true);
   });
   it("phaseById", () => {
-    expect(phaseById(2).name).toBe("Motor de Arranque: DM en Frío + Primeras Ventas");
+    expect(phaseById(2).name).toBe("Primeras Ventas");
   });
 });

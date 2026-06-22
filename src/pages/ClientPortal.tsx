@@ -268,6 +268,64 @@ export function ClientPortal() {
   );
 }
 
+const CALL_MAP: Array<[RegExp, string]> = [
+  [/onboarding/i, "Onboarding"],
+  [/weekly/i, "Weekly"],
+  [/monthly|mensual/i, "Mensual"],
+  [/cierre/i, "Cierre"],
+];
+
+// Llamadas clave de una fase (las "Llamada N — ...", no la cadencia interna).
+function keyCalls(phase: PhaseConfig): Array<{ label: string; day: number }> {
+  const milestones = (phase as { milestones?: Array<{ day: number; title: string }> }).milestones ?? [];
+  return milestones
+    .filter((m) => /^Llamada/i.test(m.title))
+    .map((m) => {
+      const hit = CALL_MAP.find(([re]) => re.test(m.title));
+      return { label: hit ? hit[1] : "Llamada", day: m.day };
+    });
+}
+
+// Línea de tiempo del programa: de "hoy" a las 4 fases y al objetivo.
+function RoadmapTimeline({ phases, totalDays }: { phases: PhaseConfig[]; totalDays: number }) {
+  return (
+    <div className="roadmap">
+      <div className="roadmap__ends">
+        <span>Empiezas hoy</span>
+        <span>Día {totalDays} · objetivo</span>
+      </div>
+      <div className="roadmap__bar">
+        {phases.map((phase, index) => (
+          <div className={`roadmap__seg roadmap__seg--${index + 1}`} key={phase.id} />
+        ))}
+      </div>
+      <div className="roadmap__cards">
+        {phases.map((phase, index) => (
+          <div className={`roadmap-card roadmap-card--${index + 1}`} key={phase.id}>
+            <div className="roadmap-card__head">
+              <span className="roadmap-card__num">{phase.id}</span>
+              <strong>{phase.name}</strong>
+            </div>
+            <p className="roadmap-card__desc">{phase.headline}</p>
+            <div className="roadmap-card__days">Días {phase.startDay}–{phase.endDay}</div>
+            <div className="roadmap-card__calls">
+              {keyCalls(phase).map((call) => (
+                <span className="roadmap-call" key={call.day}>
+                  <span className="roadmap-call__dot" aria-hidden="true" /> {call.label} · día {call.day}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="roadmap__goal">
+        <strong>Objetivo a los {totalDays} días</strong>
+        <span>Oferta validada, primeras ventas y tu sistema corriendo para escalar.</span>
+      </div>
+    </div>
+  );
+}
+
 function Welcome({
   client,
   program,
@@ -289,23 +347,10 @@ function Welcome({
         <p className="eyebrow">Agentic Sales · {program.goal}</p>
         <h1>Hola, {firstName(client.name)}.</h1>
         <p className="welcome-copy">
-          Te espera un camino de {program.totalDays} días en {program.phases.length} fases para
-          validar tu oferta, conseguir tus primeras ventas y escalar junto a tu equipo Growkey.
-          Elige tu fecha de inicio y activamos tu checklist de la fase 1.
+          Este es tu camino: {program.totalDays} días en {program.phases.length} fases, de tu oferta a
+          tus primeras ventas y a escalar. Mira el mapa, elige tu fecha de inicio y arrancamos.
         </p>
-        <ol className="welcome-phases">
-          {program.phases.map((phase) => (
-            <li className="welcome-phase" key={phase.id}>
-              <span>{phase.id}</span>
-              <div>
-                <strong>{phase.name}</strong>
-                <small>
-                  {phase.headline} · días {phase.startDay}–{phase.endDay}
-                </small>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <RoadmapTimeline phases={program.phases} totalDays={program.totalDays} />
         <form className="welcome-form" onSubmit={onSubmit}>
           <label className="field">
             <span className="field__label">¿Cuándo empieza tu camino?</span>

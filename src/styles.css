@@ -4991,10 +4991,10 @@ a.secondary-button {
 }
 .app-shell--onboarding .welcome-roadmap .jtl__bar {
   position: relative;
-  height: 10px;
+  height: 11px;
   border-radius: 999px;
-  background: #e7e7e3;
-  box-shadow: inset 0 1px 2px rgba(20, 22, 18, 0.07);
+  background: #d6d6cf;
+  box-shadow: inset 0 1px 2px rgba(20, 22, 18, 0.08);
 }
 .app-shell--onboarding .welcome-roadmap .jtl__bar-fill {
   position: absolute;
@@ -5181,4 +5181,19 @@ a.secondary-button {
 @media (max-width: 720px) {
   .app-shell--onboarding .welcome-roadmap .jtl__step-hr { display: none; }
   .app-shell--onboarding .welcome-roadmap .jtl__step { padding-right: 6px; }
+}
+
+/* Divisores de fase en la barra: la segmenta en 4 (alineado con los 4 pasos),
+   sin perder el relleno verde continuo ni el punto "Hoy". */
+.app-shell--onboarding .welcome-roadmap .jtl__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, transparent calc(25% - 2px), #ffffff calc(25% - 2px), #ffffff calc(25% + 2px), transparent calc(25% + 2px)),
+    linear-gradient(90deg, transparent calc(50% - 2px), #ffffff calc(50% - 2px), #ffffff calc(50% + 2px), transparent calc(50% + 2px)),
+    linear-gradient(90deg, transparent calc(75% - 2px), #ffffff calc(75% - 2px), #ffffff calc(75% + 2px), transparent calc(75% + 2px));
 }

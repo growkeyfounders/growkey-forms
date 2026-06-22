@@ -8,8 +8,6 @@ import {
   type FormConfig,
 } from "./formSchema";
 import { useSession } from "./session";
-import { currentDoor } from "./door";
-import { WrongDoor } from "./WrongDoor";
 import { AdminClientDetail } from "./pages/AdminClientDetail";
 import { AdminPanel } from "./pages/AdminPanel";
 import { ClientPortal } from "./pages/ClientPortal";
@@ -46,7 +44,10 @@ export function App() {
               <strong>Growkey</strong>
               <span>Panel interno</span>
             </a>
-            <SignOutButton />
+            <div className="topbar-actions">
+              <ViewSwitch current="admin" />
+              <SignOutButton />
+            </div>
           </header>
           <AdminClientDetail clientId={clientDetailMatch[1]} />
         </div>
@@ -71,7 +72,10 @@ export function App() {
               <strong>Growkey</strong>
               <span>Panel interno</span>
             </a>
-            <SignOutButton />
+            <div className="topbar-actions">
+              <ViewSwitch current="admin" />
+              <SignOutButton />
+            </div>
           </header>
           <AdminPanel
             initialFormsFilter={adminFilterSlug}
@@ -92,7 +96,10 @@ export function App() {
               <strong>Growkey</strong>
               <span>Mi camino</span>
             </a>
-            <SignOutButton />
+            <div className="topbar-actions">
+              <ViewSwitch current="client" />
+              <SignOutButton />
+            </div>
           </header>
           <ClientPortal />
         </div>
@@ -114,14 +121,16 @@ function SignOutButton() {
   );
 }
 
+// /admin requiere rol admin; /app requiere tener un camino (me.client). Una misma
+// cuenta puede tener ambos (admin + su propio camino) y cambiar entre vistas.
 function RequireRole({ role, children }: { role: "admin" | "client"; children: React.ReactNode }) {
   const { session, me, loading, signOut } = useSession();
   const profile = me?.profile ?? null;
-  const door = currentDoor();
-  // En la puerta equivocada: la cuenta pertenece a otra puerta (admin vs cliente).
-  const wrongDoor = Boolean(profile && door !== null && door !== profile.role);
-  // Ruta equivocada pero puerta correcta (ej. admin abrió /app): lo mandamos a su panel.
-  const wrongPath = Boolean(profile && !wrongDoor && profile.role !== role);
+  const isAdmin = profile?.role === "admin";
+  const hasCamino = Boolean(me?.client);
+  const allowed = role === "admin" ? isAdmin : hasCamino;
+  // Si no puede estar aquí pero sí en la otra vista, lo mandamos allá.
+  const fallback = role === "admin" ? (hasCamino ? "/app" : null) : (isAdmin ? "/admin" : null);
 
   useEffect(() => {
     if (loading) return;
@@ -129,10 +138,10 @@ function RequireRole({ role, children }: { role: "admin" | "client"; children: R
       window.location.replace("/login");
       return;
     }
-    if (wrongPath && profile) {
-      window.location.replace(profile.role === "admin" ? "/admin" : "/app");
+    if (profile && !allowed && fallback) {
+      window.location.replace(fallback);
     }
-  }, [loading, session, wrongPath, profile]);
+  }, [loading, session, profile, allowed, fallback]);
 
   if (loading || !session) {
     return (
@@ -142,19 +151,7 @@ function RequireRole({ role, children }: { role: "admin" | "client"; children: R
     );
   }
 
-  if (profile && wrongDoor) {
-    return <WrongDoor neededDoor={profile.role} />;
-  }
-
-  if (profile && wrongPath) {
-    return (
-      <div className="login-shell">
-        <p className="route-status">Cargando…</p>
-      </div>
-    );
-  }
-
-  if (!profile) {
+  if (!profile || (!allowed && !fallback)) {
     return (
       <div className="login-shell">
         <img src={logoUrl} alt="" width={56} />
@@ -172,5 +169,33 @@ function RequireRole({ role, children }: { role: "admin" | "client"; children: R
     );
   }
 
+  if (!allowed) {
+    return (
+      <div className="login-shell">
+        <p className="route-status">Cargando…</p>
+      </div>
+    );
+  }
+
   return <>{children}</>;
+}
+
+// Botón para cambiar entre el panel del equipo y el camino propio (cuando la
+// cuenta tiene ambas cosas).
+function ViewSwitch({ current }: { current: "admin" | "client" }) {
+  const { me } = useSession();
+  if (current === "admin") {
+    if (!me?.client) return null;
+    return (
+      <a className="ghost-button" href="/app">
+        Mi camino
+      </a>
+    );
+  }
+  if (me?.profile?.role !== "admin") return null;
+  return (
+    <a className="ghost-button" href="/admin">
+      Panel del equipo
+    </a>
+  );
 }

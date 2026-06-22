@@ -203,7 +203,9 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
   const isAdmin = auth.role === "admin";
 
   if (path === "/me" && method === "GET") {
-    const client = auth.role === "client" ? await getClient(auth.userId) : null;
+    // Devolvemos el camino de cualquiera que lo tenga (un admin también puede ser
+    // cliente con su propio camino). Si no tiene fila, client = null.
+    const client = await getClient(auth.userId);
     sendJson(response, 200, {
       profile: { userId: auth.userId, role: auth.role, name: auth.name },
       client,
@@ -213,7 +215,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
   }
 
   if (path === "/start-date" && method === "POST") {
-    if (auth.role !== "client") { sendJson(response, 403, { error: "forbidden" }); return; }
+    // Cualquiera con camino puede fijar su fecha (getClient valida que exista).
     const startDate = String(body.startDate || "");
     if (!isValidDateIso(startDate)) { sendJson(response, 400, { error: "invalid_date" }); return; }
     const existing = await getClient(auth.userId);
@@ -234,7 +236,7 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
   }
 
   if (path === "/portal" && method === "GET") {
-    if (auth.role !== "client") { sendJson(response, 403, { error: "forbidden" }); return; }
+    // Accesible para cualquiera con camino (cliente o admin con su propio camino).
     const client = await getClient(auth.userId);
     if (!client) { sendJson(response, 404, { error: "not_found" }); return; }
     const [tasks, submitted] = await Promise.all([getTasks(auth.userId), getSubmittedSlugs(auth.userId)]);
@@ -338,15 +340,19 @@ export async function handleSkool(request, response, url, { sendJson, readBody }
       // agregación (max(created_at) group by client_id) en vez de traer filas.
       db.select("skool_events", "select=client_id,created_at&order=created_at.desc&limit=2000"),
       db.select("skool_messages", "select=client_id,created_at&order=created_at.desc&limit=2000"),
-      // Un cliente SIN perfil es una solicitud de acceso pendiente de aprobación.
-      db.select("profiles", `select=user_id&user_id=in.(${ids})&role=eq.client`),
+      // Perfiles de estos usuarios: rol "client" = aprobado; sin perfil = solicitud
+      // pendiente; rol "admin" = es un admin con su propio camino → se excluye de
+      // la lista de clientes (no es un cliente del programa).
+      db.select("profiles", `select=user_id,role&user_id=in.(${ids})`),
     ]);
-    const approvedIds = new Set((clientProfiles ?? []).map((profile) => profile.user_id));
+    const approvedIds = new Set((clientProfiles ?? []).filter((p) => p.role === "client").map((p) => p.user_id));
+    const adminIds = new Set((clientProfiles ?? []).filter((p) => p.role === "admin").map((p) => p.user_id));
+    const clientRows = clients.filter((client) => !adminIds.has(client.id));
 
     const lastByClient = (rows, clientId) =>
       (rows ?? []).find((row) => row.client_id === clientId)?.created_at ?? null;
 
-    const views = clients.map((client) => {
+    const views = clientRows.map((client) => {
       const tasks = (allTasks ?? []).filter((task) => task.client_id === client.id);
       const slugs = (allSubmissions ?? [])
         .filter((submission) => submission.client_id === client.id)

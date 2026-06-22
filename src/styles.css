@@ -887,6 +887,12 @@ textarea:focus {
   background: var(--border);
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .password-field {
   position: relative;
   display: flex;

@@ -296,11 +296,16 @@ function Welcome({
     <main className="portal portal--welcome">
       <section className="welcome-hero">
         <div className="welcome-hero__content">
-          <span className="welcome-badge">Hola, {firstName(client.name)} · Agentic Sales</span>
-          <h1 className="welcome-headline">Tu conocimiento, convertido en un sistema que vende.</h1>
+          <h1 className="welcome-headline">Bienvenido, {firstName(client.name)}</h1>
           <p className="welcome-sub">
-            En 16 semanas construyes la marca, la oferta y el sistema de ventas que te traen
-            clientes de forma constante. Sereno, con método, paso a paso.
+            Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un
+            sistema de ventas predecible y escalable con tu conocimiento, que te trae clientes de
+            forma constante. Estos son los 4 pasos en los que trabajarás día a día para conseguirlo:
+            oferta, primeras ventas, validación y escala.
+          </p>
+          <p className="welcome-kicker">
+            La bola está en tu campo. Trabaja con obsesión todos los días hasta obtener resultados —
+            estás a pocas semanas de cambiar tu vida para siempre.
           </p>
           <form id="reservar" className="welcome-form" onSubmit={onSubmit}>
             <label className="field">

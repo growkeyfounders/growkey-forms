@@ -6,7 +6,7 @@ export const MS_DAY = 86_400_000;
 
 export const PROGRAM = {
   "totalDays": 112,
-  "goal": "Oferta validada (5 clientes) + sistema de escala corriendo",
+  "goal": "Construye tu marca personal, valida tu oferta y consigue tus primeras ventas",
   "phases": [
     {
       "id": 1,

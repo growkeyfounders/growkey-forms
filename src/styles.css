@@ -2018,7 +2018,7 @@ a.secondary-button {
 .pcal__row {
   display: flex;
   gap: 14px;
-  align-items: flex-start;
+  align-items: stretch;
   overflow-x: auto;
   min-width: 0;
   max-width: 100%;
@@ -2028,6 +2028,8 @@ a.secondary-button {
 .pcal-month {
   flex: 1 1 0;
   min-width: 250px;
+  display: flex;
+  flex-direction: column;
   border-radius: 16px;
   background: #fff;
   border: 1px solid var(--border, #eadfd9);
@@ -2093,6 +2095,8 @@ a.secondary-button {
   color: var(--dim, #9a908c);
 }
 .pcal-grid {
+  flex: 1 1 auto;
+  grid-auto-rows: 1fr;
   padding: 0 8px 10px;
   gap: 4px;
 }

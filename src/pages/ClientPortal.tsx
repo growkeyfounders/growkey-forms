@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PhaseConfig } from "../../shared/program.mjs";
-import { addDays } from "../../shared/program.mjs";
+import { addDays, currentWeek } from "../../shared/program.mjs";
 import logoUrl from "../assets/growkey-mascot.png";
 import { ApiError, apiGet, apiPost } from "../api";
 import { ChatThread, threadMemberToChatMember } from "../components/ChatThread";
@@ -349,6 +349,235 @@ function PortalHeader({ data }: { data: PortalData }) {
   );
 }
 
+function initialsOf(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "·";
+}
+
+const WEEK_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie"];
+
+function IconPlay() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+function IconFile() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm0 2 4 4h-4V4zM8 12h8v1.6H8V12zm0 3.4h8V17H8v-1.6zm0-6.8h3v1.6H8V8.6z" />
+    </svg>
+  );
+}
+function IconCheck({ size = 15 }: { size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12l4.5 4.5L19 7" />
+    </svg>
+  );
+}
+function IconCircleCheck() {
+  return (
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true">
+      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.6-4.6 1.4 1.4-6 6z" />
+    </svg>
+  );
+}
+function IconTrophy() {
+  return (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M18 2H6v2H3v3a4 4 0 0 0 4 4h.3A5 5 0 0 0 11 13.9V16H8v2h8v-2h-3v-2.1A5 5 0 0 0 16.7 11H17a4 4 0 0 0 4-4V4h-3V2zM5 7V6h1v3a2 2 0 0 1-1-2zm14 0a2 2 0 0 1-1 2V6h1v1z" />
+    </svg>
+  );
+}
+
+// Pantalla "Hoy" gamificada (modo oscuro + verde neón): racha, tira de la
+// semana, la misión del día (clase + entregable + marcar hecho), avance de la
+// fase y el próximo hito. El foco diario que motiva a avanzar.
+function DailyHome({
+  data,
+  busyTaskId,
+  onToggle,
+}: {
+  data: PortalData;
+  busyTaskId: string | null;
+  onToggle: (task: TaskRow) => void;
+}) {
+  const { program, client } = data;
+  const prog = client.day ?? 0;
+  const phase = program.phases.find((p) => p.id === client.current_phase) ?? program.phases[0];
+  const allBase = new Map(program.phases.flatMap((p) => p.baseTasks).map((b) => [b.id, b]));
+
+  const missionOf = (t: TaskRow) =>
+    (t.template_id ? allBase.get(t.template_id)?.mission : undefined) ??
+    t.title.split(" → ")[0].split(" + ")[0];
+  const deliverableOf = (t: TaskRow) => {
+    const p = t.title.split(" → ");
+    return p.length > 1 ? p[p.length - 1].trim() : null;
+  };
+  const classOf = (t: TaskRow) => phase.classes.find((c) => c.id === t.class_id);
+
+  const byDay = client.tasks
+    .filter((t) => t.suggested_day != null)
+    .sort((a, b) => (a.suggested_day ?? 0) - (b.suggested_day ?? 0));
+  const todayTask = byDay.find((t) => t.suggested_day === prog);
+  const focusTask =
+    todayTask ?? byDay.find((t) => (t.suggested_day ?? 0) > prog) ?? byDay[byDay.length - 1];
+
+  let streak = 0;
+  const upto = byDay.filter((t) => (t.suggested_day ?? 0) <= prog);
+  for (let i = upto.length - 1; i >= 0; i--) {
+    if (upto[i].done) streak++;
+    else break;
+  }
+
+  const wk = currentWeek(prog);
+  const weekTasks = byDay.filter((t) => t.week === wk).slice(0, 5);
+
+  const phaseTasks = client.tasks.filter((t) => t.phase === phase.id);
+  const phaseDone = phaseTasks.filter((t) => t.done).length;
+  const phasePct = phaseTasks.length ? Math.round((phaseDone / phaseTasks.length) * 100) : 0;
+
+  const totalDone = client.tasks.filter((t) => t.done).length;
+  const totalTasks = client.tasks.length || program.totalDays;
+  const progPct = Math.round((totalDone / totalTasks) * 100);
+
+  const heroes = program.phases.flatMap((p) =>
+    (p.milestones ?? []).filter((m) => m.type === "hero"),
+  );
+  const nextHero = heroes.filter((h) => h.day > prog).sort((a, b) => a.day - b.day)[0];
+  const heroInMissions = nextHero
+    ? byDay.filter((t) => (t.suggested_day ?? 0) > prog && (t.suggested_day ?? 0) <= nextHero.day).length
+    : 0;
+
+  const cls = focusTask ? classOf(focusTask) : undefined;
+  const deliverable = focusTask ? deliverableOf(focusTask) : null;
+  const focusDone = !!focusTask?.done;
+
+  return (
+    <div className="daily">
+      <div className="daily__head">
+        <div className="daily__avatar">{initialsOf(client.name)}</div>
+        <div className="daily__hi">
+          <strong>Hola, {firstName(client.name)}</strong>
+          <span>Misión {Math.min(totalDone + 1, totalTasks)} de {totalTasks}</span>
+        </div>
+        <div className="daily__streak">
+          <span aria-hidden="true">🔥</span>
+          {streak}
+        </div>
+      </div>
+
+      <div className="daily__stats">
+        <div className="daily-stat">
+          <b>
+            {phase.id}
+            <i>/{program.phases.length}</i>
+          </b>
+          <span>Fase</span>
+        </div>
+        <div className="daily-stat">
+          <b>
+            {progPct}
+            <i>%</i>
+          </b>
+          <span>Avance</span>
+        </div>
+        <div className="daily-stat">
+          <b>
+            {streak}
+            <i> 🔥</i>
+          </b>
+          <span>Racha</span>
+        </div>
+      </div>
+
+      <div className="daily__week">
+        {weekTasks.map((t, i) => {
+          const today = t.suggested_day === prog;
+          const state = t.done ? "done" : today ? "today" : (t.suggested_day ?? 0) < prog ? "miss" : "soon";
+          return (
+            <div className={`daily-day daily-day--${state}`} key={t.id}>
+              <span className="daily-day__dot">{t.done ? <IconCheck /> : null}</span>
+              <span className="daily-day__lbl">{WEEK_LABELS[i] ?? ""}</span>
+            </div>
+          );
+        })}
+      </div>
+
+      {focusTask ? (
+        <div className="daily-mission">
+          <span className="daily-mission__eyebrow">{todayTask ? "Tu misión de hoy" : "Tu próxima misión"}</span>
+          <strong className="daily-mission__title">{missionOf(focusTask)}</strong>
+
+          {cls ? (
+            <div className="daily-row">
+              <span className="daily-row__ic">
+                <IconPlay />
+              </span>
+              <span className="daily-row__txt">
+                <b>Ver la clase</b>
+                <small>{cls.title}</small>
+              </span>
+            </div>
+          ) : null}
+          {deliverable ? (
+            <div className="daily-row">
+              <span className="daily-row__ic">
+                <IconFile />
+              </span>
+              <span className="daily-row__txt">
+                <b>Entregable</b>
+                <small>{deliverable}</small>
+              </span>
+            </div>
+          ) : null}
+
+          <button
+            className={`daily-cta${focusDone ? " is-done" : ""}`}
+            disabled={busyTaskId === focusTask.id}
+            onClick={() => onToggle(focusTask)}
+            type="button"
+          >
+            <IconCircleCheck />
+            {focusDone ? "¡Completada! Toca para deshacer" : "Marcar como completada"}
+          </button>
+        </div>
+      ) : null}
+
+      <div className="daily-phase">
+        <div className="daily-phase__top">
+          <span>
+            Fase {phase.id} · {phase.name}
+          </span>
+          <small>
+            {phaseDone} / {phaseTasks.length} misiones
+          </small>
+        </div>
+        <div className="daily-phase__bar">
+          <i style={{ width: `${phasePct}%` }} />
+        </div>
+        {nextHero ? (
+          <div className="daily-phase__hero">
+            <IconTrophy />
+            Próximo logro: <b>{nextHero.title}</b>
+            {heroInMissions > 0 ? ` · en ${heroInMissions} ${heroInMissions === 1 ? "misión" : "misiones"}` : ""}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="daily-streak-card">
+        <span className="daily-streak-card__flame">🔥</span>
+        <div>
+          <strong>{streak > 0 ? `¡Vas ${streak} ${streak === 1 ? "día" : "días"} seguidos!` : "¡Arranca tu racha hoy!"}</strong>
+          <span>{focusDone ? "Racha asegurada por hoy. Vuelve mañana." : "Completa tu misión para no romper la racha."}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Active({
   data,
   busyTaskId,
@@ -362,8 +591,9 @@ function Active({
   const phase = program.phases.find((item) => item.id === client.current_phase) ?? program.phases[0];
   const paused = client.status === "paused";
 
+  void phase;
   return (
-    <main className="portal">
+    <main className="portal portal--daily">
       {paused ? (
         <div className="pause-banner" role="status">
           <strong>Tu programa está en pausa</strong>
@@ -371,36 +601,7 @@ function Active({
         </div>
       ) : null}
 
-      <PortalHeader data={data} />
-
-      <section className="portal-card" aria-label="Tu camino">
-        <header className="portal-card__header">
-          <h3>Tu camino de {program.totalDays} días</h3>
-          <small>{phase.headline}</small>
-        </header>
-        <PhaseTimeline currentPhase={client.current_phase} day={client.day} startDate={client.start_date} />
-      </section>
-
-      <div className="portal-grid">
-        <div className="portal-col">
-          {client.start_date && client.day !== null ? (
-            <WeekView day={client.day} startDate={client.start_date} tasks={client.tasks} />
-          ) : null}
-          <PhaseClasses phase={phase} />
-        </div>
-        <div className="portal-col">
-          <Checklist
-            busyTaskId={busyTaskId}
-            canToggle={!paused}
-            onToggle={onToggle}
-            phase={phase}
-            submittedFormSlugs={client.submittedFormSlugs}
-            tasks={client.tasks}
-          />
-        </div>
-      </div>
-
-      <TeamChatCard clientId={client.id} />
+      <DailyHome data={data} busyTaskId={busyTaskId} onToggle={onToggle} />
     </main>
   );
 }

@@ -320,7 +320,7 @@ function RoadmapTimeline({ phases }: { phases: PhaseConfig[] }) {
       </div>
       <div className="roadmap__goal">
         <strong>Tu objetivo</strong>
-        <span>Un sistema de ventas probado y predecible que te trae clientes de forma constante.</span>
+        <span>Un sistema de ventas predecible con tu conocimiento, que te trae clientes de forma constante.</span>
       </div>
     </div>
   );
@@ -347,9 +347,9 @@ function Welcome({
         <p className="eyebrow">Agentic Sales · {program.goal}</p>
         <h1>Hola, {firstName(client.name)}.</h1>
         <p className="welcome-copy">
-          Aquí construyes lo que casi ningún experto logra: un sistema de ventas que funciona y te trae
-          clientes de forma predecible. Lo armas paso a paso —oferta, primeras ventas, validación y
-          escala—. Elige tu fecha y empezamos hoy.
+          Aquí construyes lo que casi ningún experto logra: un sistema de ventas predecible con tu
+          conocimiento, que te trae clientes de forma constante. Lo armas paso a paso —oferta, primeras
+          ventas, validación y escala—. Elige tu fecha y empezamos hoy.
         </p>
         <RoadmapTimeline phases={program.phases} />
         <form className="welcome-form" onSubmit={onSubmit}>

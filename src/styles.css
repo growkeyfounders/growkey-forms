@@ -4993,7 +4993,14 @@ a.secondary-button {
   position: relative;
   height: 11px;
   border-radius: 999px;
-  background: #d6d6cf;
+  /* 4 segmentos con el color de cada fase (igual que las tarjetas de mes) */
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, #2f6df6 42%, #fff) 0 25%,
+    color-mix(in srgb, #10b981 42%, #fff) 25% 50%,
+    color-mix(in srgb, #f59e0b 48%, #fff) 50% 75%,
+    color-mix(in srgb, #ef4444 42%, #fff) 75% 100%
+  );
   box-shadow: inset 0 1px 2px rgba(20, 22, 18, 0.08);
 }
 .app-shell--onboarding .welcome-roadmap .jtl__bar-fill {

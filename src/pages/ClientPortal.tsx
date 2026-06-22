@@ -289,11 +289,20 @@ function Welcome({
       <section className="welcome-card">
         <div className="welcome-top">
           <div className="welcome-intro">
-            <p className="eyebrow">Agentic Sales · {program.goal}</p>
+            <p className="eyebrow">
+              Agentic Sales · Construye tu marca personal, crea un sistema de contenido, crea tu
+              oferta, arma un sistema de ventas, ten tus primeras ventas y escala tu oferta.
+            </p>
             <h1>Hola, {firstName(client.name)}.</h1>
             <p className="welcome-copy">
-              Vas a construir un sistema de ventas predecible con tu conocimiento, que te trae clientes
-              de forma constante. Lo armas en 4 pasos: oferta, primeras ventas, validación y escala.
+              Elige <b>ya</b> el día que inicias, porque en <b>16 semanas</b> vas a construir un
+              sistema de ventas predecible y escalable con tu conocimiento, que te trae clientes de
+              forma constante. Estos son los 4 pasos en los que trabajarás día a día para conseguirlo:
+              oferta, primeras ventas, validación y escala.
+            </p>
+            <p className="welcome-kicker">
+              La bola está en tu campo. Trabaja con obsesión todos los días hasta obtener
+              resultados — estás a pocas semanas de cambiar tu vida para siempre.
             </p>
           </div>
           <form className="welcome-form" onSubmit={onSubmit}>
